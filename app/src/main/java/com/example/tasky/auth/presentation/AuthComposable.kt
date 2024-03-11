@@ -147,7 +147,7 @@ fun ActionButton(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.padding_20)
     val cornerRadius = dimensionResource(R.dimen.radius_30)
-    val fontSize = dimensionResource(R.dimen.font_size_14).value.sp
+    val fontSize = dimensionResource(R.dimen.font_size_16).value.sp
 
     Button(
         modifier = modifier
@@ -161,7 +161,8 @@ fun ActionButton(
         Text(
             text = text.uppercase(Locale.getDefault()),
             color = Color.White,
-            fontSize = fontSize
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold
         )
     }
 }
