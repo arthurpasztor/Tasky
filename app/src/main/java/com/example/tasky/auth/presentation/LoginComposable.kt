@@ -25,12 +25,21 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
 import com.example.tasky.auth.domain.LoginViewModel
+import com.example.tasky.auth.presentation.destinations.SignUpComposableDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Preview
+@RootNavGraph(start = true)
+@Destination
 @Composable
-fun LoginComposable(viewModel: LoginViewModel = viewModel()) {
+fun LoginComposable(
+    navigator: DestinationsNavigator? = null,
+    viewModel: LoginViewModel = viewModel()
+) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     Column(
@@ -65,16 +74,20 @@ fun LoginComposable(viewModel: LoginViewModel = viewModel()) {
             }
             Spacer(modifier = Modifier.weight(1f))
             SignUpText(
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = dimensionResource(id = R.dimen.padding_40))
+                    .padding(bottom = dimensionResource(id = R.dimen.padding_40)),
+                navigator = navigator
             )
         }
     }
 }
 
 @Composable
-fun SignUpText(modifier: Modifier = Modifier) {
+fun SignUpText(
+    modifier: Modifier = Modifier,
+    navigator: DestinationsNavigator? = null
+) {
     val signUp = stringResource(id = R.string.sign_up).uppercase()
 
     val annotatedString = buildAnnotatedString {
@@ -97,8 +110,7 @@ fun SignUpText(modifier: Modifier = Modifier) {
         )
     ) { offset ->
         annotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let { span ->
-            // TODO navigate to Sign up screen
-            println("Clicked on ${span.item}")
+            navigator?.navigate(SignUpComposableDestination)
         }
     }
 }

@@ -24,10 +24,16 @@ import com.example.tasky.R
 import com.example.tasky.auth.domain.SignUpViewModel
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Preview
+@Destination
 @Composable
-fun SignUpComposable(viewModel: SignUpViewModel = viewModel()) {
+fun SignUpComposable(
+    navigator: DestinationsNavigator? = null,
+    viewModel: SignUpViewModel = viewModel()
+) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     Column(
@@ -69,8 +75,7 @@ fun SignUpComposable(viewModel: SignUpViewModel = viewModel()) {
             }
             Spacer(modifier = Modifier.weight(1f))
             BackButton(Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_40))) {
-                // TODO navigate back to Login screen
-                println("Clicked on back navigation")
+                navigator?.popBackStack()
             }
         }
     }
