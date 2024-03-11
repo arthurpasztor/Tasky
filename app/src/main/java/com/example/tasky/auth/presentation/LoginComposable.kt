@@ -45,7 +45,7 @@ fun LoginComposable(viewModel: LoginViewModel = viewModel()) {
                 .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
                 .background(BackgroundWhite)
         ) {
-            EmailTextField(
+            UserInfoTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
                 input = viewModel.emailText,
                 label = stringResource(R.string.email),

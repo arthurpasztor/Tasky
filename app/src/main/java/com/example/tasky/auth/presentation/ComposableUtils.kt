@@ -59,7 +59,7 @@ fun AuthenticationTitleComposable(title: String = "Welcome Back!") {
 
 @Preview
 @Composable
-fun EmailTextField(
+fun UserInfoTextField(
     modifier: Modifier = Modifier,
     input: String = "",
     label: String = "Email address",
