@@ -2,7 +2,10 @@
     <string name="app_name">Tasky</string>
 
     <string name="welcome_back">Welcome Back!</string>
+    <string name="create_your_account">Create your account</string>
+    <string name="name">Name</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
     <string name="log_in">Log in</string>
+    <string name="get_started">Get started</string>
 </resources>
