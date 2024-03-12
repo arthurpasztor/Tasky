@@ -1,5 +1,6 @@
 package com.example.tasky.auth.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +36,8 @@ fun SignUpComposable(
     navigator: DestinationsNavigator? = null,
     viewModel: SignUpViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     Column(
@@ -71,7 +75,12 @@ fun SignUpComposable(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
                 text = stringResource(R.string.get_started)
             ) {
-                viewModel.signUp()
+                when {
+                    !viewModel.isNameValid() -> Toast.makeText(context, R.string.error_name_invalid, Toast.LENGTH_LONG).show()
+                    !viewModel.isEmailValid() -> Toast.makeText(context, R.string.error_email_invalid, Toast.LENGTH_LONG).show()
+                    !viewModel.isPasswordValid() -> Toast.makeText(context, R.string.error_password_invalid, Toast.LENGTH_LONG).show()
+                    else ->viewModel.signUp()
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
             BackButton(Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_40))) {
@@ -89,7 +98,7 @@ fun BackButton(modifier: Modifier = Modifier, action: () -> Unit) {
     Button(
         modifier = modifier
             .padding(start = horizontalPadding),
-        onClick = { action.invoke() },
+        onClick = { action() },
         colors = ButtonDefaults.buttonColors(containerColor = BackgroundBlack),
         shape = RoundedCornerShape(cornerRadius)
     ) {

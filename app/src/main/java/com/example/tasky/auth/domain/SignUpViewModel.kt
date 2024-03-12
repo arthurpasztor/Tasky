@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.tasky.auth.presentation.isEmailValid
+import com.example.tasky.auth.presentation.isNameValid
+import com.example.tasky.auth.presentation.isPasswordValid
 
 class SignUpViewModel : ViewModel() {
 
@@ -27,9 +29,11 @@ class SignUpViewModel : ViewModel() {
         passwordText = new
     }
 
-    fun isNameValid() = nameText.isNotBlank()
+    fun isNameValid() = nameText.isNameValid()
 
     fun isEmailValid() = emailText.isEmailValid()
+
+    fun isPasswordValid() = passwordText.isPasswordValid()
 
     fun signUp() {
         // TODO implement

@@ -10,4 +10,8 @@
     <string name="dont_have_an_account">Don\'t have an account?</string>
     <string name="sign_up">Sign up</string>
     <string name="get_started">Get started</string>
+
+    <string name="error_name_invalid">The name is invalid</string>
+    <string name="error_email_invalid">The email is invalid</string>
+    <string name="error_password_invalid">The password is invalid</string>
 </resources>
