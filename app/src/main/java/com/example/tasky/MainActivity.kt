@@ -1,5 +1,6 @@
 package com.example.tasky
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,8 @@ class MainActivity : ComponentActivity() {
                     DestinationsNavHost(navGraph = NavGraphs.root)
                 }
             }
+
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 }
