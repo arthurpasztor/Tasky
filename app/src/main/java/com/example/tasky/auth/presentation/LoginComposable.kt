@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,22 +25,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
-import com.example.tasky.auth.domain.LoginViewModel
-import com.example.tasky.auth.presentation.destinations.SignUpComposableDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Preview
 @RootNavGraph(start = true)
 @Destination
 @Composable
 fun LoginComposable(
-    navigator: DestinationsNavigator? = null,
-    viewModel: LoginViewModel = viewModel()
+    vm: LoginViewModel = viewModel(),
+    state: StateFlow<LoginState> = MutableStateFlow(LoginState()),
+    onAction: (LoginAction) -> Unit = {}
 ) {
+
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     Column(
@@ -56,28 +58,30 @@ fun LoginComposable(
         ) {
             UserInfoTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
-                input = viewModel.emailText,
+                input = state.collectAsState().value.emailText,
                 label = stringResource(R.string.email),
-                isValid = { viewModel.isEmailValid() },
-                updateInputState = { viewModel.updateEmail(it) }
+                isValid = state.collectAsState().value.isEmailValid(),
+                updateInputState = { state.value.emailText = it }
+//                updateInputState = { vm.updateEmail(it) }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
-                input = viewModel.passwordText,
-                updateInputState = { viewModel.updatePassword(it) }
+                input = state.collectAsState().value.passwordText,
+                updateInputState = { state.value.passwordText = it }
+//                updateInputState = { vm.updatePassword(it) }
             )
             ActionButton(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 text = stringResource(R.string.log_in)
             ) {
-                viewModel.logIn()
+                onAction.invoke(LoginAction.LOG_IN)
             }
             Spacer(modifier = Modifier.weight(1f))
             SignUpText(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = dimensionResource(id = R.dimen.padding_40)),
-                navigator = navigator
+                onAction = onAction
             )
         }
     }
@@ -86,7 +90,7 @@ fun LoginComposable(
 @Composable
 fun SignUpText(
     modifier: Modifier = Modifier,
-    navigator: DestinationsNavigator? = null
+    onAction: (LoginAction) -> Unit = {}
 ) {
     val signUp = stringResource(id = R.string.sign_up).uppercase()
 
@@ -109,8 +113,13 @@ fun SignUpText(
             fontSize = dimensionResource(R.dimen.font_size_16).value.sp
         )
     ) { offset ->
-        annotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let { span ->
-            navigator?.navigate(SignUpComposableDestination)
+        annotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let {
+            onAction.invoke(LoginAction.NAVIGATE_TO_SIGN_UP)
         }
     }
+}
+
+enum class LoginAction {
+    LOG_IN,
+    NAVIGATE_TO_SIGN_UP
 }

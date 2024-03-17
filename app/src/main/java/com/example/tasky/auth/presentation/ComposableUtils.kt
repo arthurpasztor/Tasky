@@ -63,7 +63,7 @@ fun UserInfoTextField(
     modifier: Modifier = Modifier,
     input: String = "",
     label: String = "Email address",
-    isValid: () -> Boolean = { true },
+    isValid: Boolean = true,
     updateInputState: (String) -> Unit = {}
 ) {
     val emailCheckIcon: @Composable (() -> Unit) =
@@ -86,7 +86,7 @@ fun UserInfoTextField(
         value = input,
         onValueChange = updateInputState,
         label = { Text(text = label) },
-        trailingIcon = if (isValid()) emailCheckIcon else null,
+        trailingIcon = if (isValid) emailCheckIcon else null,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         singleLine = true,
         colors = TextFieldDefaults.colors(

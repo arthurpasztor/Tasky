@@ -1,7 +1,7 @@
 package com.example.tasky
 
-import com.example.tasky.auth.presentation.isNameValid
-import com.example.tasky.auth.presentation.isPasswordValid
+import com.example.tasky.auth.domain.isNameValid
+import com.example.tasky.auth.domain.isPasswordValid
 import org.junit.Test
 
 import org.junit.Assert.*

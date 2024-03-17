@@ -1,5 +1,6 @@
 package com.example.tasky.auth.presentation
 
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -21,21 +22,24 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
-import com.example.tasky.auth.domain.SignUpViewModel
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.parcelize.Parcelize
+
+data class SignUpComposableNavArgs(
+    val state: SignUpState
+)
 
 @Preview
 @Destination
 @Composable
 fun SignUpComposable(
-    navigator: DestinationsNavigator? = null,
-    viewModel: SignUpViewModel = viewModel()
+    state: SignUpState = SignUpState(),
+    onAction: (SignUpAction) -> Unit = {}
 ) {
+
     val context = LocalContext.current
 
     val cornerRadius = dimensionResource(R.dimen.radius_30)
@@ -54,37 +58,37 @@ fun SignUpComposable(
         ) {
             UserInfoTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
-                input = viewModel.nameText,
+                input = state.nameText,
                 label = stringResource(R.string.name),
-                isValid = { viewModel.isNameValid() },
-                updateInputState = { viewModel.updateNameText(it) }
+                isValid = state.isNameValid(),
+                updateInputState = { state.nameText = it }
             )
             UserInfoTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
-                input = viewModel.emailText,
+                input = state.emailText,
                 label = stringResource(R.string.email),
-                isValid = { viewModel.isEmailValid() },
-                updateInputState = { viewModel.updateEmail(it) }
+                isValid = state.isEmailValid(),
+                updateInputState = { state.emailText = it }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
-                input = viewModel.passwordText,
-                updateInputState = { viewModel.updatePassword(it) }
+                input = state.passwordText,
+                updateInputState = { state.passwordText = it }
             )
             ActionButton(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
                 text = stringResource(R.string.get_started)
             ) {
                 when {
-                    !viewModel.isNameValid() -> Toast.makeText(context, R.string.error_name_invalid, Toast.LENGTH_LONG).show()
-                    !viewModel.isEmailValid() -> Toast.makeText(context, R.string.error_email_invalid, Toast.LENGTH_LONG).show()
-                    !viewModel.isPasswordValid() -> Toast.makeText(context, R.string.error_password_invalid, Toast.LENGTH_LONG).show()
-                    else ->viewModel.signUp()
+                    !state.isNameValid() -> Toast.makeText(context, R.string.error_name_invalid, Toast.LENGTH_LONG).show()
+                    !state.isEmailValid() -> Toast.makeText(context, R.string.error_email_invalid, Toast.LENGTH_LONG).show()
+                    !state.isPasswordValid() -> Toast.makeText(context, R.string.error_password_invalid, Toast.LENGTH_LONG).show()
+                    else -> onAction.invoke(SignUpAction.SIGN_UP)
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             BackButton(Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_40))) {
-                navigator?.popBackStack()
+                onAction.invoke(SignUpAction.NAVIGATE_BACK)
             }
         }
     }
@@ -108,4 +112,10 @@ fun BackButton(modifier: Modifier = Modifier, action: () -> Unit) {
             tint = Color.White
         )
     }
+}
+
+@Parcelize
+enum class SignUpAction: Parcelable {
+    SIGN_UP,
+    NAVIGATE_BACK
 }
