@@ -1,6 +1,5 @@
 package com.example.tasky.auth.presentation
 
-import android.os.Parcelable
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -14,6 +13,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -22,24 +23,42 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
-import kotlinx.parcelize.Parcelize
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-data class SignUpComposableNavArgs(
-    val state: SignUpState
-)
-
-@Preview
 @Destination
 @Composable
-fun SignUpComposable(
+fun SignUpRoot(
+    navigator: DestinationsNavigator,
+    signUpVM: SignUpViewModel = viewModel()
+) {
+    val context = LocalContext.current
+
+    val state by signUpVM.state.collectAsStateWithLifecycle()
+    LaunchedEffect(signUpVM, context) {
+        signUpVM.navChannel.collect { destination ->
+            when (destination) {
+                SignUpNav.NavigateBack -> navigator.popBackStack()
+            }
+        }
+    }
+    SignUpScreen(
+        state = state,
+        onAction = signUpVM::onAction
+    )
+}
+
+@Preview
+@Composable
+fun SignUpScreen(
     state: SignUpState = SignUpState(),
     onAction: (SignUpAction) -> Unit = {}
 ) {
-
     val context = LocalContext.current
 
     val cornerRadius = dimensionResource(R.dimen.radius_30)
@@ -49,7 +68,7 @@ fun SignUpComposable(
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
-        AuthenticationTitleComposable(stringResource(R.string.create_your_account))
+        AuthenticationTitle(stringResource(R.string.create_your_account))
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,35 +79,35 @@ fun SignUpComposable(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
                 input = state.nameText,
                 label = stringResource(R.string.name),
-                isValid = state.isNameValid(),
-                updateInputState = { state.nameText = it }
+                isValid = state.isNameValid,
+                updateInputState = { onAction(SignUpAction.UpdateName(it)) }
             )
             UserInfoTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 input = state.emailText,
                 label = stringResource(R.string.email),
-                isValid = state.isEmailValid(),
-                updateInputState = { state.emailText = it }
+                isValid = state.isEmailValid,
+                updateInputState = { onAction(SignUpAction.UpdateEmail(it)) }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 input = state.passwordText,
-                updateInputState = { state.passwordText = it }
+                updateInputState = { onAction(SignUpAction.UpdatePassword(it)) }
             )
             ActionButton(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
                 text = stringResource(R.string.get_started)
             ) {
                 when {
-                    !state.isNameValid() -> Toast.makeText(context, R.string.error_name_invalid, Toast.LENGTH_LONG).show()
-                    !state.isEmailValid() -> Toast.makeText(context, R.string.error_email_invalid, Toast.LENGTH_LONG).show()
-                    !state.isPasswordValid() -> Toast.makeText(context, R.string.error_password_invalid, Toast.LENGTH_LONG).show()
-                    else -> onAction.invoke(SignUpAction.SIGN_UP)
+                    !state.isNameValid -> Toast.makeText(context, R.string.error_name_invalid, Toast.LENGTH_LONG).show()
+                    !state.isEmailValid -> Toast.makeText(context, R.string.error_email_invalid, Toast.LENGTH_LONG).show()
+                    !state.isPasswordValid -> Toast.makeText(context, R.string.error_password_invalid, Toast.LENGTH_LONG).show()
+                    else -> onAction.invoke(SignUpAction.SignUp)
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             BackButton(Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_40))) {
-                onAction.invoke(SignUpAction.NAVIGATE_BACK)
+                onAction.invoke(SignUpAction.NavigateBack)
             }
         }
     }
@@ -114,8 +133,10 @@ fun BackButton(modifier: Modifier = Modifier, action: () -> Unit) {
     }
 }
 
-@Parcelize
-enum class SignUpAction: Parcelable {
-    SIGN_UP,
-    NAVIGATE_BACK
+sealed class SignUpAction {
+    class UpdateName(val name: String): SignUpAction()
+    class UpdateEmail(val email: String): SignUpAction()
+    class UpdatePassword(val password: String): SignUpAction()
+    data object SignUp: SignUpAction()
+    data object NavigateBack: SignUpAction()
 }

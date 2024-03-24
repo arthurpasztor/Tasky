@@ -41,7 +41,7 @@ import java.util.Locale
 
 @Preview
 @Composable
-fun AuthenticationTitleComposable(title: String = "Welcome Back!") {
+fun AuthenticationTitle(title: String = "Welcome Back!") {
     val verticalPadding = dimensionResource(R.dimen.padding_52)
     val fontSize = dimensionResource(R.dimen.font_size_36).value.sp
 

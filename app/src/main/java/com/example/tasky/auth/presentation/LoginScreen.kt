@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -23,25 +25,45 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
+import com.example.tasky.auth.presentation.destinations.SignUpRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@Preview
 @RootNavGraph(start = true)
 @Destination
 @Composable
-fun LoginComposable(
-    vm: LoginViewModel = viewModel(),
-    state: StateFlow<LoginState> = MutableStateFlow(LoginState()),
+fun LoginRoot(
+    navigator: DestinationsNavigator,
+    loginVM: LoginViewModel = viewModel()
+) {
+    val context = LocalContext.current
+
+    val state by loginVM.state.collectAsStateWithLifecycle()
+    LaunchedEffect(loginVM, context) {
+        loginVM.navChannel.collect { destination ->
+            when (destination) {
+                LoginNav.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
+            }
+        }
+    }
+    LoginScreen(
+        state = state,
+        onAction = loginVM::onAction
+    )
+}
+
+@Preview
+@Composable
+fun LoginScreen(
+    state: LoginState = LoginState(),
     onAction: (LoginAction) -> Unit = {}
 ) {
-
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     Column(
@@ -49,7 +71,7 @@ fun LoginComposable(
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
-        AuthenticationTitleComposable(stringResource(R.string.welcome_back))
+        AuthenticationTitle(stringResource(R.string.welcome_back))
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -58,23 +80,21 @@ fun LoginComposable(
         ) {
             UserInfoTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
-                input = state.collectAsState().value.emailText,
+                input = state.emailText,
                 label = stringResource(R.string.email),
-                isValid = state.collectAsState().value.isEmailValid(),
-                updateInputState = { state.value.emailText = it }
-//                updateInputState = { vm.updateEmail(it) }
+                isValid = state.isEmailValid,
+                updateInputState = { onAction(LoginAction.UpdateEmail(it)) }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
-                input = state.collectAsState().value.passwordText,
-                updateInputState = { state.value.passwordText = it }
-//                updateInputState = { vm.updatePassword(it) }
+                input = state.passwordText,
+                updateInputState = { onAction(LoginAction.UpdatePassword(it)) }
             )
             ActionButton(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 text = stringResource(R.string.log_in)
             ) {
-                onAction.invoke(LoginAction.LOG_IN)
+                onAction.invoke(LoginAction.LogIn)
             }
             Spacer(modifier = Modifier.weight(1f))
             SignUpText(
@@ -114,12 +134,14 @@ fun SignUpText(
         )
     ) { offset ->
         annotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let {
-            onAction.invoke(LoginAction.NAVIGATE_TO_SIGN_UP)
+            onAction.invoke(LoginAction.NavigateToSignUp)
         }
     }
 }
 
-enum class LoginAction {
-    LOG_IN,
-    NAVIGATE_TO_SIGN_UP
+sealed class LoginAction {
+    class UpdateEmail(val email: String): LoginAction()
+    class UpdatePassword(val password: String): LoginAction()
+    data object LogIn: LoginAction()
+    data object NavigateToSignUp: LoginAction()
 }
