@@ -30,18 +30,18 @@ import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.koin.androidx.compose.koinViewModel
 
 @Destination
 @Composable
-fun SignUpRoot(
-    navigator: DestinationsNavigator,
-    signUpVM: SignUpViewModel = viewModel()
-) {
-    val context = LocalContext.current
+fun SignUpRoot(navigator: DestinationsNavigator) {
 
-    val state by signUpVM.state.collectAsStateWithLifecycle()
-    LaunchedEffect(signUpVM, context) {
-        signUpVM.navChannel.collect { destination ->
+    val context = LocalContext.current
+    val viewModel: SignUpViewModel = koinViewModel()
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel, context) {
+        viewModel.navChannel.collect { destination ->
             when (destination) {
                 SignUpNav.NavigateBack -> navigator.popBackStack()
             }
@@ -49,7 +49,7 @@ fun SignUpRoot(
     }
     SignUpScreen(
         state = state,
-        onAction = signUpVM::onAction
+        onAction = viewModel::onAction
     )
 }
 

@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
 import com.example.tasky.auth.presentation.destinations.SignUpRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
@@ -34,19 +33,19 @@ import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.koin.androidx.compose.koinViewModel
 
 @RootNavGraph(start = true)
 @Destination
 @Composable
-fun LoginRoot(
-    navigator: DestinationsNavigator,
-    loginVM: LoginViewModel = viewModel()
-) {
-    val context = LocalContext.current
+fun LoginRoot(navigator: DestinationsNavigator) {
 
-    val state by loginVM.state.collectAsStateWithLifecycle()
-    LaunchedEffect(loginVM, context) {
-        loginVM.navChannel.collect { destination ->
+    val context = LocalContext.current
+    val viewModel: LoginViewModel = koinViewModel()
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel, context) {
+        viewModel.navChannel.collect { destination ->
             when (destination) {
                 LoginNav.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
             }
@@ -54,7 +53,7 @@ fun LoginRoot(
     }
     LoginScreen(
         state = state,
-        onAction = loginVM::onAction
+        onAction = viewModel::onAction
     )
 }
 
