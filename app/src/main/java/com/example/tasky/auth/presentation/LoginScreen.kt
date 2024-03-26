@@ -1,6 +1,9 @@
 package com.example.tasky.auth.presentation
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -27,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.auth.data.AuthResult
+import com.example.tasky.auth.presentation.destinations.LoginRootDestination
+import com.example.tasky.auth.presentation.destinations.MainScreenDestination
 import com.example.tasky.auth.presentation.destinations.SignUpRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -40,6 +48,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun LoginRoot(navigator: DestinationsNavigator) {
 
+    val TAG = "LoginScreen"
+
     val context = LocalContext.current
     val viewModel: LoginViewModel = koinViewModel()
 
@@ -47,7 +57,26 @@ fun LoginRoot(navigator: DestinationsNavigator) {
     LaunchedEffect(viewModel, context) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                LoginNav.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
+                LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
+                is LoginAuthAction.HandleAuthResponse -> {
+                    when (destination.result) {
+                        is AuthResult.Authorized<*> -> {
+                            navigator.navigate(MainScreenDestination) {
+                                popUpTo(LoginRootDestination.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                        is AuthResult.Unauthorized -> {
+                            Log.e(TAG, "Unauthorized: ${destination.result.error.message}")
+                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
+                        }
+                        is AuthResult.Error -> {
+                            Log.e(TAG, "Error: ${destination.result.error.message}")
+                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             }
         }
     }
@@ -55,6 +84,16 @@ fun LoginRoot(navigator: DestinationsNavigator) {
         state = state,
         onAction = viewModel::onAction
     )
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 }
 
 @Preview

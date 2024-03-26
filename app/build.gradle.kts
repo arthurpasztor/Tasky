@@ -1,8 +1,11 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -22,10 +25,20 @@ android {
         }
     }
 
+    val apiKey = gradleLocalProperties(rootDir).getProperty("API_KEY")
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            buildConfigField("String", "BASE_URL", "\"https://tasky.pl-coding.com\"")
+        }
+
+        debug {
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            buildConfigField("String", "BASE_URL", "\"https://tasky.pl-coding.com\"")
         }
     }
     compileOptions {
@@ -37,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -77,4 +91,16 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-android:3.4.0")
     implementation("io.insert-koin:koin-androidx-compose:3.4.2")
+
+    // Remote
+    val ktorVersion = "2.3.0"
+    val ktorCoreVersion = "2.3.9"
+    implementation("io.ktor:ktor-client-android:${ktorVersion}")
+    implementation("io.ktor:ktor-client-core:${ktorCoreVersion}")
+    implementation("io.ktor:ktor-client-cio:${ktorCoreVersion}")
+    implementation("io.ktor:ktor-client-logging:${ktorVersion}")
+    implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+    implementation("io.ktor:ktor-client-serialization:${ktorVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
