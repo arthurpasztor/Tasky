@@ -58,6 +58,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.compose.material:material-icons-extended:1.6.3")
     testImplementation("junit:junit:4.13.2")
@@ -72,4 +73,8 @@ dependencies {
     val destinationsVersion = "1.9.54"
     implementation("io.github.raamcosta.compose-destinations:core:$destinationsVersion")
     ksp("io.github.raamcosta.compose-destinations:ksp:$destinationsVersion")
+
+    // Koin
+    implementation("io.insert-koin:koin-android:3.4.0")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.2")
 }
