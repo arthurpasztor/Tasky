@@ -82,16 +82,19 @@ fun LoginScreen(
                 input = state.emailText,
                 label = stringResource(R.string.email),
                 isValid = state.isEmailValid,
+                validationErrorText = if (state.shouldShowEmailValidationError) stringResource(R.string.error_email_invalid) else null,
                 updateInputState = { onAction(LoginAction.UpdateEmail(it)) }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 input = state.passwordText,
+                validationErrorText = null,
                 updateInputState = { onAction(LoginAction.UpdatePassword(it)) }
             )
             ActionButton(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
-                text = stringResource(R.string.log_in)
+                text = stringResource(R.string.log_in),
+                enabled = state.isActionButtonEnabled
             ) {
                 onAction.invoke(LoginAction.LogIn)
             }
