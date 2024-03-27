@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -64,6 +65,7 @@ fun UserInfoTextField(
     input: String = "",
     label: String = "Email address",
     isValid: Boolean = true,
+    validationErrorText: String? = "Error",
     updateInputState: (String) -> Unit = {}
 ) {
     val emailCheckIcon: @Composable (() -> Unit) =
@@ -92,8 +94,18 @@ fun UserInfoTextField(
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        )
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedSupportingTextColor = Color.Red,
+            unfocusedSupportingTextColor = Color.Red,
+        ),
+        supportingText = validationErrorText?.let {
+            @Composable {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     )
 }
 
@@ -102,6 +114,7 @@ fun UserInfoTextField(
 fun PasswordTextField(
     modifier: Modifier = Modifier,
     input: String = "",
+    validationErrorText: String? = "Error",
     updateInputState: (String) -> Unit = {}
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -133,8 +146,18 @@ fun PasswordTextField(
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        )
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedSupportingTextColor = Color.Red,
+            unfocusedSupportingTextColor = Color.Red,
+        ),
+        supportingText = validationErrorText?.let {
+            @Composable {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     )
 }
 
@@ -143,6 +166,7 @@ fun PasswordTextField(
 fun ActionButton(
     modifier: Modifier = Modifier,
     text: String = "Log in",
+    enabled: Boolean = true,
     action: () -> Unit = {}
 ) {
     val horizontalPadding = dimensionResource(R.dimen.padding_20)
@@ -156,7 +180,8 @@ fun ActionButton(
             .padding(start = horizontalPadding, end = horizontalPadding),
         onClick = { action.invoke() },
         colors = ButtonDefaults.buttonColors(containerColor = BackgroundBlack),
-        shape = RoundedCornerShape(cornerRadius)
+        shape = RoundedCornerShape(cornerRadius),
+        enabled = enabled
     ) {
         Text(
             text = text.uppercase(Locale.getDefault()),

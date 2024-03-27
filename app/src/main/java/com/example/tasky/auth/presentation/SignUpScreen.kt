@@ -59,8 +59,6 @@ fun SignUpScreen(
     state: SignUpState = SignUpState(),
     onAction: (SignUpAction) -> Unit = {}
 ) {
-    val context = LocalContext.current
-
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     Column(
@@ -80,6 +78,7 @@ fun SignUpScreen(
                 input = state.nameText,
                 label = stringResource(R.string.name),
                 isValid = state.isNameValid,
+                validationErrorText = if (state.shouldShowNameValidationError) stringResource(R.string.error_name_invalid) else null,
                 updateInputState = { onAction(SignUpAction.UpdateName(it)) }
             )
             UserInfoTextField(
@@ -87,23 +86,21 @@ fun SignUpScreen(
                 input = state.emailText,
                 label = stringResource(R.string.email),
                 isValid = state.isEmailValid,
+                validationErrorText = if (state.shouldShowEmailValidationError) stringResource(R.string.error_email_invalid) else null,
                 updateInputState = { onAction(SignUpAction.UpdateEmail(it)) }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 input = state.passwordText,
+                validationErrorText = if (state.shouldShowPasswordValidationError) stringResource(R.string.error_password_invalid) else null,
                 updateInputState = { onAction(SignUpAction.UpdatePassword(it)) }
             )
             ActionButton(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_40)),
-                text = stringResource(R.string.get_started)
+                text = stringResource(R.string.get_started),
+                enabled = state.isActionButtonEnabled
             ) {
-                when {
-                    !state.isNameValid -> Toast.makeText(context, R.string.error_name_invalid, Toast.LENGTH_LONG).show()
-                    !state.isEmailValid -> Toast.makeText(context, R.string.error_email_invalid, Toast.LENGTH_LONG).show()
-                    !state.isPasswordValid -> Toast.makeText(context, R.string.error_password_invalid, Toast.LENGTH_LONG).show()
-                    else -> onAction.invoke(SignUpAction.SignUp)
-                }
+                onAction.invoke(SignUpAction.SignUp)
             }
             Spacer(modifier = Modifier.weight(1f))
             BackButton(Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_40))) {

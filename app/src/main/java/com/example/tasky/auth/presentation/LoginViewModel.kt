@@ -25,7 +25,9 @@ class LoginViewModel : ViewModel() {
             is LoginAction.UpdateEmail -> _state.update {
                 it.copy(
                     emailText = action.email,
-                    isEmailValid = action.email.isEmailValid()
+                    isEmailValid = action.email.isEmailValid(),
+                    shouldShowEmailValidationError = !action.email.isEmailValid(),
+                    isActionButtonEnabled = action.email.isEmailValid()
                 )
             }
             is LoginAction.UpdatePassword -> _state.update {
@@ -51,7 +53,11 @@ data class LoginState(
     val emailText: String = "",
     val passwordText: String = "",
 
-    val isEmailValid: Boolean = false
+    val isEmailValid: Boolean = false,
+
+    val shouldShowEmailValidationError: Boolean = false,
+
+    val isActionButtonEnabled: Boolean = false
 )
 
 sealed class LoginNav {

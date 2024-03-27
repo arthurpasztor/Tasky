@@ -27,19 +27,25 @@ class SignUpViewModel : ViewModel() {
             is SignUpAction.UpdateName -> _state.update {
                 it.copy(
                     nameText = action.name,
-                    isNameValid = action.name.isNameValid()
+                    isNameValid = action.name.isNameValid(),
+                    shouldShowNameValidationError = !action.name.isNameValid(),
+                    isActionButtonEnabled = action.name.isNameValid() && it.isEmailValid && it.isPasswordValid
                 )
             }
             is SignUpAction.UpdateEmail -> _state.update {
                 it.copy(
                     emailText = action.email,
-                    isEmailValid = action.email.isEmailValid()
+                    isEmailValid = action.email.isEmailValid(),
+                    shouldShowEmailValidationError = !action.email.isEmailValid(),
+                    isActionButtonEnabled = it.isNameValid && action.email.isEmailValid() && it.isPasswordValid
                 )
             }
             is SignUpAction.UpdatePassword -> _state.update {
                 it.copy(
                     passwordText = action.password,
-                    isPasswordValid = action.password.isPasswordValid()
+                    isPasswordValid = action.password.isPasswordValid(),
+                    shouldShowPasswordValidationError = !action.password.isPasswordValid(),
+                    isActionButtonEnabled = it.isNameValid && it.isEmailValid && action.password.isPasswordValid()
                 )
             }
         }
@@ -63,7 +69,13 @@ data class SignUpState(
 
     val isNameValid: Boolean = false,
     val isEmailValid: Boolean = false,
-    val isPasswordValid: Boolean = false
+    val isPasswordValid: Boolean = false,
+
+    val shouldShowNameValidationError: Boolean = false,
+    val shouldShowEmailValidationError: Boolean = false,
+    val shouldShowPasswordValidationError: Boolean = false,
+
+    val isActionButtonEnabled: Boolean = false
 )
 
 sealed class SignUpNav {
