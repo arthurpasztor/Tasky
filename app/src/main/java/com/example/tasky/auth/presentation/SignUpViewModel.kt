@@ -2,6 +2,10 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.auth.data.AuthRepository
+import com.example.tasky.auth.data.AuthResult
+import com.example.tasky.auth.data.dto.LoginRequest
+import com.example.tasky.auth.data.dto.SignUpRequest
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.isNameValid
 import com.example.tasky.auth.domain.isPasswordValid
@@ -11,14 +15,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
 
 class SignUpViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(SignUpState())
     val state = _state.asStateFlow()
 
-    private val _navChannel = Channel<SignUpNav>()
+    private val _navChannel = Channel<SignUpAuthAction>()
     val navChannel = _navChannel.receiveAsFlow()
+
+    private val repository: AuthRepository by inject(AuthRepository::class.java)
 
     fun onAction(action: SignUpAction) {
         when (action) {
@@ -52,17 +59,45 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun signUp() {
-        // TODO implement
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            val payload = SignUpRequest(
+                fullName = _state.value.nameText,
+                email = _state.value.emailText,
+                password = _state.value.passwordText
+            )
+            val response = repository.signUp(payload)
+
+            if (response is AuthResult.Authorized<*> && response.data is LoginRequest) {
+                loginAfterSignUp(response.data)
+            } else {
+                _state.update { it.copy(isLoading = false) }
+
+                _navChannel.send(SignUpAuthAction.HandleAuthResponse(response))
+            }
+        }
+    }
+
+    private fun loginAfterSignUp(payload: LoginRequest) {
+        viewModelScope.launch {
+            val response = repository.login(payload)
+            _navChannel.send(SignUpAuthAction.HandleAuthResponse(response))
+
+            _state.update { it.copy(isLoading = false) }
+        }
     }
 
     private fun navigateBack() {
         viewModelScope.launch {
-            _navChannel.send(SignUpNav.NavigateBack)
+            _navChannel.send(SignUpAuthAction.NavigateBack)
         }
     }
 }
 
 data class SignUpState(
+    val isLoading: Boolean = false,
+
     val nameText: String = "",
     val emailText: String = "",
     val passwordText: String = "",
@@ -78,6 +113,7 @@ data class SignUpState(
     val isActionButtonEnabled: Boolean = false
 )
 
-sealed class SignUpNav {
-    data object NavigateBack: SignUpNav()
+sealed class SignUpAuthAction {
+    data object NavigateBack: SignUpAuthAction()
+    class HandleAuthResponse(val result: AuthResult): SignUpAuthAction()
 }

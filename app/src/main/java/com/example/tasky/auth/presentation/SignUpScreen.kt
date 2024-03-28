@@ -1,7 +1,9 @@
 package com.example.tasky.auth.presentation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,10 +13,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,8 +28,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasky.R
+import com.example.tasky.auth.data.AuthResult
+import com.example.tasky.auth.presentation.destinations.LoginRootDestination
+import com.example.tasky.auth.presentation.destinations.MainScreenDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
@@ -36,6 +42,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SignUpRoot(navigator: DestinationsNavigator) {
 
+    val TAG = "SignUpScreen"
+
     val context = LocalContext.current
     val viewModel: SignUpViewModel = koinViewModel()
 
@@ -43,7 +51,26 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
     LaunchedEffect(viewModel, context) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                SignUpNav.NavigateBack -> navigator.popBackStack()
+                SignUpAuthAction.NavigateBack -> navigator.popBackStack()
+                is SignUpAuthAction.HandleAuthResponse -> {
+                    when (destination.result) {
+                        is AuthResult.Authorized<*> -> {
+                            navigator.navigate(MainScreenDestination) {
+                                popUpTo(LoginRootDestination.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                        is AuthResult.Unauthorized -> {
+                            Log.e(TAG, "Unauthorized: ${destination.result.error.message}")
+                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
+                        }
+                        is AuthResult.Error -> {
+                            Log.e(TAG, "Error: ${destination.result.error.message}")
+                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             }
         }
     }
@@ -51,6 +78,16 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
         state = state,
         onAction = viewModel::onAction
     )
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 }
 
 @Preview
