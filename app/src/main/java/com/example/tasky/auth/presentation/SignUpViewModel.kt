@@ -6,9 +6,12 @@ import com.example.tasky.auth.data.AuthRepository
 import com.example.tasky.auth.data.AuthResult
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
+import com.example.tasky.auth.domain.NameError
+import com.example.tasky.auth.domain.PasswordError
+import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.isEmailValid
-import com.example.tasky.auth.domain.isNameValid
-import com.example.tasky.auth.domain.isPasswordValid
+import com.example.tasky.auth.domain.validateName
+import com.example.tasky.auth.domain.validatePassword
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,27 +35,29 @@ class SignUpViewModel : ViewModel() {
             SignUpAction.NavigateBack -> navigateBack()
             SignUpAction.SignUp -> signUp()
             is SignUpAction.UpdateName -> _state.update {
+                val validateName = action.name.validateName()
                 it.copy(
                     nameText = action.name,
-                    isNameValid = action.name.isNameValid(),
-                    shouldShowNameValidationError = !action.name.isNameValid(),
-                    isActionButtonEnabled = action.name.isNameValid() && it.isEmailValid && it.isPasswordValid
+                    isNameValid = validateName !is Result.Error,
+                    nameValidationError = if (validateName is Result.Error) validateName.error else null,
+                    isActionButtonEnabled = validateName !is Result.Error && it.isEmailValid && it.isPasswordValid
                 )
             }
             is SignUpAction.UpdateEmail -> _state.update {
                 it.copy(
                     emailText = action.email,
                     isEmailValid = action.email.isEmailValid(),
-                    shouldShowEmailValidationError = !action.email.isEmailValid(),
+                    emailValidationError = !action.email.isEmailValid(),
                     isActionButtonEnabled = it.isNameValid && action.email.isEmailValid() && it.isPasswordValid
                 )
             }
             is SignUpAction.UpdatePassword -> _state.update {
+                val validatePassword = action.password.validatePassword()
                 it.copy(
                     passwordText = action.password,
-                    isPasswordValid = action.password.isPasswordValid(),
-                    shouldShowPasswordValidationError = !action.password.isPasswordValid(),
-                    isActionButtonEnabled = it.isNameValid && it.isEmailValid && action.password.isPasswordValid()
+                    isPasswordValid = validatePassword !is Result.Error,
+                    passwordValidationError = if (validatePassword is Result.Error) validatePassword.error else null,
+                    isActionButtonEnabled = it.isNameValid && it.isEmailValid && validatePassword !is Result.Error
                 )
             }
         }
@@ -106,9 +111,9 @@ data class SignUpState(
     val isEmailValid: Boolean = false,
     val isPasswordValid: Boolean = false,
 
-    val shouldShowNameValidationError: Boolean = false,
-    val shouldShowEmailValidationError: Boolean = false,
-    val shouldShowPasswordValidationError: Boolean = false,
+    val nameValidationError: NameError? = null,
+    val emailValidationError: Boolean = false,
+    val passwordValidationError: PasswordError? = null,
 
     val isActionButtonEnabled: Boolean = false
 )

@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.auth.data.AuthResult
+import com.example.tasky.auth.domain.NameError
+import com.example.tasky.auth.domain.PasswordError
+import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.presentation.destinations.LoginRootDestination
 import com.example.tasky.auth.presentation.destinations.MainScreenDestination
 import com.example.tasky.ui.theme.BackgroundBlack
@@ -115,7 +118,7 @@ fun SignUpScreen(
                 input = state.nameText,
                 label = stringResource(R.string.name),
                 isValid = state.isNameValid,
-                validationErrorText = if (state.shouldShowNameValidationError) stringResource(R.string.error_name_invalid) else null,
+                validationErrorText = state.nameValidationError.getErrorMessage(),
                 updateInputState = { onAction(SignUpAction.UpdateName(it)) }
             )
             UserInfoTextField(
@@ -123,13 +126,13 @@ fun SignUpScreen(
                 input = state.emailText,
                 label = stringResource(R.string.email),
                 isValid = state.isEmailValid,
-                validationErrorText = if (state.shouldShowEmailValidationError) stringResource(R.string.error_email_invalid) else null,
+                validationErrorText = if (state.emailValidationError) stringResource(R.string.error_email_invalid) else null,
                 updateInputState = { onAction(SignUpAction.UpdateEmail(it)) }
             )
             PasswordTextField(
                 modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_20)),
                 input = state.passwordText,
-                validationErrorText = if (state.shouldShowPasswordValidationError) stringResource(R.string.error_password_invalid) else null,
+                validationErrorText = state.passwordValidationError.getErrorMessage(),
                 updateInputState = { onAction(SignUpAction.UpdatePassword(it)) }
             )
             ActionButton(
@@ -144,6 +147,29 @@ fun SignUpScreen(
                 onAction.invoke(SignUpAction.NavigateBack)
             }
         }
+    }
+}
+
+@Composable
+fun RootError?.getErrorMessage(): String? {
+    return when (this) {
+        is NameError -> {
+            when (this) {
+                NameError.TOO_SHORT -> stringResource(R.string.error_name_too_short)
+                NameError.TOO_LONG -> stringResource(R.string.error_name_too_long)
+            }
+        }
+
+        is PasswordError -> {
+            when (this) {
+                PasswordError.NO_LOWERCASE -> stringResource(R.string.error_password_no_lowercase)
+                PasswordError.NO_UPPERCASE -> stringResource(R.string.error_password_no_uppercase)
+                PasswordError.NO_DIGIT -> stringResource(R.string.error_password_no_digits)
+                PasswordError.TOO_SHORT -> stringResource(R.string.error_password_too_short)
+            }
+        }
+
+        null -> null
     }
 }
 
