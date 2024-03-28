@@ -18,4 +18,14 @@
     <string name="error_password_no_uppercase">The password has no uppercase characters</string>
     <string name="error_password_no_digits">The password has no digits</string>
     <string name="error_password_too_short">The password is too short</string>
+
+    <string name="error_redirect">There are multiple options for the requested resource</string>
+    <string name="error_unauthorized">Unauthorized</string>
+    <string name="error_request_timed_out">The request timed out</string>
+    <string name="error_conflict">The email or password is incorrect</string>
+<!--    <string name="error_conflict">A user with that email already exists</string>-->
+    <string name="error_payload_too_large">The payload is too large</string>
+    <string name="error_client">Bad request</string>
+    <string name="error_server">Oops, something went wrong. Please try again</string>
+    <string name="error_unknown">An unknown error occurred</string>
 </resources>

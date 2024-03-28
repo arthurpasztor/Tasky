@@ -3,8 +3,9 @@ package com.example.tasky.auth.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.data.AuthRepository
-import com.example.tasky.auth.data.AuthResult
 import com.example.tasky.auth.data.dto.LoginRequest
+import com.example.tasky.auth.domain.Result
+import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,5 +79,5 @@ data class LoginState(
 
 sealed class LoginAuthAction {
     data object NavigateToSignUpScreen: LoginAuthAction()
-    class HandleAuthResponse(val result: AuthResult): LoginAuthAction()
+    class HandleAuthResponse(val result: Result<Unit, RootError>): LoginAuthAction()
 }

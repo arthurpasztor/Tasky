@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.data.AuthResult
+import com.example.tasky.auth.domain.HttpError
+import com.example.tasky.auth.domain.Result
+import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.auth.presentation.destinations.LoginRootDestination
 import com.example.tasky.auth.presentation.destinations.MainScreenDestination
 import com.example.tasky.auth.presentation.destinations.SignUpRootDestination
@@ -60,20 +62,17 @@ fun LoginRoot(navigator: DestinationsNavigator) {
                 LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
                 is LoginAuthAction.HandleAuthResponse -> {
                     when (destination.result) {
-                        is AuthResult.Authorized<*> -> {
+                        is Result.Success -> {
                             navigator.navigate(MainScreenDestination) {
                                 popUpTo(LoginRootDestination.route) {
                                     inclusive = true
                                 }
                             }
                         }
-                        is AuthResult.Unauthorized -> {
-                            Log.e(TAG, "Unauthorized: ${destination.result.error.message}")
-                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
-                        }
-                        is AuthResult.Error -> {
-                            Log.e(TAG, "Error: ${destination.result.error.message}")
-                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
+                        is Result.Error -> {
+                            val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)
+                            Log.e(TAG, "Error: $errorMessage")
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
                         }
                     }
                 }

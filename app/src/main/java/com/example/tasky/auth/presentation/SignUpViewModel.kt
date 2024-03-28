@@ -3,12 +3,12 @@ package com.example.tasky.auth.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.data.AuthRepository
-import com.example.tasky.auth.data.AuthResult
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
 import com.example.tasky.auth.domain.Result
+import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword
@@ -74,7 +74,7 @@ class SignUpViewModel : ViewModel() {
             )
             val response = repository.signUp(payload)
 
-            if (response is AuthResult.Authorized<*> && response.data is LoginRequest) {
+            if (response is Result.Success<*, RootError> && response.data is LoginRequest) {
                 loginAfterSignUp(response.data)
             } else {
                 _state.update { it.copy(isLoading = false) }
@@ -120,5 +120,5 @@ data class SignUpState(
 
 sealed class SignUpAuthAction {
     data object NavigateBack: SignUpAuthAction()
-    class HandleAuthResponse(val result: AuthResult): SignUpAuthAction()
+    class HandleAuthResponse(val result: Result<*, RootError>): SignUpAuthAction()
 }

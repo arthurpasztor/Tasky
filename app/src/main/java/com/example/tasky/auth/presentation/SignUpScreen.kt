@@ -29,10 +29,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.data.AuthResult
+import com.example.tasky.auth.domain.HttpError
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
+import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
+import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.auth.presentation.destinations.LoginRootDestination
 import com.example.tasky.auth.presentation.destinations.MainScreenDestination
 import com.example.tasky.ui.theme.BackgroundBlack
@@ -57,20 +59,17 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
                 SignUpAuthAction.NavigateBack -> navigator.popBackStack()
                 is SignUpAuthAction.HandleAuthResponse -> {
                     when (destination.result) {
-                        is AuthResult.Authorized<*> -> {
+                        is Result.Success -> {
                             navigator.navigate(MainScreenDestination) {
                                 popUpTo(LoginRootDestination.route) {
                                     inclusive = true
                                 }
                             }
                         }
-                        is AuthResult.Unauthorized -> {
-                            Log.e(TAG, "Unauthorized: ${destination.result.error.message}")
-                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
-                        }
-                        is AuthResult.Error -> {
-                            Log.e(TAG, "Error: ${destination.result.error.message}")
-                            Toast.makeText(context, destination.result.error.message, Toast.LENGTH_LONG).show()
+                        is Result.Error -> {
+                            val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)
+                            Log.e(TAG, "Error: $errorMessage")
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -169,7 +168,7 @@ fun RootError?.getErrorMessage(): String? {
             }
         }
 
-        null -> null
+        else -> null
     }
 }
 
