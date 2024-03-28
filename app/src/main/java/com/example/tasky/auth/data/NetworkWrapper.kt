@@ -44,8 +44,8 @@ object NetworkWrapper {
         }
 
         engine {
-            connectTimeout= TIME_OUT
-            socketTimeout= TIME_OUT
+            connectTimeout = TIME_OUT
+            socketTimeout = TIME_OUT
         }
     }
 }

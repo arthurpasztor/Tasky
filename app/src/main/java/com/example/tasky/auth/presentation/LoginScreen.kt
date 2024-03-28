@@ -69,6 +69,7 @@ fun LoginRoot(navigator: DestinationsNavigator) {
                                 }
                             }
                         }
+
                         is Result.Error -> {
                             val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)
                             Log.e(TAG, "Error: $errorMessage")
@@ -180,8 +181,8 @@ fun SignUpText(
 }
 
 sealed class LoginAction {
-    class UpdateEmail(val email: String): LoginAction()
-    class UpdatePassword(val password: String): LoginAction()
-    data object LogIn: LoginAction()
-    data object NavigateToSignUp: LoginAction()
+    class UpdateEmail(val email: String) : LoginAction()
+    class UpdatePassword(val password: String) : LoginAction()
+    data object LogIn : LoginAction()
+    data object NavigateToSignUp : LoginAction()
 }

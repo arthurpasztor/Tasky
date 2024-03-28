@@ -43,6 +43,7 @@ class SignUpViewModel : ViewModel() {
                     isActionButtonEnabled = validateName !is Result.Error && it.isEmailValid && it.isPasswordValid
                 )
             }
+
             is SignUpAction.UpdateEmail -> _state.update {
                 it.copy(
                     emailText = action.email,
@@ -51,6 +52,7 @@ class SignUpViewModel : ViewModel() {
                     isActionButtonEnabled = it.isNameValid && action.email.isEmailValid() && it.isPasswordValid
                 )
             }
+
             is SignUpAction.UpdatePassword -> _state.update {
                 val validatePassword = action.password.validatePassword()
                 it.copy(
@@ -119,6 +121,6 @@ data class SignUpState(
 )
 
 sealed class SignUpAuthAction {
-    data object NavigateBack: SignUpAuthAction()
-    class HandleAuthResponse(val result: Result<*, RootError>): SignUpAuthAction()
+    data object NavigateBack : SignUpAuthAction()
+    class HandleAuthResponse(val result: Result<*, RootError>) : SignUpAuthAction()
 }

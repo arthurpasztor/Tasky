@@ -37,6 +37,7 @@ class LoginViewModel : ViewModel() {
                     isActionButtonEnabled = action.email.isEmailValid()
                 )
             }
+
             is LoginAction.UpdatePassword -> _state.update {
                 it.copy(
                     passwordText = action.password,
@@ -78,6 +79,6 @@ data class LoginState(
 )
 
 sealed class LoginAuthAction {
-    data object NavigateToSignUpScreen: LoginAuthAction()
-    class HandleAuthResponse(val result: Result<Unit, RootError>): LoginAuthAction()
+    data object NavigateToSignUpScreen : LoginAuthAction()
+    class HandleAuthResponse(val result: Result<Unit, RootError>) : LoginAuthAction()
 }

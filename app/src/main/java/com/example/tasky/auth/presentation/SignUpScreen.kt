@@ -66,6 +66,7 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
                                 }
                             }
                         }
+
                         is Result.Error -> {
                             val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)
                             Log.e(TAG, "Error: $errorMessage")
@@ -193,9 +194,9 @@ fun BackButton(modifier: Modifier = Modifier, action: () -> Unit) {
 }
 
 sealed class SignUpAction {
-    class UpdateName(val name: String): SignUpAction()
-    class UpdateEmail(val email: String): SignUpAction()
-    class UpdatePassword(val password: String): SignUpAction()
-    data object SignUp: SignUpAction()
-    data object NavigateBack: SignUpAction()
+    class UpdateName(val name: String) : SignUpAction()
+    class UpdateEmail(val email: String) : SignUpAction()
+    class UpdatePassword(val password: String) : SignUpAction()
+    data object SignUp : SignUpAction()
+    data object NavigateBack : SignUpAction()
 }

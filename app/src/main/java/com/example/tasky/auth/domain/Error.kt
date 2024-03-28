@@ -2,7 +2,7 @@ package com.example.tasky.auth.domain
 
 sealed interface Error
 
-enum class HttpError: Error {
+enum class HttpError : Error {
     REDIRECT, //3xx
     UNAUTHORIZED, //401
     REQUEST_TIMEOUT, //408
