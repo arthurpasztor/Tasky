@@ -6,15 +6,15 @@ import com.example.tasky.auth.data.dto.AuthError
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
 import com.example.tasky.auth.data.dto.TokenResponse
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
+import java.util.concurrent.CancellationException
 
-class AuthRepositoryImpl : AuthRepository {
-
-    private val client = NetworkWrapper.authClient
+class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
 
     override suspend fun login(info: LoginRequest): AuthResult {
         return try {
@@ -33,8 +33,12 @@ class AuthRepositoryImpl : AuthRepository {
                 handleErrors(httpResponse)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error: ${e.message} / ${e.cause}")
-            AuthResult.Error(AuthError(e.message ?: "Unknown error"))
+            if (e is CancellationException) {
+                throw e
+            } else {
+                Log.e(TAG, "Error: ${e.message} / ${e.cause}")
+                AuthResult.Error(AuthError(e.message ?: "Unknown error"))
+            }
         }
     }
 
@@ -51,8 +55,12 @@ class AuthRepositoryImpl : AuthRepository {
                 handleErrors(httpResponse)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error: ${e.message} / ${e.cause}")
-            AuthResult.Error(AuthError(e.message ?: "Unknown error"))
+            if (e is CancellationException) {
+                throw e
+            } else {
+                Log.e(TAG, "Error: ${e.message} / ${e.cause}")
+                AuthResult.Error(AuthError(e.message ?: "Unknown error"))
+            }
         }
     }
 
