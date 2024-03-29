@@ -15,9 +15,9 @@ fun String.isEmailValid() = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 fun String.validatePassword(): Result<Unit, PasswordError> {
     return when {
         length in 0..8 -> Result.Error(PasswordError.TOO_SHORT)
-        !any { it.isLowerCase() } -> Result.Error(PasswordError.NO_LOWERCASE)
-        !any { it.isUpperCase() } -> Result.Error(PasswordError.NO_UPPERCASE)
-        !any { it.isDigit() } -> Result.Error(PasswordError.NO_DIGIT)
+        none { it.isLowerCase() } -> Result.Error(PasswordError.NO_LOWERCASE)
+        none { it.isUpperCase() } -> Result.Error(PasswordError.NO_UPPERCASE)
+        none { it.isDigit() } -> Result.Error(PasswordError.NO_DIGIT)
         else -> Result.Success(Unit)
     }
 }
