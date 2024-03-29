@@ -11,7 +11,21 @@
     <string name="sign_up">Sign up</string>
     <string name="get_started">Get started</string>
 
-    <string name="error_name_invalid">The name is invalid</string>
+    <string name="error_name_too_short">The name is too short</string>
+    <string name="error_name_too_long">The name is too long</string>
     <string name="error_email_invalid">The email is invalid</string>
-    <string name="error_password_invalid">The password is invalid</string>
+    <string name="error_password_no_lowercase">The password has no lowercase characters</string>
+    <string name="error_password_no_uppercase">The password has no uppercase characters</string>
+    <string name="error_password_no_digits">The password has no digits</string>
+    <string name="error_password_too_short">The password is too short</string>
+
+    <string name="error_redirect">There are multiple options for the requested resource</string>
+    <string name="error_unauthorized">Unauthorized</string>
+    <string name="error_request_timed_out">The request timed out</string>
+    <string name="error_conflict_login">The email or password is incorrect</string>
+    <string name="error_conflict_sign_up">A user with that email already exists</string>
+    <string name="error_payload_too_large">The payload is too large</string>
+    <string name="error_client">Bad request</string>
+    <string name="error_server">Oops, something went wrong. Please try again</string>
+    <string name="error_unknown">An unknown error occurred</string>
 </resources>

@@ -6,9 +6,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.ANDROID
-import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -22,7 +19,7 @@ object NetworkWrapper {
 
     private const val TIME_OUT = 5000
 
-    val authClient = HttpClient(Android) {
+    fun provideAuthClient() = HttpClient(Android) {
 
         install(DefaultRequest) {
             contentType(ContentType.Application.Json)
@@ -47,8 +44,8 @@ object NetworkWrapper {
         }
 
         engine {
-            connectTimeout= TIME_OUT
-            socketTimeout= TIME_OUT
+            connectTimeout = TIME_OUT
+            socketTimeout = TIME_OUT
         }
     }
 }
