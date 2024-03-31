@@ -1,4 +1,4 @@
-package com.example.tasky.auth.data
+package com.example.tasky.core.data
 
 import android.util.Log
 import com.example.tasky.auth.domain.HttpError

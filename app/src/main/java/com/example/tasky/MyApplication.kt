@@ -2,6 +2,8 @@ package com.example.tasky
 
 import android.app.Application
 import com.example.tasky.auth.di.authModule
+import com.example.tasky.core.di.coreModule
+import com.example.tasky.main.di.apiModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -14,7 +16,7 @@ class MyApplication : Application() {
         startKoin {
             androidContext(this@MyApplication)
             androidLogger()
-            modules(authModule)
+            modules(coreModule, authModule, apiModule)
         }
     }
 }

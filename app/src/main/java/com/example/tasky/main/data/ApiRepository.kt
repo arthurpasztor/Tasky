@@ -1,4 +1,4 @@
-package com.example.tasky.auth.data
+package com.example.tasky.main.data
 
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError

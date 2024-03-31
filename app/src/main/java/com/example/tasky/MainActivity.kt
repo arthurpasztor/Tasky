@@ -9,16 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.example.tasky.auth.data.ApiRepository
 import com.example.tasky.auth.presentation.LoginRoot
-import com.example.tasky.auth.presentation.NavGraphs
-import com.example.tasky.auth.presentation.destinations.LoginRootDestination
+import com.example.tasky.destinations.LoginRootDestination
+import com.example.tasky.main.data.ApiRepository
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.TaskyTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent
 import org.koin.java.KoinJavaComponent.inject
 
 class MainActivity : ComponentActivity() {

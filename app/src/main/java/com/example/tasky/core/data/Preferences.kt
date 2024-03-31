@@ -1,4 +1,4 @@
-package com.example.tasky.auth.data
+package com.example.tasky.core.data
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
