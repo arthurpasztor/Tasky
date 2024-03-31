@@ -76,7 +76,7 @@ class SignUpViewModel : ViewModel() {
             )
             val response = repository.signUp(payload)
 
-            if (response is Result.Success<*, RootError> && response.data is LoginRequest) {
+            if (response is Result.Success<*> && response.data is LoginRequest) {
                 loginAfterSignUp(response.data)
             } else {
                 _state.update { it.copy(isLoading = false) }
