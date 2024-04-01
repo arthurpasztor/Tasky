@@ -24,12 +24,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.tasky.NavGraphs
 import com.example.tasky.R
 import com.example.tasky.auth.domain.HttpError
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.LoginRootDestination
+import com.example.tasky.destinations.MainRootDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
@@ -52,8 +52,11 @@ fun MainRoot(navigator: DestinationsNavigator) {
                     when (destination.result) {
                         is Result.Success -> {
                             viewModel.onAction(MainAction.ClearUserData)
-                            navigator.clearBackStack(NavGraphs.root)
-                            navigator.navigate(LoginRootDestination)
+                            navigator.navigate(LoginRootDestination) {
+                                popUpTo(MainRootDestination.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
                         is Result.Error -> {
                             val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)

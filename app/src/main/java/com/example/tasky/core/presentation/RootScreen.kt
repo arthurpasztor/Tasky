@@ -3,10 +3,10 @@ package com.example.tasky.core.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import com.example.tasky.NavGraphs
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.MainRootDestination
+import com.example.tasky.destinations.RootScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -24,12 +24,18 @@ fun RootScreen(navigator: DestinationsNavigator)  {
         viewModel.navChannel.collect { result ->
             when (result) {
                 is Result.Success -> {
-                    navigator.clearBackStack(NavGraphs.root)
-                    navigator.navigate(MainRootDestination)
+                    navigator.navigate(MainRootDestination) {
+                        popUpTo(RootScreenDestination.route) {
+                            inclusive = true
+                        }
+                    }
                 }
                 is Result.Error -> {
-                    navigator.clearBackStack(NavGraphs.root)
-                    navigator.navigate(LoginRootDestination)
+                    navigator.navigate(LoginRootDestination) {
+                        popUpTo(RootScreenDestination.route) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
         }
