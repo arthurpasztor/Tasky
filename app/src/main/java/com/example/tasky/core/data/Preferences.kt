@@ -27,7 +27,7 @@ class Preferences(context: Context) {
         return preferences.getString(key, default) ?: return default
     }
 
-    fun save(key: String, value: String) {
+    fun putString(key: String, value: String) {
         editor.putString(key, value)
         editor.apply()
     }
@@ -55,8 +55,9 @@ class Preferences(context: Context) {
 
     companion object {
         private const val PREFERENCES_NAME = "TaskyStore"
-        private const val ENCRYPTED_PREFERENCES_NAME = "EncryptedQuanswerStore"
+        private const val ENCRYPTED_PREFERENCES_NAME = "EncryptedTaskyStore"
 
         const val KEY_TOKEN = "JWT_token"
+        const val KEY_USER_NAME = "full_name"
     }
 }
