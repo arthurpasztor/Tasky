@@ -21,7 +21,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,7 +48,7 @@ fun MainRoot(navigator: DestinationsNavigator) {
     LaunchedEffect(viewModel, context) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                is MainDummyAction.HandleLogoutResponse -> {
+                is MainResponseAction.HandleLogoutResponse -> {
                     when (destination.result) {
                         is Result.Success -> {
                             viewModel.onAction(MainAction.ClearUserData)
@@ -97,21 +96,6 @@ private fun MainScreen(
             )
         }
 
-        Button(
-            modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth(),
-            onClick = {
-                onAction.invoke(MainAction.TestApi)
-            }) {
-            Text(
-                text = "Test API",
-                color = Color.White,
-                fontSize = fontSize,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
         Text(
             text = "Welcome ${state.userName}",
             textAlign = TextAlign.Center,
@@ -129,5 +113,4 @@ private fun MainScreen(
 sealed class MainAction {
     data object LogOut: MainAction()
     data object ClearUserData: MainAction()
-    data object TestApi: MainAction()
 }

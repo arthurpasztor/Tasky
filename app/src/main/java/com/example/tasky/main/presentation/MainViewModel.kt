@@ -16,12 +16,13 @@ import org.koin.java.KoinJavaComponent.inject
 
 // FYI, MainViewModel is for testing purposes only, will be changed
 class MainViewModel: ViewModel() {
+
     private val _state = MutableStateFlow(MainState())
-
     val state = _state.asStateFlow()
-    private val _navChannel = Channel<MainDummyAction>()
 
+    private val _navChannel = Channel<MainResponseAction>()
     val navChannel = _navChannel.receiveAsFlow()
+
     private val prefs: Preferences by inject(Preferences::class.java)
     private val repository: ApiRepository by inject(ApiRepository::class.java)
 
@@ -37,14 +38,13 @@ class MainViewModel: ViewModel() {
         when (action) {
             MainAction.LogOut -> logOut()
             MainAction.ClearUserData -> clearUserData()
-            MainAction.TestApi -> testAPI()
         }
     }
 
     private fun logOut() {
         viewModelScope.launch {
             val response = repository.logout()
-            _navChannel.send(MainDummyAction.HandleLogoutResponse(response))
+            _navChannel.send(MainResponseAction.HandleLogoutResponse(response))
         }
     }
 
@@ -52,16 +52,10 @@ class MainViewModel: ViewModel() {
         prefs.removeAll()
         prefs.removeEncrypted(Preferences.KEY_TOKEN)
     }
-
-    private fun testAPI() {
-        viewModelScope.launch {
-            repository.authenticate()
-        }
-    }
 }
 
 data class MainState(val userName: String = "")
 
-sealed class MainDummyAction {
-    class HandleLogoutResponse(val result: Result<Unit, RootError>): MainDummyAction()
+sealed class MainResponseAction {
+    class HandleLogoutResponse(val result: Result<Unit, RootError>): MainResponseAction()
 }
