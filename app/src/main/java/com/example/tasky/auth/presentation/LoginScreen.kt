@@ -36,16 +36,14 @@ import com.example.tasky.auth.domain.HttpError
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.MainScreenDestination
+import com.example.tasky.destinations.MainRootDestination
 import com.example.tasky.destinations.SignUpRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
-@RootNavGraph(start = true)
 @Destination
 @Composable
 fun LoginRoot(navigator: DestinationsNavigator) {
@@ -63,7 +61,7 @@ fun LoginRoot(navigator: DestinationsNavigator) {
                 is LoginAuthAction.HandleAuthResponse -> {
                     when (destination.result) {
                         is Result.Success -> {
-                            navigator.navigate(MainScreenDestination) {
+                            navigator.navigate(MainRootDestination) {
                                 popUpTo(LoginRootDestination.route) {
                                     inclusive = true
                                 }

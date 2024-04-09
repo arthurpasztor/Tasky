@@ -5,4 +5,5 @@ import com.example.tasky.auth.domain.RootError
 
 interface ApiRepository {
     suspend fun authenticate(): Result<Unit, RootError>
+    suspend fun logout(): Result<Unit, RootError>
 }

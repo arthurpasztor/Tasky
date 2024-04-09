@@ -10,9 +10,16 @@ import io.ktor.http.HttpMethod
 class ApiRepositoryImpl(client: HttpClient) : ApiRepository, BaseRepositoryImpl(client) {
 
     private val tokenCheckUrl = "${BuildConfig.BASE_URL}/authenticate"
+    private val logoutUrl = "${BuildConfig.BASE_URL}/logout"
 
     override suspend fun authenticate(): Result<Unit, RootError> {
         return executeRequest<Unit, Unit>(HttpMethod.Get, tokenCheckUrl) {
+            Result.Success(Unit)
+        }
+    }
+
+    override suspend fun logout(): Result<Unit, RootError> {
+        return executeRequest<Unit, Unit>(HttpMethod.Get, logoutUrl) {
             Result.Success(Unit)
         }
     }

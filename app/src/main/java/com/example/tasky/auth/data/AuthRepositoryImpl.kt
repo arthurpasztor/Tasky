@@ -8,9 +8,12 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.BaseRepositoryImpl
 import com.example.tasky.core.data.Preferences
+import com.example.tasky.main.di.apiModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
+import org.koin.core.context.loadKoinModules
+import org.koin.core.context.unloadKoinModules
 import org.koin.java.KoinJavaComponent.inject
 
 class AuthRepositoryImpl(client: HttpClient) : AuthRepository, BaseRepositoryImpl(client) {
@@ -25,6 +28,10 @@ class AuthRepositoryImpl(client: HttpClient) : AuthRepository, BaseRepositoryImp
             val response = it.body<TokenResponse>()
 
             prefs.putEncryptedString(Preferences.KEY_TOKEN, response.token)
+            prefs.putString(Preferences.KEY_USER_NAME, response.fullName)
+
+            unloadKoinModules(apiModule)
+            loadKoinModules(apiModule)
 
             Result.Success(Unit)
         }
