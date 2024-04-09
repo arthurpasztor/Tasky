@@ -35,8 +35,8 @@ import com.example.tasky.auth.domain.PasswordError
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.asUiText
-import com.example.tasky.auth.presentation.destinations.LoginRootDestination
-import com.example.tasky.auth.presentation.destinations.MainScreenDestination
+import com.example.tasky.destinations.LoginRootDestination
+import com.example.tasky.destinations.MainScreenDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination

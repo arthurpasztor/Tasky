@@ -1,4 +1,4 @@
-package com.example.tasky.auth.presentation
+package com.example.tasky.main.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
