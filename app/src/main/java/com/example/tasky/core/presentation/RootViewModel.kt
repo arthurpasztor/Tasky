@@ -14,7 +14,7 @@ class RootViewModel(private val repository: ApiRepository): ViewModel() {
     private val _navChannel = Channel<Result<Unit, RootError>>()
     val navChannel = _navChannel.receiveAsFlow()
 
-    fun checkTokenValid() {
+    init {
         viewModelScope.launch {
             val response = repository.authenticate()
             _navChannel.send(response)

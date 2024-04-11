@@ -40,6 +40,4 @@ fun RootScreen(navigator: DestinationsNavigator)  {
             }
         }
     }
-
-    viewModel.checkTokenValid()
 }
