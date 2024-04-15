@@ -13,17 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.inject
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
 
     private val _navChannel = Channel<LoginAuthAction>()
     val navChannel = _navChannel.receiveAsFlow()
-
-    private val repository: AuthRepository by inject(AuthRepository::class.java)
 
     fun onAction(action: LoginAction) {
         when (action) {

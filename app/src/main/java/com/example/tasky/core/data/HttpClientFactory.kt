@@ -18,7 +18,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.java.KoinJavaComponent.inject
 
-object NetworkWrapper {
+object HttpClientFactory {
 
     private const val TIME_OUT = 5000
 

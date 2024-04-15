@@ -12,19 +12,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.inject
 
 // FYI, MainViewModel is for testing purposes only, will be changed
-class MainViewModel: ViewModel() {
+class MainViewModel(
+    private val repository: ApiRepository,
+    private val prefs: Preferences
+) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
 
     private val _navChannel = Channel<MainResponseAction>()
     val navChannel = _navChannel.receiveAsFlow()
-
-    private val prefs: Preferences by inject(Preferences::class.java)
-    private val repository: ApiRepository by inject(ApiRepository::class.java)
 
     init {
         _state.update {
@@ -57,5 +56,5 @@ class MainViewModel: ViewModel() {
 data class MainState(val userName: String = "")
 
 sealed class MainResponseAction {
-    class HandleLogoutResponse(val result: Result<Unit, RootError>): MainResponseAction()
+    class HandleLogoutResponse(val result: Result<Unit, RootError>) : MainResponseAction()
 }
