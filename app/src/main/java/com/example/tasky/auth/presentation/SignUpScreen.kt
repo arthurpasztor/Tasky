@@ -53,7 +53,7 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
     val viewModel: SignUpViewModel = koinViewModel()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel, context) {
+    LaunchedEffect(viewModel) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
                 SignUpAuthAction.NavigateBack -> navigator.popBackStack()

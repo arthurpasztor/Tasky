@@ -56,7 +56,7 @@ fun LoginRoot(navigator: DestinationsNavigator) {
     val viewModel: LoginViewModel = koinViewModel()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel, context) {
+    LaunchedEffect(viewModel) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
                 LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
