@@ -45,7 +45,7 @@ fun MainRoot(navigator: DestinationsNavigator) {
     val viewModel: MainViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(true) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
                 is MainResponseAction.HandleLogoutResponse -> {

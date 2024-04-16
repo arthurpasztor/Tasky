@@ -35,10 +35,17 @@ class MainActivity : ComponentActivity() {
                 val isAuthenticated by viewModel.isLoggedIn.collectAsState()
 
                 Surface(modifier = Modifier.fillMaxSize(), color = BackgroundBlack) {
-                    DestinationsNavHost(
-                        navGraph = NavGraphs.root,
-                        startRoute = if (isAuthenticated == true) MainRootDestination else LoginRootDestination
-                    )
+                    if (isAuthenticated == true) {
+                        DestinationsNavHost(
+                            navGraph = NavGraphs.root,
+                            startRoute = MainRootDestination
+                        )
+                    } else {
+                        DestinationsNavHost(
+                            navGraph = NavGraphs.root,
+                            startRoute = LoginRootDestination
+                        )
+                    }
                 }
             }
 
