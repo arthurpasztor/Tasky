@@ -13,16 +13,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// FYI, MainViewModel is for testing purposes only, will be changed
-class MainViewModel(
+class AgendaViewModel(
     private val repository: ApiRepository,
     private val prefs: Preferences
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(MainState())
+    private val _state = MutableStateFlow(AgendaState())
     val state = _state.asStateFlow()
 
-    private val _navChannel = Channel<MainResponseAction>()
+    private val _navChannel = Channel<AgendaResponseAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
     init {
@@ -33,17 +32,17 @@ class MainViewModel(
         }
     }
 
-    fun onAction(action: MainAction) {
+    fun onAction(action: AgendaAction) {
         when (action) {
-            MainAction.LogOut -> logOut()
-            MainAction.ClearUserData -> clearUserData()
+            AgendaAction.LogOut -> logOut()
+            AgendaAction.ClearUserData -> clearUserData()
         }
     }
 
     private fun logOut() {
         viewModelScope.launch {
             val response = repository.logout()
-            _navChannel.send(MainResponseAction.HandleLogoutResponse(response))
+            _navChannel.send(AgendaResponseAction.HandleLogoutResponse(response))
         }
     }
 
@@ -53,8 +52,11 @@ class MainViewModel(
     }
 }
 
-data class MainState(val userName: String = "")
+data class AgendaState(
+    val userName: String = "",
+    val month: String = "March"
+)
 
-sealed class MainResponseAction {
-    class HandleLogoutResponse(val result: Result<Unit, RootError>) : MainResponseAction()
+sealed class AgendaResponseAction {
+    class HandleLogoutResponse(val result: Result<Unit, RootError>) : AgendaResponseAction()
 }
