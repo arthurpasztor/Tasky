@@ -54,7 +54,7 @@ class AgendaViewModel(
 
 data class AgendaState(
     val userName: String = "",
-    val month: String = "March"
+    val month: String = "March" //TODO change to Date or Calendar
 )
 
 sealed class AgendaResponseAction {
