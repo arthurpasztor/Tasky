@@ -50,6 +50,7 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
+import com.example.tasky.main.domain.getInitials
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.Purple40
@@ -103,7 +104,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 @Preview
 @Composable
 private fun AgendaScreen(
-    state: AgendaState = AgendaState("User"),
+    state: AgendaState = AgendaState("Arthur"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
@@ -160,7 +161,7 @@ private fun AgendaScreen(
 @Composable
 fun ProfileIcon(
     modifier: Modifier = Modifier,
-    state: AgendaState = AgendaState("User", "March"),
+    state: AgendaState = AgendaState("Arthur Pasztor", "March"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
     var isContextMenuVisible by rememberSaveable {
@@ -196,7 +197,7 @@ fun ProfileIcon(
         ) {
             Text(
                 modifier = Modifier.align(Alignment.Center),
-                text = "MA",
+                text = state.userName.getInitials(),
                 color = Purple40
             )
         }
