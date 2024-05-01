@@ -10,6 +10,8 @@
     <dimen name="radius_30">30dp</dimen>
 
     <dimen name="profile_icon_size">40dp</dimen>
+    <dimen name="day_bubble_width">40dp</dimen>
+    <dimen name="day_bubble_height">70dp</dimen>
 
     <dimen name="font_size_16">16sp</dimen>
     <dimen name="font_size_36">36sp</dimen>

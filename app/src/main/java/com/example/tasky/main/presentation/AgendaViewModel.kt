@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class AgendaViewModel(
     private val repository: ApiRepository,
@@ -36,6 +37,26 @@ class AgendaViewModel(
         when (action) {
             AgendaAction.LogOut -> logOut()
             AgendaAction.ClearUserData -> clearUserData()
+            is AgendaAction.UpdateSelectedDate -> {
+                updateSelectedDate(action.newSelection, action.forceSelectedDateToFirstPosition)
+            }
+        }
+    }
+
+    private fun updateSelectedDate(date: LocalDate, forceSelectedDateToFirstPosition: Boolean) {
+        if (forceSelectedDateToFirstPosition) {
+            _state.update {
+                it.copy(
+                    selectedDate = date,
+                    firstDateOfHeader = date
+                )
+            }
+        } else {
+            _state.update {
+                it.copy(
+                    selectedDate = date
+                )
+            }
         }
     }
 
@@ -54,7 +75,8 @@ class AgendaViewModel(
 
 data class AgendaState(
     val userName: String = "",
-    val month: String = "March" //TODO change to Date or Calendar
+    val selectedDate: LocalDate = LocalDate.now(),
+    val firstDateOfHeader: LocalDate = LocalDate.now()
 )
 
 sealed class AgendaResponseAction {

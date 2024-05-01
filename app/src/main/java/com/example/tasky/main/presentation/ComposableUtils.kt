@@ -34,7 +34,7 @@ import com.example.tasky.ui.theme.PurpleGrey80
 @Composable
 fun ProfileIcon(
     modifier: Modifier = Modifier,
-    state: AgendaState = AgendaState("Arthur Pasztor", "March"),
+    state: AgendaState = AgendaState("Arthur Pasztor"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
     var isContextMenuVisible by rememberSaveable {
