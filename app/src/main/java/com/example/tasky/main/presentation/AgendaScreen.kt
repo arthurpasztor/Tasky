@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
@@ -28,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +50,9 @@ import com.example.tasky.ui.theme.SelectedDateYellow
 import com.example.tasky.ui.theme.UnselectedDateTransparent
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.util.Locale
@@ -101,26 +107,26 @@ private fun AgendaScreen(
     val cornerRadius = dimensionResource(R.dimen.radius_30)
     val monthPadding = dimensionResource(R.dimen.padding_20)
 
+    val dateDialogState = rememberMaterialDialogState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
         Row {
-            Text(
-                modifier = Modifier
-                    .padding(
-                        start = monthPadding,
-                        top = monthPadding,
-                        bottom = monthPadding
-                    ),
-                text = state.selectedDate.month.name.uppercase(Locale.getDefault()),
+            ClickableText(
+                modifier = Modifier.padding(start = monthPadding, top = monthPadding, bottom = monthPadding),
+                text = AnnotatedString(state.selectedDate.month.name.uppercase(Locale.getDefault())),
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     fontSize = dimensionResource(R.dimen.font_size_16).value.sp,
                     color = Color.White
-                )
+                ),
+                onClick = {
+                    dateDialogState.show()
+                }
             )
             Icon(
                 modifier = Modifier.align(Alignment.CenterVertically),
@@ -150,6 +156,21 @@ private fun AgendaScreen(
                 state = state,
                 onAction = onAction
             )
+        }
+    }
+
+    MaterialDialog(
+        dialogState = dateDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.ok))
+            negativeButton(text = stringResource(id = R.string.cancel))
+        }
+    ) {
+        datepicker(
+            initialDate = state.selectedDate,
+            title = stringResource(id = R.string.pick_a_date)
+        ) {
+            onAction(AgendaAction.UpdateSelectedDate(it, true))
         }
     }
 }
@@ -218,5 +239,6 @@ fun DayBubble(
 sealed class AgendaAction {
     data object LogOut : AgendaAction()
     data object ClearUserData : AgendaAction()
-    class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) : AgendaAction()
+    class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
+        AgendaAction()
 }
