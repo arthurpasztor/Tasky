@@ -10,12 +10,16 @@ import kotlinx.coroutines.launch
 
 class RootViewModel(private val repository: ApiRepository): ViewModel() {
 
-    private val _isLoggedIn = MutableStateFlow<Boolean?>(null)
+    private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn = _isLoggedIn.asStateFlow()
+
+    private val _isCheckingAuthentication = MutableStateFlow(true)
+    val isCheckingAuthentication = _isCheckingAuthentication.asStateFlow()
 
     init {
         viewModelScope.launch {
             val response = repository.authenticate()
+            _isCheckingAuthentication.value = false
             when (response) {
                 is Result.Success -> {
                     _isLoggedIn.value = true

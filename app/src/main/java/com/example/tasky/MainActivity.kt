@@ -16,34 +16,30 @@ import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.TaskyTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel: RootViewModel by inject()
+        val viewModel: RootViewModel by viewModel()
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                viewModel.isLoggedIn.value != null
+                viewModel.isCheckingAuthentication.value
             }
         }
 
         setContent {
             TaskyTheme {
+                val isCheckingAuthentication by viewModel.isCheckingAuthentication.collectAsState()
                 val isAuthenticated by viewModel.isLoggedIn.collectAsState()
 
                 Surface(modifier = Modifier.fillMaxSize(), color = BackgroundBlack) {
-                    if (isAuthenticated == true) {
+                    if(!isCheckingAuthentication) {
                         DestinationsNavHost(
                             navGraph = NavGraphs.root,
-                            startRoute = AgendaRootDestination
-                        )
-                    } else {
-                        DestinationsNavHost(
-                            navGraph = NavGraphs.root,
-                            startRoute = LoginRootDestination
+                            startRoute = if (isAuthenticated) AgendaRootDestination else LoginRootDestination
                         )
                     }
                 }
