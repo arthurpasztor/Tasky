@@ -8,15 +8,17 @@ fun String.getInitials(): String {
     return this.trim().run {
         when {
             isEmpty() -> "-"
-            length == 1 || length == 2 -> this.uppercase(Locale.getDefault())
+
+            length in 1..2 -> this.uppercase(Locale.getDefault())
+
             !contains(delimiter) -> {
                 substring(0..1)
                     .uppercase(Locale.getDefault())
             }
 
             else -> {
-                splitToSequence(delimiter, limit = 2)
-                    .map { it.first() }
+                val initials = splitToSequence(delimiter).map { it.first() }
+                sequenceOf(initials.first(), initials.last())
                     .joinToString("")
                     .uppercase(Locale.getDefault())
             }

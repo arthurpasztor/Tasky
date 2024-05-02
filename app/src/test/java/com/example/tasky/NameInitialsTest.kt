@@ -17,6 +17,16 @@ class NameInitialsTest {
     }
 
     @Test
+    fun `test name initials with 3 tokens`() {
+        assertEquals("AP", "Arthur MiddleName Pasztor".getInitials())
+    }
+    
+    @Test
+    fun `test name initials with many tokens`() {
+        assertEquals("AP", "Arthur Name1 Name2 Name3 Name5 Name6 Pasztor".getInitials())
+    }
+
+    @Test
     fun `test name initials with 1 token`() {
         assertEquals("AR", "Arthur".getInitials())
     }
