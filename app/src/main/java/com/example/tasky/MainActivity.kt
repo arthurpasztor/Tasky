@@ -11,8 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.tasky.core.presentation.RootViewModel
+import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.MainRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.TaskyTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     if (isAuthenticated == true) {
                         DestinationsNavHost(
                             navGraph = NavGraphs.root,
-                            startRoute = MainRootDestination
+                            startRoute = AgendaRootDestination
                         )
                     } else {
                         DestinationsNavHost(

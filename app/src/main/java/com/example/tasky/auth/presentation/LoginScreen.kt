@@ -35,8 +35,8 @@ import com.example.tasky.R
 import com.example.tasky.auth.domain.HttpError
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
+import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.MainRootDestination
 import com.example.tasky.destinations.SignUpRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -63,7 +63,7 @@ fun LoginRoot(navigator: DestinationsNavigator) {
                 is LoginAuthAction.HandleAuthResponse -> {
                     when (destination.result) {
                         is Result.Success -> {
-                            navigator.navigate(MainRootDestination) {
+                            navigator.navigate(AgendaRootDestination) {
                                 popUpTo(LoginRootDestination.route) {
                                     inclusive = true
                                 }
