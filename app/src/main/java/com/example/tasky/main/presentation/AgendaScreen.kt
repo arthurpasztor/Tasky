@@ -3,12 +3,19 @@ package com.example.tasky.main.presentation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
@@ -22,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,9 +46,15 @@ import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.example.tasky.ui.theme.SelectedDateYellow
+import com.example.tasky.ui.theme.UnselectedDateTransparent
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDate
 import java.util.Locale
 
 @Destination
@@ -92,26 +107,26 @@ private fun AgendaScreen(
     val cornerRadius = dimensionResource(R.dimen.radius_30)
     val monthPadding = dimensionResource(R.dimen.padding_20)
 
+    val dateDialogState = rememberMaterialDialogState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
         Row {
-            Text(
-                modifier = Modifier
-                    .padding(
-                        start = monthPadding,
-                        top = monthPadding,
-                        bottom = monthPadding
-                    ),
-                text = state.month.uppercase(Locale.getDefault()),
+            ClickableText(
+                modifier = Modifier.padding(start = monthPadding, top = monthPadding, bottom = monthPadding),
+                text = AnnotatedString(state.selectedDate.month.name.uppercase(Locale.getDefault())),
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     fontSize = dimensionResource(R.dimen.font_size_16).value.sp,
                     color = Color.White
-                )
+                ),
+                onClick = {
+                    dateDialogState.show()
+                }
             )
             Icon(
                 modifier = Modifier.align(Alignment.CenterVertically),
@@ -134,12 +149,96 @@ private fun AgendaScreen(
                 .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
                 .background(BackgroundWhite)
         ) {
-
+            WeekHeader(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = dimensionResource(id = R.dimen.padding_20)),
+                state = state,
+                onAction = onAction
+            )
         }
+    }
+
+    MaterialDialog(
+        dialogState = dateDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.ok))
+            negativeButton(text = stringResource(id = R.string.cancel))
+        }
+    ) {
+        datepicker(
+            initialDate = state.selectedDate,
+            title = stringResource(id = R.string.pick_a_date)
+        ) {
+            onAction(AgendaAction.UpdateSelectedDate(it, true))
+        }
+    }
+}
+
+@Preview
+@Composable
+fun WeekHeader(
+    modifier: Modifier = Modifier,
+    state: AgendaState = AgendaState("Arthur"),
+    onAction: (AgendaAction) -> Unit = {}
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(id = R.dimen.padding_8))
+    ) {
+        val firstDay = state.firstDateOfHeader
+
+        repeat(6) { index ->
+            val nextDay = firstDay.plusDays(index.toLong())
+            DayBubble(
+                modifier = Modifier.weight(1f),
+                day = nextDay,
+                isSelected = nextDay == state.selectedDate,
+            ) {
+                onAction(AgendaAction.UpdateSelectedDate(it, false))
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun DayBubble(
+    modifier: Modifier = Modifier,
+    day: LocalDate = LocalDate.now(),
+    isSelected: Boolean = true,
+    onDaySelected: (selectedDay: LocalDate) -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .width(dimensionResource(R.dimen.day_bubble_width))
+            .height(dimensionResource(R.dimen.day_bubble_height))
+            .padding(horizontal = dimensionResource(id = R.dimen.padding_8))
+            .clip(CircleShape)
+            .background(if (isSelected) SelectedDateYellow else UnselectedDateTransparent)
+            .clickable {
+                if (!isSelected) onDaySelected(day)
+            },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = day.dayOfWeek.name.first().toString(),
+            color = Color.Gray
+        )
+        Text(
+            text = day.dayOfMonth.toString(),
+            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            fontSize = dimensionResource(R.dimen.font_size_16).value.sp
+        )
     }
 }
 
 sealed class AgendaAction {
     data object LogOut : AgendaAction()
     data object ClearUserData : AgendaAction()
+    class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
+        AgendaAction()
 }
