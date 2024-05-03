@@ -121,7 +121,7 @@ private fun AgendaScreen(
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    fontSize = dimensionResource(R.dimen.font_size_16).value.sp,
+                    fontSize = 16.sp,
                     color = Color.White
                 ),
                 onClick = {
