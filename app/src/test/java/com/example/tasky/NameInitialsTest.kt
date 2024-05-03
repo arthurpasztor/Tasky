@@ -1,59 +1,60 @@
 package com.example.tasky
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import com.example.tasky.main.domain.getInitials
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NameInitialsTest {
 
     @Test
     fun `test name initials with 2 tokens`() {
-        assertEquals("AP", "Arthur Pasztor".getInitials())
+        assertThat("Arthur Pasztor".getInitials()).isEqualTo("AP")
     }
 
     @Test
     fun `test name initials with 2 tokens with white spaces`() {
-        assertEquals("AP", "     Arthur Pasztor     ".getInitials())
+        assertThat("     Arthur Pasztor     ".getInitials()).isEqualTo("AP")
     }
 
     @Test
     fun `test name initials with 3 tokens`() {
-        assertEquals("AP", "Arthur MiddleName Pasztor".getInitials())
+        assertThat("Arthur MiddleName Pasztor".getInitials()).isEqualTo("AP")
     }
-    
+
     @Test
     fun `test name initials with many tokens`() {
-        assertEquals("AP", "Arthur Name1 Name2 Name3 Name5 Name6 Pasztor".getInitials())
+        assertThat("Arthur Name1 Name2 Name3 Name5 Name6 Pasztor".getInitials()).isEqualTo("AP")
     }
 
     @Test
     fun `test name initials with 1 token`() {
-        assertEquals("AR", "Arthur".getInitials())
+        assertThat("Arthur".getInitials()).isEqualTo("AR")
     }
 
     @Test
     fun `test name initials with only 2 characters`() {
-        assertEquals("AR", "Ar".getInitials())
+        assertThat("Ar".getInitials()).isEqualTo("AR")
     }
 
     @Test
     fun `test name initials with only 1 character`() {
-        assertEquals("AR", "Ar".getInitials())
+        assertThat("Ar".getInitials()).isEqualTo("AR")
     }
 
 
     @Test
     fun `test name initials with only 1 character and white spaces`() {
-        assertEquals("AR", "        Ar      ".getInitials())
+        assertThat("        Ar      ".getInitials()).isEqualTo("AR")
     }
 
     @Test
     fun `test name initials with empty string`() {
-        assertEquals("-", "".getInitials())
+        assertThat("".getInitials()).isEqualTo("-")
     }
 
     @Test
     fun `test name initials with white spaces only`() {
-        assertEquals("-", "         ".getInitials())
+        assertThat("         ".getInitials()).isEqualTo("-")
     }
 }

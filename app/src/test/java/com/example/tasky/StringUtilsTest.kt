@@ -1,5 +1,7 @@
 package com.example.tasky
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
 import com.example.tasky.auth.domain.Result
@@ -17,43 +19,43 @@ class StringUtilsTest {
 
     @Test
     fun `test name validation success`() {
-        assertEquals(TestSuccess(Unit), "Arthur90".validateName())
+        assertThat("Arthur90".validateName()).isEqualTo(TestSuccess(Unit))
     }
 
     @Test
     fun `test name validation failure - too short`() {
-        assertEquals(TestNameError(NameError.TOO_SHORT), "".validateName())
-        assertEquals(TestNameError(NameError.TOO_SHORT), "Ar9".validateName())
+        assertThat("".validateName()).isEqualTo(TestNameError(NameError.TOO_SHORT))
+        assertThat("Ar9".validateName()).isEqualTo(TestNameError(NameError.TOO_SHORT))
     }
 
     @Test
     fun `test name validation failure - too long`() {
-        assertEquals(TestNameError(NameError.TOO_LONG), "1234567890qwertyuiopasdfghjkl;zxcvbnm,./!@#$%^&*()_MORE_THAN_50".validateName())
+        assertThat("1234567890qwertyuiopasdfghjkl;zxcvbnm,./!@#$%^&*()_MORE_THAN_50".validateName()).isEqualTo(TestNameError(NameError.TOO_LONG))
     }
 
     @Test
     fun `test password validation success`() {
-        assertEquals(TestSuccess(Unit), "Password8".validatePassword())
+        assertThat("Password8".validatePassword()).isEqualTo(TestSuccess(Unit))
     }
 
     @Test
     fun `test password validation failure - too short`() {
-        assertEquals(TestPasswordError(PasswordError.TOO_SHORT), "".validatePassword())
-        assertEquals(TestPasswordError(PasswordError.TOO_SHORT), "Passw8".validatePassword())
+        assertThat("".validatePassword()).isEqualTo(TestPasswordError(PasswordError.TOO_SHORT))
+        assertThat("Passw8".validatePassword()).isEqualTo(TestPasswordError(PasswordError.TOO_SHORT))
     }
 
     @Test
     fun `test password validation failure - no uppercase character`() {
-        assertEquals(TestPasswordError(PasswordError.NO_UPPERCASE), "passwd_lowercase_8".validatePassword())
+        assertThat("passwd_lowercase_8".validatePassword()).isEqualTo(TestPasswordError(PasswordError.NO_UPPERCASE))
     }
 
     @Test
     fun `test password validation failure - no lowercase character`() {
-        assertEquals(TestPasswordError(PasswordError.NO_LOWERCASE), "PASSWD_UPPERCASE_8".validatePassword())
+        assertThat("PASSWD_UPPERCASE_8".validatePassword()).isEqualTo(TestPasswordError(PasswordError.NO_LOWERCASE))
     }
 
     @Test
     fun `test password validation failure - no digit`() {
-        assertEquals(TestPasswordError(PasswordError.NO_DIGIT), "Passwd_no_number".validatePassword())
+        assertThat("Passwd_no_number".validatePassword()).isEqualTo(TestPasswordError(PasswordError.NO_DIGIT))
     }
 }
