@@ -37,4 +37,6 @@
     <string name="event">Event</string>
     <string name="task">Task</string>
     <string name="reminder">Reminder</string>
+    <string name="save">Save</string>
+    <string name="edit_task">Edit Task</string>
 </resources>

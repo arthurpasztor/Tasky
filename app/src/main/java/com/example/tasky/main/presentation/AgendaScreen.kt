@@ -32,9 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,10 +43,12 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
+import com.example.tasky.destinations.TaskDetailRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
 import com.example.tasky.ui.theme.UnselectedDateTransparent
+import com.example.tasky.ui.theme.headerStyle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.vanpra.composematerialdialogs.MaterialDialog
@@ -94,13 +94,18 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                     //TODO implement
                     Log.e(TAG, "AgendaRoot: CreateNewEventAction")
                 }
+                AgendaResponseAction.CreateNewTaskAction -> {
+                    Log.e(TAG, "AgendaRoot: CreateNewTaskAction")
+
+                    navigator.navigate(TaskDetailRootDestination(DetailInteractionMode.CREATE)) {
+                        popUpTo(LoginRootDestination.route) {
+                            inclusive = true
+                        }
+                    }
+                }
                 AgendaResponseAction.CreateNewReminderAction -> {
                     //TODO implement
                     Log.e(TAG, "AgendaRoot: CreateNewReminderAction")
-                }
-                AgendaResponseAction.CreateNewTaskAction -> {
-                    //TODO implement
-                    Log.e(TAG, "AgendaRoot: CreateNewTaskAction")
                 }
             }
         }
@@ -135,12 +140,7 @@ private fun AgendaScreen(
                 ClickableText(
                     modifier = Modifier.padding(start = monthPadding, top = monthPadding, bottom = monthPadding),
                     text = AnnotatedString(state.selectedDate.month.name.uppercase(Locale.getDefault())),
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp,
-                        color = Color.White
-                    ),
+                    style = headerStyle,
                     onClick = {
                         dateDialogState.show()
                     }
