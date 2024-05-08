@@ -1,6 +1,7 @@
 package com.example.tasky.main.domain
 
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -28,6 +29,8 @@ fun String.getInitials(): String {
     }
 }
 
-private val headerFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+fun LocalDate.formatHeaderDate(): String = format(DateTimeFormatter.ofPattern("dd MMMM yyyy")).uppercase()
 
-fun LocalDate.formatToHeader(): String = format(headerFormatter).uppercase()
+fun LocalDate.formatDetailDate(): String = format(DateTimeFormatter.ofPattern("MMM dd yyyy"))
+
+fun LocalTime.formatDetailTime(): String = format(DateTimeFormatter.ofPattern("HH:mm"))

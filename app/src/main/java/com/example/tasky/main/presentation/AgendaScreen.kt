@@ -44,6 +44,7 @@ import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.TaskDetailRootDestination
+import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow

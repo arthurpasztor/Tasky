@@ -13,6 +13,8 @@ val Pink40 = Color(0xFF7D5260)
 val BackgroundBlack = Color.Black
 val BackgroundWhite = Color.White
 
-val CheckmarkGreen = Color(0xFF128D0F)
+val TaskyGreen = Color(0xFF128D0F)
 val SelectedDateYellow = Color(0xFFFDEFA8)
 val UnselectedDateTransparent = Color.Transparent
+
+val VeryLightGray = Color(0xFFEEF6FF)
