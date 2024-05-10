@@ -25,10 +25,14 @@ class TaskViewModel(private val repository: ApiRepository, mode: DetailInteracti
     fun onAction(action: TaskAction) {
         when (action) {
             TaskAction.NavigateBack -> navigateBack()
+            TaskAction.OpenTitleEditor -> openTitleEditor()
+            TaskAction.OpenDescriptionEditor -> openDescriptionEditor()
             TaskAction.SwitchToEditMode -> switchToEditMode()
             is TaskAction.UpdateDate -> updateDate(action.newDate)
             is TaskAction.UpdateTime -> updateTime(action.newTime)
             is TaskAction.UpdateReminder -> updateReminder(action.newReminder)
+            is TaskAction.UpdateTitle -> updateTitle(action.newTitle)
+            is TaskAction.UpdateDescription -> updateDescription(action.newDescription)
         }
     }
 
@@ -38,10 +42,20 @@ class TaskViewModel(private val repository: ApiRepository, mode: DetailInteracti
         }
     }
 
-    private fun switchToEditMode() {
+    private fun openTitleEditor() {
         viewModelScope.launch {
-            _state.update { it.copy(interactionMode = DetailInteractionMode.EDIT) }
+            _navChannel.send(TaskVMAction.OpenTitleEditor)
         }
+    }
+
+    private fun openDescriptionEditor() {
+        viewModelScope.launch {
+            _navChannel.send(TaskVMAction.OpenDescriptionEditor)
+        }
+    }
+
+    private fun switchToEditMode() {
+        _state.update { it.copy(interactionMode = DetailInteractionMode.EDIT) }
     }
 
     private fun updateDate(date: LocalDate) {
@@ -67,6 +81,22 @@ class TaskViewModel(private val repository: ApiRepository, mode: DetailInteracti
             )
         }
     }
+
+    private fun updateTitle(title: String) {
+        _state.update {
+            it.copy(
+                title = title
+            )
+        }
+    }
+
+    private fun updateDescription(description: String) {
+        _state.update {
+            it.copy(
+                description = description
+            )
+        }
+    }
 }
 
 data class TaskState(
@@ -84,4 +114,10 @@ data class TaskState(
 
 sealed class TaskVMAction {
     data object NavigateBack : TaskVMAction()
+    data object OpenTitleEditor : TaskVMAction()
+    data object OpenDescriptionEditor : TaskVMAction()
+}
+
+sealed class TextEditorVMAction {
+    data object NavigateBack : TextEditorVMAction()
 }

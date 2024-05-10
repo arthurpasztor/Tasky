@@ -13,3 +13,8 @@ enum class ReminderType(val display: String) {
     HOUR_6("6 hour before"),
     DAY_1("1 day before")
 }
+
+enum class DetailItemType {
+    TITLE,
+    DESCRIPTION
+}

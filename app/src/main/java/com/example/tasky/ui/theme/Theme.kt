@@ -69,3 +69,10 @@ val detailDescriptionStyle = TextStyle(
     fontSize = 14.sp,
     color = Color.Black
 )
+
+val greenSaveButtonStyle = TextStyle(
+    fontWeight = FontWeight.Bold,
+    textAlign = TextAlign.Center,
+    fontSize = 16.sp,
+    color = TaskyGreen,
+)

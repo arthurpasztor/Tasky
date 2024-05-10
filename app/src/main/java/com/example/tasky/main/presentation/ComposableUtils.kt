@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -303,6 +304,24 @@ fun ArrowEditButton(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = "edit",
+            tint = Color.Black,
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ArrowBackButton(
+    onAction: () -> Unit = {}
+) {
+    IconButton(
+        modifier = Modifier.size(60.dp),
+        onClick = {
+            onAction.invoke()
+        }) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            contentDescription = "back",
             tint = Color.Black,
         )
     }

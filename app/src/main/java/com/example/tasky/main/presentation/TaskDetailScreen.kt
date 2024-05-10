@@ -33,7 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.main.domain.DetailInteractionMode
+import com.example.tasky.main.domain.DetailItemType
 import com.example.tasky.main.domain.ReminderType
 import com.example.tasky.main.domain.formatDetailDate
 import com.example.tasky.main.domain.formatDetailTime
@@ -48,6 +50,8 @@ import com.example.tasky.ui.theme.detailTypeStyle
 import com.example.tasky.ui.theme.headerStyle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
@@ -59,7 +63,11 @@ import java.time.LocalTime
 
 @Destination
 @Composable
-fun TaskDetailRoot(navigator: DestinationsNavigator, mode: DetailInteractionMode) {
+fun TaskDetailRoot(
+    navigator: DestinationsNavigator,
+    resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
+    mode: DetailInteractionMode
+) {
 
     val TAG = "TaskDetailScreen"
 
@@ -70,6 +78,33 @@ fun TaskDetailRoot(navigator: DestinationsNavigator, mode: DetailInteractionMode
         viewModel.navChannel.collect { destination ->
             when (destination) {
                 TaskVMAction.NavigateBack -> navigator.popBackStack()
+                TaskVMAction.OpenTitleEditor -> {
+                    navigator.navigate(
+                        TextEditorRootDestination(
+                            text = state.title,
+                            type = DetailItemType.TITLE,
+                        )
+                    )
+                }
+
+                TaskVMAction.OpenDescriptionEditor -> {
+                    navigator.navigate(
+                        TextEditorRootDestination(
+                            text = state.description,
+                            type = DetailItemType.DESCRIPTION,
+                        )
+                    )
+                }
+
+            }
+        }
+    }
+
+    resultRecipient.onNavResult { result ->
+        if (result is NavResult.Value) {
+            when (result.value.type) {
+                DetailItemType.TITLE -> viewModel.onAction(TaskAction.UpdateTitle(result.value.newText))
+                DetailItemType.DESCRIPTION -> viewModel.onAction(TaskAction.UpdateDescription(result.value.newText))
             }
         }
     }
@@ -197,7 +232,7 @@ private fun TaskDetailScreen(
                 )
                 Spacer(Modifier.weight(1f))
                 ArrowEditButton {
-                    //TODO open edit screen
+                    onAction.invoke(TaskAction.OpenTitleEditor)
                 }
             }
 
@@ -213,7 +248,7 @@ private fun TaskDetailScreen(
                 )
                 Spacer(Modifier.weight(1f))
                 ArrowEditButton {
-                    //TODO open edit screen
+                    onAction.invoke(TaskAction.OpenDescriptionEditor)
                 }
             }
 
@@ -299,8 +334,12 @@ private fun TaskDetailScreen(
 
 sealed class TaskAction {
     data object NavigateBack : TaskAction()
+    data object OpenTitleEditor : TaskAction()
+    data object OpenDescriptionEditor : TaskAction()
     data object SwitchToEditMode : TaskAction()
+    class UpdateTitle(val newTitle: String) : TaskAction()
+    class UpdateDescription(val newDescription: String) : TaskAction()
     class UpdateDate(val newDate: LocalDate) : TaskAction()
     class UpdateTime(val newTime: LocalTime) : TaskAction()
-    class UpdateReminder(val newReminder: ReminderType): TaskAction()
+    class UpdateReminder(val newReminder: ReminderType) : TaskAction()
 }
