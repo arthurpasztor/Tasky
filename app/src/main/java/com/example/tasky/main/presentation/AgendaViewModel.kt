@@ -40,6 +40,9 @@ class AgendaViewModel(
             is AgendaAction.UpdateSelectedDate -> {
                 updateSelectedDate(action.newSelection, action.forceSelectedDateToFirstPosition)
             }
+            AgendaAction.CreateNewEvent -> createNewEvent()
+            AgendaAction.CreateNewTask -> createNewTask()
+            AgendaAction.CreateNewReminder -> createNewReminder()
         }
     }
 
@@ -67,6 +70,24 @@ class AgendaViewModel(
         }
     }
 
+    private fun createNewEvent() {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.CreateNewEventAction)
+        }
+    }
+
+    private fun createNewTask() {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.CreateNewTaskAction)
+        }
+    }
+
+    private fun createNewReminder() {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.CreateNewReminderAction)
+        }
+    }
+
     private fun clearUserData() {
         prefs.removeAll()
         prefs.removeEncrypted(Preferences.KEY_TOKEN)
@@ -81,4 +102,7 @@ data class AgendaState(
 
 sealed class AgendaResponseAction {
     class HandleLogoutResponse(val result: Result<Unit, RootError>) : AgendaResponseAction()
+    data object CreateNewEventAction : AgendaResponseAction()
+    data object CreateNewTaskAction : AgendaResponseAction()
+    data object CreateNewReminderAction : AgendaResponseAction()
 }

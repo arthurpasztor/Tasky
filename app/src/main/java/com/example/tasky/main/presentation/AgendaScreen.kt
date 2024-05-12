@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,9 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,10 +43,12 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
+import com.example.tasky.destinations.TaskDetailRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
 import com.example.tasky.ui.theme.UnselectedDateTransparent
+import com.example.tasky.ui.theme.headerStyle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.vanpra.composematerialdialogs.MaterialDialog
@@ -88,6 +89,24 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                         }
                     }
                 }
+
+                AgendaResponseAction.CreateNewEventAction -> {
+                    //TODO implement
+                    Log.e(TAG, "AgendaRoot: CreateNewEventAction")
+                }
+                AgendaResponseAction.CreateNewTaskAction -> {
+                    Log.e(TAG, "AgendaRoot: CreateNewTaskAction")
+
+                    navigator.navigate(TaskDetailRootDestination(DetailInteractionMode.CREATE)) {
+                        popUpTo(LoginRootDestination.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+                AgendaResponseAction.CreateNewReminderAction -> {
+                    //TODO implement
+                    Log.e(TAG, "AgendaRoot: CreateNewReminderAction")
+                }
             }
         }
     }
@@ -109,69 +128,78 @@ private fun AgendaScreen(
 
     val dateDialogState = rememberMaterialDialogState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundBlack)
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Row {
-            ClickableText(
-                modifier = Modifier.padding(start = monthPadding, top = monthPadding, bottom = monthPadding),
-                text = AnnotatedString(state.selectedDate.month.name.uppercase(Locale.getDefault())),
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp,
-                    color = Color.White
-                ),
-                onClick = {
-                    dateDialogState.show()
-                }
-            )
-            Icon(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = "arrowDropDownIcon",
-                tint = Color.White
-            )
-            Spacer(Modifier.weight(1f))
-            ProfileIcon(
-                modifier = Modifier
-                    .padding(end = dimensionResource(R.dimen.padding_8))
-                    .align(Alignment.CenterVertically),
-                state = state,
-                onAction = onAction
-            )
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
-                .background(BackgroundWhite)
+                .background(BackgroundBlack)
         ) {
-            WeekHeader(
+            Row {
+                ClickableText(
+                    modifier = Modifier.padding(start = monthPadding, top = monthPadding, bottom = monthPadding),
+                    text = AnnotatedString(state.selectedDate.month.name.uppercase(Locale.getDefault())),
+                    style = headerStyle,
+                    onClick = {
+                        dateDialogState.show()
+                    }
+                )
+                Icon(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "arrowDropDownIcon",
+                    tint = Color.White
+                )
+                Spacer(Modifier.weight(1f))
+                ProfileIcon(
+                    modifier = Modifier
+                        .padding(end = dimensionResource(R.dimen.padding_8))
+                        .align(Alignment.CenterVertically),
+                    state = state,
+                    onAction = onAction
+                )
+            }
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = dimensionResource(id = R.dimen.padding_20)),
-                state = state,
-                onAction = onAction
-            )
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
+                    .background(BackgroundWhite)
+            ) {
+                WeekHeader(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = dimensionResource(id = R.dimen.padding_20)),
+                    state = state,
+                    onAction = onAction
+                )
+            }
         }
-    }
 
-    MaterialDialog(
-        dialogState = dateDialogState,
-        buttons = {
-            positiveButton(text = stringResource(id = R.string.ok))
-            negativeButton(text = stringResource(id = R.string.cancel))
-        }
-    ) {
-        datepicker(
-            initialDate = state.selectedDate,
-            title = stringResource(id = R.string.pick_a_date)
+        MaterialDialog(
+            dialogState = dateDialogState,
+            buttons = {
+                positiveButton(text = stringResource(id = R.string.ok))
+                negativeButton(text = stringResource(id = R.string.cancel))
+            }
         ) {
-            onAction(AgendaAction.UpdateSelectedDate(it, true))
+            datepicker(
+                initialDate = state.selectedDate,
+                title = stringResource(id = R.string.pick_a_date)
+            ) {
+                onAction(AgendaAction.UpdateSelectedDate(it, true))
+            }
         }
+
+        AddButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    bottom = dimensionResource(id = R.dimen.padding_40),
+                    end = dimensionResource(id = R.dimen.padding_20)
+                ),
+            onAction = onAction
+        )
     }
 }
 
@@ -241,4 +269,7 @@ sealed class AgendaAction {
     data object ClearUserData : AgendaAction()
     class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
         AgendaAction()
+    data object CreateNewEvent : AgendaAction()
+    data object CreateNewTask : AgendaAction()
+    data object CreateNewReminder : AgendaAction()
 }

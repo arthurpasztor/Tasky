@@ -33,4 +33,10 @@
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
     <string name="pick_a_date">Pick a date</string>
+
+    <string name="event">Event</string>
+    <string name="task">Task</string>
+    <string name="reminder">Reminder</string>
+    <string name="save">Save</string>
+    <string name="edit_task">Edit Task</string>
 </resources>
