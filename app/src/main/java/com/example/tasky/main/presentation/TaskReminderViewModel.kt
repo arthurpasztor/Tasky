@@ -6,6 +6,7 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.main.data.ApiRepository
 import com.example.tasky.main.data.dto.TaskDTO
+import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.ReminderType
 import com.example.tasky.main.domain.getMillis
@@ -20,7 +21,11 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
-class TaskReminderViewModel(private val repository: ApiRepository, private val mode: DetailInteractionMode) : ViewModel() {
+class TaskReminderViewModel(
+    private val repository: ApiRepository,
+    private val type: AgendaItemType,
+    private val mode: DetailInteractionMode
+) : ViewModel() {
 
     private val _state = MutableStateFlow(TaskReminderState(interactionMode = mode))
     val state = _state.asStateFlow()
@@ -40,6 +45,7 @@ class TaskReminderViewModel(private val repository: ApiRepository, private val m
             is TaskReminderAction.UpdateTitle -> updateTitle(action.newTitle)
             is TaskReminderAction.UpdateDescription -> updateDescription(action.newDescription)
             TaskReminderAction.SaveTask -> saveTask()
+            TaskReminderAction.SaveReminder -> saveReminder()
         }
     }
 
@@ -119,6 +125,10 @@ class TaskReminderViewModel(private val repository: ApiRepository, private val m
 
             _state.update { it.copy(isLoading = false) }
         }
+    }
+
+    private fun saveReminder() {
+        //TODO implement
     }
 
     private fun collectTaskPayload(): TaskDTO {

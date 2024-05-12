@@ -1,6 +1,8 @@
 package com.example.tasky.main.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +48,8 @@ import com.example.tasky.main.domain.formatDetailTime
 import com.example.tasky.main.domain.formatHeaderDate
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.example.tasky.ui.theme.ReminderBorderGray
+import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.detailDescriptionStyle
@@ -77,7 +81,7 @@ fun TaskReminderDetailRoot(
     val TAG = "TaskDetailScreen"
 
     val context = LocalContext.current
-    val viewModel: TaskReminderViewModel = getViewModel(parameters = { parametersOf(mode) })
+    val viewModel: TaskReminderViewModel = getViewModel(parameters = { parametersOf(type, mode) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
@@ -127,7 +131,8 @@ fun TaskReminderDetailRoot(
 
     TaskReminderDetailScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        type = type
     )
     if (state.isLoading) {
         Box(
@@ -145,7 +150,8 @@ fun TaskReminderDetailRoot(
 @Composable
 private fun TaskReminderDetailScreen(
     state: TaskReminderState = TaskReminderState(),
-    onAction: (TaskReminderAction) -> Unit = {}
+    onAction: (TaskReminderAction) -> Unit = {},
+    type: AgendaItemType = AgendaItemType.REMINDER
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
     val headerPadding = dimensionResource(R.dimen.padding_20)
@@ -153,9 +159,11 @@ private fun TaskReminderDetailScreen(
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
 
+    val editHeader =
+        stringResource(id = if (type == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
     val headerText = when (state.interactionMode) {
         DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
-        DetailInteractionMode.EDIT -> stringResource(id = R.string.edit_task).uppercase()
+        DetailInteractionMode.EDIT -> editHeader.uppercase()
         DetailInteractionMode.VIEW -> LocalDate.now().formatHeaderDate() //TODO change to the current task's date
     }
 
@@ -184,7 +192,12 @@ private fun TaskReminderDetailScreen(
                         text = AnnotatedString(stringResource(id = R.string.save)),
                         style = headerStyle,
                         onClick = {
-                            onAction(TaskReminderAction.SaveTask)
+                            onAction(
+                                if (type == AgendaItemType.TASK)
+                                    TaskReminderAction.SaveTask
+                                else
+                                    TaskReminderAction.SaveReminder
+                            )
                         }
                     )
                 }
@@ -214,19 +227,22 @@ private fun TaskReminderDetailScreen(
                 .background(BackgroundWhite)
                 .padding(horizontal = 16.dp)
         ) {
+
+
             Row(modifier = Modifier.padding(top = 20.dp)) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10))
                         .size(18.dp)
-                        .background(TaskyGreen)
+                        .background(if (type == AgendaItemType.TASK) TaskyGreen else ReminderGray)
+                        .border(BorderStroke(1.dp, if (type == AgendaItemType.TASK) TaskyGreen else ReminderBorderGray))
                         .align(Alignment.CenterVertically),
                 )
                 Text(
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .align(Alignment.CenterVertically),
-                    text = stringResource(id = R.string.task),
+                    text = stringResource(id = if (type == AgendaItemType.TASK) R.string.task else R.string.reminder),
                     style = detailTypeStyle,
                 )
             }
@@ -361,4 +377,5 @@ sealed class TaskReminderAction {
     class UpdateTime(val newTime: LocalTime) : TaskReminderAction()
     class UpdateReminder(val newReminder: ReminderType) : TaskReminderAction()
     data object SaveTask : TaskReminderAction()
+    data object SaveReminder : TaskReminderAction()
 }

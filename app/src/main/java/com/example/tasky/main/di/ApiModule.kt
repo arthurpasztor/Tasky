@@ -13,7 +13,7 @@ import org.koin.dsl.module
 val apiModule = module {
     viewModelOf(::AgendaViewModel)
     viewModel { params ->
-        TaskReminderViewModel(get(), params[0])
+        TaskReminderViewModel(get(), params[0], params[1])
     }
 
     single(named("apiClient")) { HttpClientFactory.provideApiClient() }
