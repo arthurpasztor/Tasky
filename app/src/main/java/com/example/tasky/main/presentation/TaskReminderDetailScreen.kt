@@ -1,6 +1,8 @@
 package com.example.tasky.main.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +39,7 @@ import com.example.tasky.R
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.core.domain.showToast
 import com.example.tasky.destinations.TextEditorRootDestination
+import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.DetailItemType
 import com.example.tasky.main.domain.ReminderType
@@ -45,6 +48,8 @@ import com.example.tasky.main.domain.formatDetailTime
 import com.example.tasky.main.domain.formatHeaderDate
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.example.tasky.ui.theme.ReminderBorderGray
+import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.detailDescriptionStyle
@@ -66,23 +71,24 @@ import java.time.LocalTime
 
 @Destination
 @Composable
-fun TaskDetailRoot(
+fun TaskReminderDetailRoot(
     navigator: DestinationsNavigator,
     resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
+    type: AgendaItemType,
     mode: DetailInteractionMode
 ) {
 
     val TAG = "TaskDetailScreen"
 
     val context = LocalContext.current
-    val viewModel: TaskViewModel = getViewModel(parameters = { parametersOf(mode) })
+    val viewModel: TaskReminderViewModel = getViewModel(parameters = { parametersOf(type, mode) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                TaskVMAction.NavigateBack -> navigator.popBackStack()
-                TaskVMAction.OpenTitleEditor -> {
+                TaskReminderVMAction.NavigateBack -> navigator.popBackStack()
+                TaskReminderVMAction.OpenTitleEditor -> {
                     navigator.navigate(
                         TextEditorRootDestination(
                             text = state.title,
@@ -91,7 +97,7 @@ fun TaskDetailRoot(
                     )
                 }
 
-                TaskVMAction.OpenDescriptionEditor -> {
+                TaskReminderVMAction.OpenDescriptionEditor -> {
                     navigator.navigate(
                         TextEditorRootDestination(
                             text = state.description,
@@ -100,10 +106,21 @@ fun TaskDetailRoot(
                     )
                 }
 
-                is TaskVMAction.CreateTask -> {
+                is TaskReminderVMAction.CreateTask -> {
                     when (destination.result) {
                         is Result.Success -> {
                             context.showToast(R.string.success_task_created)
+                            navigator.popBackStack()
+                        }
+
+                        is Result.Error -> context.showToast(destination.result.error, TAG)
+                    }
+                }
+
+                is TaskReminderVMAction.CreateReminder -> {
+                    when (destination.result) {
+                        is Result.Success -> {
+                            context.showToast(R.string.success_reminder_created)
                             navigator.popBackStack()
                         }
 
@@ -117,13 +134,13 @@ fun TaskDetailRoot(
     resultRecipient.onNavResult { result ->
         if (result is NavResult.Value) {
             when (result.value.type) {
-                DetailItemType.TITLE -> viewModel.onAction(TaskAction.UpdateTitle(result.value.newText))
-                DetailItemType.DESCRIPTION -> viewModel.onAction(TaskAction.UpdateDescription(result.value.newText))
+                DetailItemType.TITLE -> viewModel.onAction(TaskReminderAction.UpdateTitle(result.value.newText))
+                DetailItemType.DESCRIPTION -> viewModel.onAction(TaskReminderAction.UpdateDescription(result.value.newText))
             }
         }
     }
 
-    TaskDetailScreen(
+    TaskReminderDetailScreen(
         state = state,
         onAction = viewModel::onAction
     )
@@ -141,70 +158,33 @@ fun TaskDetailRoot(
 
 @Preview
 @Composable
-private fun TaskDetailScreen(
-    state: TaskState = TaskState(),
-    onAction: (TaskAction) -> Unit = {}
+private fun TaskReminderDetailScreen(
+    state: TaskReminderState = TaskReminderState(),
+    onAction: (TaskReminderAction) -> Unit = {}
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
-    val headerPadding = dimensionResource(R.dimen.padding_20)
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
-
-    val headerText = when (state.interactionMode) {
-        DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
-        DetailInteractionMode.EDIT -> stringResource(id = R.string.edit_task).uppercase()
-        DetailInteractionMode.VIEW -> LocalDate.now().formatHeaderDate() //TODO change to the current task's date
-    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
-        Row {
-            CloseButton { onAction.invoke(TaskAction.NavigateBack) }
-            Spacer(Modifier.weight(1f))
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = headerPadding),
-                text = headerText,
-                style = headerStyle
-            )
-            Spacer(Modifier.weight(1f))
-            when (state.interactionMode) {
-                DetailInteractionMode.CREATE, DetailInteractionMode.EDIT -> {
-                    ClickableText(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(end = headerPadding),
-                        text = AnnotatedString(stringResource(id = R.string.save)),
-                        style = headerStyle,
-                        onClick = {
-                            onAction(TaskAction.SaveTask)
-                        }
-                    )
-                }
-
-                DetailInteractionMode.VIEW -> {
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .size(60.dp)
-                            .padding(8.dp),
-                        onClick = {
-                            onAction(TaskAction.SwitchToEditMode)
-                        }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "create, edit",
-                            tint = Color.White,
-                        )
-                    }
-                }
-            }
-        }
+        AgendaItemDetailHeader(
+            agendaItemType = state.agendaItemType,
+            interactionMode = state.interactionMode,
+            onNavigateBack = { onAction.invoke(TaskReminderAction.NavigateBack) },
+            onSwitchToEditMode = { onAction(TaskReminderAction.SwitchToEditMode) },
+            onSave = {
+                onAction(
+                    if (state.agendaItemType == AgendaItemType.TASK)
+                        TaskReminderAction.SaveTask
+                    else
+                        TaskReminderAction.SaveReminder
+                )
+            })
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -212,19 +192,27 @@ private fun TaskDetailScreen(
                 .background(BackgroundWhite)
                 .padding(horizontal = 16.dp)
         ) {
+
+
             Row(modifier = Modifier.padding(top = 20.dp)) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10))
                         .size(18.dp)
-                        .background(TaskyGreen)
+                        .background(if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderGray)
+                        .border(
+                            BorderStroke(
+                                1.dp,
+                                if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderBorderGray
+                            )
+                        )
                         .align(Alignment.CenterVertically),
                 )
                 Text(
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .align(Alignment.CenterVertically),
-                    text = stringResource(id = R.string.task),
+                    text = stringResource(id = if (state.agendaItemType == AgendaItemType.TASK) R.string.task else R.string.reminder),
                     style = detailTypeStyle,
                 )
             }
@@ -248,7 +236,7 @@ private fun TaskDetailScreen(
                 )
                 Spacer(Modifier.weight(1f))
                 ArrowEditButton {
-                    onAction.invoke(TaskAction.OpenTitleEditor)
+                    onAction.invoke(TaskReminderAction.OpenTitleEditor)
                 }
             }
 
@@ -264,7 +252,7 @@ private fun TaskDetailScreen(
                 )
                 Spacer(Modifier.weight(1f))
                 ArrowEditButton {
-                    onAction.invoke(TaskAction.OpenDescriptionEditor)
+                    onAction.invoke(TaskReminderAction.OpenDescriptionEditor)
                 }
             }
 
@@ -328,7 +316,7 @@ private fun TaskDetailScreen(
                 it.isAfter(now) || it.isEqual(now)
             }
         ) {
-            onAction(TaskAction.UpdateDate(it))
+            onAction(TaskReminderAction.UpdateDate(it))
         }
     }
 
@@ -343,20 +331,21 @@ private fun TaskDetailScreen(
             initialTime = state.time,
             title = stringResource(id = R.string.pick_a_time)
         ) {
-            onAction(TaskAction.UpdateTime(it))
+            onAction(TaskReminderAction.UpdateTime(it))
         }
     }
 }
 
-sealed class TaskAction {
-    data object NavigateBack : TaskAction()
-    data object OpenTitleEditor : TaskAction()
-    data object OpenDescriptionEditor : TaskAction()
-    data object SwitchToEditMode : TaskAction()
-    class UpdateTitle(val newTitle: String) : TaskAction()
-    class UpdateDescription(val newDescription: String) : TaskAction()
-    class UpdateDate(val newDate: LocalDate) : TaskAction()
-    class UpdateTime(val newTime: LocalTime) : TaskAction()
-    class UpdateReminder(val newReminder: ReminderType) : TaskAction()
-    data object SaveTask : TaskAction()
+sealed class TaskReminderAction {
+    data object NavigateBack : TaskReminderAction()
+    data object OpenTitleEditor : TaskReminderAction()
+    data object OpenDescriptionEditor : TaskReminderAction()
+    data object SwitchToEditMode : TaskReminderAction()
+    class UpdateTitle(val newTitle: String) : TaskReminderAction()
+    class UpdateDescription(val newDescription: String) : TaskReminderAction()
+    class UpdateDate(val newDate: LocalDate) : TaskReminderAction()
+    class UpdateTime(val newTime: LocalTime) : TaskReminderAction()
+    class UpdateReminder(val newReminder: ReminderType) : TaskReminderAction()
+    data object SaveTask : TaskReminderAction()
+    data object SaveReminder : TaskReminderAction()
 }

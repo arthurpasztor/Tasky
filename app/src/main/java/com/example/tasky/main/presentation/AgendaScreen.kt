@@ -43,7 +43,8 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.TaskDetailRootDestination
+import com.example.tasky.destinations.TaskReminderDetailRootDestination
+import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -95,18 +96,31 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                     //TODO implement
                     Log.e(TAG, "AgendaRoot: CreateNewEventAction")
                 }
-                AgendaResponseAction.CreateNewTaskAction -> {
-                    Log.e(TAG, "AgendaRoot: CreateNewTaskAction")
 
-                    navigator.navigate(TaskDetailRootDestination(DetailInteractionMode.CREATE)) {
+                AgendaResponseAction.CreateNewTaskAction -> {
+                    navigator.navigate(
+                        TaskReminderDetailRootDestination(
+                            type = AgendaItemType.TASK,
+                            mode = DetailInteractionMode.CREATE
+                        )
+                    ) {
                         popUpTo(LoginRootDestination.route) {
                             inclusive = true
                         }
                     }
                 }
+
                 AgendaResponseAction.CreateNewReminderAction -> {
-                    //TODO implement
-                    Log.e(TAG, "AgendaRoot: CreateNewReminderAction")
+                    navigator.navigate(
+                        TaskReminderDetailRootDestination(
+                            type = AgendaItemType.REMINDER,
+                            mode = DetailInteractionMode.CREATE
+                        )
+                    ) {
+                        popUpTo(LoginRootDestination.route) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
         }
@@ -270,6 +284,7 @@ sealed class AgendaAction {
     data object ClearUserData : AgendaAction()
     class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
         AgendaAction()
+
     data object CreateNewEvent : AgendaAction()
     data object CreateNewTask : AgendaAction()
     data object CreateNewReminder : AgendaAction()

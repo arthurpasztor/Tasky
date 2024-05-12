@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
+import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.ReminderType
 import com.example.tasky.main.domain.getMillis
@@ -20,44 +22,49 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
-class TaskViewModel(private val repository: ApiRepository, private val mode: DetailInteractionMode) : ViewModel() {
+class TaskReminderViewModel(
+    private val repository: ApiRepository,
+    type: AgendaItemType,
+    mode: DetailInteractionMode
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskState(interactionMode = mode))
+    private val _state = MutableStateFlow(TaskReminderState(agendaItemType = type, interactionMode = mode))
     val state = _state.asStateFlow()
 
-    private val _navChannel = Channel<TaskVMAction>()
+    private val _navChannel = Channel<TaskReminderVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
-    fun onAction(action: TaskAction) {
+    fun onAction(action: TaskReminderAction) {
         when (action) {
-            TaskAction.NavigateBack -> navigateBack()
-            TaskAction.OpenTitleEditor -> openTitleEditor()
-            TaskAction.OpenDescriptionEditor -> openDescriptionEditor()
-            TaskAction.SwitchToEditMode -> switchToEditMode()
-            is TaskAction.UpdateDate -> updateDate(action.newDate)
-            is TaskAction.UpdateTime -> updateTime(action.newTime)
-            is TaskAction.UpdateReminder -> updateReminder(action.newReminder)
-            is TaskAction.UpdateTitle -> updateTitle(action.newTitle)
-            is TaskAction.UpdateDescription -> updateDescription(action.newDescription)
-            TaskAction.SaveTask -> saveTask()
+            TaskReminderAction.NavigateBack -> navigateBack()
+            TaskReminderAction.OpenTitleEditor -> openTitleEditor()
+            TaskReminderAction.OpenDescriptionEditor -> openDescriptionEditor()
+            TaskReminderAction.SwitchToEditMode -> switchToEditMode()
+            is TaskReminderAction.UpdateDate -> updateDate(action.newDate)
+            is TaskReminderAction.UpdateTime -> updateTime(action.newTime)
+            is TaskReminderAction.UpdateReminder -> updateReminder(action.newReminder)
+            is TaskReminderAction.UpdateTitle -> updateTitle(action.newTitle)
+            is TaskReminderAction.UpdateDescription -> updateDescription(action.newDescription)
+            TaskReminderAction.SaveTask -> saveTask()
+            TaskReminderAction.SaveReminder -> saveReminder()
         }
     }
 
     private fun navigateBack() {
         viewModelScope.launch {
-            _navChannel.send(TaskVMAction.NavigateBack)
+            _navChannel.send(TaskReminderVMAction.NavigateBack)
         }
     }
 
     private fun openTitleEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskVMAction.OpenTitleEditor)
+            _navChannel.send(TaskReminderVMAction.OpenTitleEditor)
         }
     }
 
     private fun openDescriptionEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskVMAction.OpenDescriptionEditor)
+            _navChannel.send(TaskReminderVMAction.OpenDescriptionEditor)
         }
     }
 
@@ -110,12 +117,28 @@ class TaskViewModel(private val repository: ApiRepository, private val mode: Det
             _state.update { it.copy(isLoading = true) }
 
             val payload = collectTaskPayload()
-            val response = if (mode == DetailInteractionMode.CREATE) {
+            val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
                 repository.createTask(payload)
             } else {
                 repository.updateTask(payload)
             }
-            _navChannel.send(TaskVMAction.CreateTask(response))
+            _navChannel.send(TaskReminderVMAction.CreateTask(response))
+
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun saveReminder() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            val payload = collectReminderPayload()
+            val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
+                repository.createReminder(payload)
+            } else {
+                repository.updateReminder(payload)
+            }
+            _navChannel.send(TaskReminderVMAction.CreateReminder(response))
 
             _state.update { it.copy(isLoading = false) }
         }
@@ -124,13 +147,7 @@ class TaskViewModel(private val repository: ApiRepository, private val mode: Det
     private fun collectTaskPayload(): TaskDTO {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
-            val remindAt: LocalDateTime = when (it.reminderType) {
-                ReminderType.MINUTES_10 -> time.minusMinutes(10)
-                ReminderType.MINUTES_30 -> time.minusMinutes(30)
-                ReminderType.HOUR_1 -> time.minusHours(1)
-                ReminderType.HOUR_6 -> time.minusHours(6)
-                ReminderType.DAY_1 -> time.minusDays(1)
-            }
+            val remindAt = it.reminderType.getReminder(time)
 
             return TaskDTO(
                 id = UUID.randomUUID().toString(),
@@ -142,9 +159,24 @@ class TaskViewModel(private val repository: ApiRepository, private val mode: Det
             )
         }
     }
+
+    private fun collectReminderPayload(): ReminderDTO {
+        _state.value.let {
+            val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
+            val remindAt = it.reminderType.getReminder(time)
+
+            return ReminderDTO(
+                id = UUID.randomUUID().toString(),
+                title = it.title,
+                description = it.description,
+                time = time.getMillis(),
+                remindAt = remindAt.getMillis()
+            )
+        }
+    }
 }
 
-data class TaskState(
+data class TaskReminderState(
     val isLoading: Boolean = false,
 
     val title: String = "Title",
@@ -154,12 +186,14 @@ data class TaskState(
     val reminderType: ReminderType = ReminderType.MINUTES_30,
     val isDone: Boolean = false,
 
+    val agendaItemType: AgendaItemType = AgendaItemType.TASK,
     val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE
 )
 
-sealed class TaskVMAction {
-    data object NavigateBack : TaskVMAction()
-    data object OpenTitleEditor : TaskVMAction()
-    data object OpenDescriptionEditor : TaskVMAction()
-    class CreateTask(val result: Result<Unit, RootError>) : TaskVMAction()
+sealed class TaskReminderVMAction {
+    data object NavigateBack : TaskReminderVMAction()
+    data object OpenTitleEditor : TaskReminderVMAction()
+    data object OpenDescriptionEditor : TaskReminderVMAction()
+    class CreateTask(val result: Result<Unit, RootError>) : TaskReminderVMAction()
+    class CreateReminder(val result: Result<Unit, RootError>) : TaskReminderVMAction()
 }
