@@ -43,4 +43,6 @@
     <string name="edit_task">Edit Task</string>
     <string name="edit_title">Edit Title</string>
     <string name="edit_description">Edit Description</string>
+
+    <string name="success_task_created">Task successfully created</string>
 </resources>
