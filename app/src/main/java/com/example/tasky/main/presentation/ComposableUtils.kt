@@ -3,13 +3,18 @@ package com.example.tasky.main.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -30,14 +35,101 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
+import com.example.tasky.main.domain.ReminderType
 import com.example.tasky.main.domain.getInitials
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.Purple40
 import com.example.tasky.ui.theme.PurpleGrey80
+import com.example.tasky.ui.theme.VeryLightGray
+import com.example.tasky.ui.theme.detailDescriptionStyle
+
+@Preview
+@Composable
+fun ReminderSelector(
+    modifier: Modifier = Modifier,
+    state: TaskState = TaskState(),
+    onAction: (TaskAction) -> Unit = {}
+) {
+    var isContextMenuVisible by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var pressOffset by remember {
+        mutableStateOf(DpOffset.Zero)
+    }
+    var itemHeight by remember {
+        mutableStateOf(0.dp)
+    }
+    val density = LocalDensity.current
+
+    Box(
+        modifier = modifier
+            .onSizeChanged {
+                itemHeight = with(density) { it.height.toDp() }
+            }
+    ) {
+        Row(modifier = Modifier
+            .pointerInput(true) {
+                detectTapGestures(
+                    onPress = {
+                        isContextMenuVisible = true
+                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                    },
+                )
+            }) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10))
+                    .size(22.dp)
+                    .background(VeryLightGray)
+                    .align(Alignment.CenterVertically),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.NotificationsNone,
+                    contentDescription = "checkIcon",
+                    tint = Color.LightGray
+                )
+            }
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 10.dp),
+                text = state.reminderType.display,
+                style = detailDescriptionStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "edit",
+                tint = Color.Black,
+            )
+        }
+        DropdownMenu(
+            expanded = isContextMenuVisible,
+            onDismissRequest = {
+                isContextMenuVisible = false
+            },
+            offset = pressOffset.copy(
+                y = pressOffset.y - itemHeight
+            )
+        ) {
+            ReminderType.entries.forEach {
+                DropdownMenuItem(
+                    text = { Text(text = it.display) },
+                    onClick = {
+                        onAction.invoke(TaskAction.UpdateReminder(it))
+                        isContextMenuVisible = false
+                    })
+            }
+        }
+    }
+}
 
 @Preview
 @Composable
@@ -195,6 +287,42 @@ fun CloseButton(
             imageVector = Icons.Default.Close,
             contentDescription = "cancel",
             tint = Color.White,
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ArrowEditButton(
+    onAction: () -> Unit = {}
+) {
+    IconButton(
+        modifier = Modifier.size(60.dp),
+        onClick = {
+            onAction.invoke()
+        }) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = "edit",
+            tint = Color.Black,
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ArrowBackButton(
+    onAction: () -> Unit = {}
+) {
+    IconButton(
+        modifier = Modifier.size(60.dp),
+        onClick = {
+            onAction.invoke()
+        }) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            contentDescription = "back",
+            tint = Color.Black,
         )
     }
 }

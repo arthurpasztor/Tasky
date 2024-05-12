@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
 import com.example.tasky.ui.theme.BackgroundBlack
-import com.example.tasky.ui.theme.CheckmarkGreen
+import com.example.tasky.ui.theme.TaskyGreen
 import java.util.Locale
 
 @Preview
@@ -73,7 +73,7 @@ fun UserInfoTextField(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = "checkIcon",
-                tint = CheckmarkGreen
+                tint = TaskyGreen
             )
         }
 

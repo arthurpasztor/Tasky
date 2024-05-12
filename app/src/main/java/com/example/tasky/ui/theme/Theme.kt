@@ -48,3 +48,31 @@ val headerStyle = TextStyle(
     fontSize = 16.sp,
     color = Color.White
 )
+
+val detailTypeStyle = TextStyle(
+    fontWeight = FontWeight.Bold,
+    textAlign = TextAlign.Center,
+    fontSize = 14.sp,
+    color = Color.Gray
+)
+
+val detailTitleStyle = TextStyle(
+    fontWeight = FontWeight.Bold,
+    textAlign = TextAlign.Start,
+    fontSize = 26.sp,
+    color = Color.Black
+)
+
+val detailDescriptionStyle = TextStyle(
+    textAlign = TextAlign.Start,
+    lineHeight = 20.sp,
+    fontSize = 14.sp,
+    color = Color.Black
+)
+
+val greenSaveButtonStyle = TextStyle(
+    fontWeight = FontWeight.Bold,
+    textAlign = TextAlign.Center,
+    fontSize = 16.sp,
+    color = TaskyGreen,
+)
