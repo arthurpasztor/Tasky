@@ -1,7 +1,5 @@
 package com.example.tasky.auth.presentation
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,12 +27,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.domain.HttpError
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
-import com.example.tasky.auth.domain.asUiText
+import com.example.tasky.core.domain.showToast
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
@@ -67,11 +64,7 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
                             }
                         }
 
-                        is Result.Error -> {
-                            val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)
-                            Log.e(TAG, "Error: $errorMessage")
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
-                        }
+                        is Result.Error -> context.showToast(destination.result.error, TAG)
                     }
                 }
             }

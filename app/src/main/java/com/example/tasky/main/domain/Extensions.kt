@@ -1,7 +1,9 @@
 package com.example.tasky.main.domain
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -34,3 +36,5 @@ fun LocalDate.formatHeaderDate(): String = format(DateTimeFormatter.ofPattern("d
 fun LocalDate.formatDetailDate(): String = format(DateTimeFormatter.ofPattern("MMM dd yyyy"))
 
 fun LocalTime.formatDetailTime(): String = format(DateTimeFormatter.ofPattern("HH:mm"))
+
+fun LocalDateTime.getMillis(): Long = atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

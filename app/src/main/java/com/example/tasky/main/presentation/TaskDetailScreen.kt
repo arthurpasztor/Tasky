@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -33,6 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.auth.domain.Result
+import com.example.tasky.core.domain.showToast
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.DetailItemType
@@ -71,6 +74,7 @@ fun TaskDetailRoot(
 
     val TAG = "TaskDetailScreen"
 
+    val context = LocalContext.current
     val viewModel: TaskViewModel = getViewModel(parameters = { parametersOf(mode) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -96,6 +100,16 @@ fun TaskDetailRoot(
                     )
                 }
 
+                is TaskVMAction.CreateTask -> {
+                    when (destination.result) {
+                        is Result.Success -> {
+                            context.showToast(R.string.success_task_created)
+                            navigator.popBackStack()
+                        }
+
+                        is Result.Error -> context.showToast(destination.result.error, TAG)
+                    }
+                }
             }
         }
     }
@@ -117,7 +131,7 @@ fun TaskDetailRoot(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White),
+                .background(Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
@@ -161,12 +175,15 @@ private fun TaskDetailScreen(
             Spacer(Modifier.weight(1f))
             when (state.interactionMode) {
                 DetailInteractionMode.CREATE, DetailInteractionMode.EDIT -> {
-                    Text(
+                    ClickableText(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(end = headerPadding),
-                        text = stringResource(id = R.string.save),
-                        style = headerStyle
+                        text = AnnotatedString(stringResource(id = R.string.save)),
+                        style = headerStyle,
+                        onClick = {
+                            onAction(TaskAction.SaveTask)
+                        }
                     )
                 }
 
@@ -187,7 +204,6 @@ private fun TaskDetailScreen(
                     }
                 }
             }
-
         }
         Column(
             modifier = Modifier
@@ -342,4 +358,5 @@ sealed class TaskAction {
     class UpdateDate(val newDate: LocalDate) : TaskAction()
     class UpdateTime(val newTime: LocalTime) : TaskAction()
     class UpdateReminder(val newReminder: ReminderType) : TaskAction()
+    data object SaveTask : TaskAction()
 }
