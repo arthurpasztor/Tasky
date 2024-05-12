@@ -52,8 +52,8 @@ import com.example.tasky.ui.theme.detailDescriptionStyle
 @Composable
 fun ReminderSelector(
     modifier: Modifier = Modifier,
-    state: TaskState = TaskState(),
-    onAction: (TaskAction) -> Unit = {}
+    state: TaskReminderState = TaskReminderState(),
+    onAction: (TaskReminderAction) -> Unit = {}
 ) {
     var isContextMenuVisible by rememberSaveable {
         mutableStateOf(false)
@@ -123,7 +123,7 @@ fun ReminderSelector(
                 DropdownMenuItem(
                     text = { Text(text = it.display) },
                     onClick = {
-                        onAction.invoke(TaskAction.UpdateReminder(it))
+                        onAction.invoke(TaskReminderAction.UpdateReminder(it))
                         isContextMenuVisible = false
                     })
             }

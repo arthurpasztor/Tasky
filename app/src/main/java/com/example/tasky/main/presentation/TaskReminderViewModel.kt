@@ -20,44 +20,44 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
-class TaskViewModel(private val repository: ApiRepository, private val mode: DetailInteractionMode) : ViewModel() {
+class TaskReminderViewModel(private val repository: ApiRepository, private val mode: DetailInteractionMode) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskState(interactionMode = mode))
+    private val _state = MutableStateFlow(TaskReminderState(interactionMode = mode))
     val state = _state.asStateFlow()
 
-    private val _navChannel = Channel<TaskVMAction>()
+    private val _navChannel = Channel<TaskReminderVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
-    fun onAction(action: TaskAction) {
+    fun onAction(action: TaskReminderAction) {
         when (action) {
-            TaskAction.NavigateBack -> navigateBack()
-            TaskAction.OpenTitleEditor -> openTitleEditor()
-            TaskAction.OpenDescriptionEditor -> openDescriptionEditor()
-            TaskAction.SwitchToEditMode -> switchToEditMode()
-            is TaskAction.UpdateDate -> updateDate(action.newDate)
-            is TaskAction.UpdateTime -> updateTime(action.newTime)
-            is TaskAction.UpdateReminder -> updateReminder(action.newReminder)
-            is TaskAction.UpdateTitle -> updateTitle(action.newTitle)
-            is TaskAction.UpdateDescription -> updateDescription(action.newDescription)
-            TaskAction.SaveTask -> saveTask()
+            TaskReminderAction.NavigateBack -> navigateBack()
+            TaskReminderAction.OpenTitleEditor -> openTitleEditor()
+            TaskReminderAction.OpenDescriptionEditor -> openDescriptionEditor()
+            TaskReminderAction.SwitchToEditMode -> switchToEditMode()
+            is TaskReminderAction.UpdateDate -> updateDate(action.newDate)
+            is TaskReminderAction.UpdateTime -> updateTime(action.newTime)
+            is TaskReminderAction.UpdateReminder -> updateReminder(action.newReminder)
+            is TaskReminderAction.UpdateTitle -> updateTitle(action.newTitle)
+            is TaskReminderAction.UpdateDescription -> updateDescription(action.newDescription)
+            TaskReminderAction.SaveTask -> saveTask()
         }
     }
 
     private fun navigateBack() {
         viewModelScope.launch {
-            _navChannel.send(TaskVMAction.NavigateBack)
+            _navChannel.send(TaskReminderVMAction.NavigateBack)
         }
     }
 
     private fun openTitleEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskVMAction.OpenTitleEditor)
+            _navChannel.send(TaskReminderVMAction.OpenTitleEditor)
         }
     }
 
     private fun openDescriptionEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskVMAction.OpenDescriptionEditor)
+            _navChannel.send(TaskReminderVMAction.OpenDescriptionEditor)
         }
     }
 
@@ -115,7 +115,7 @@ class TaskViewModel(private val repository: ApiRepository, private val mode: Det
             } else {
                 repository.updateTask(payload)
             }
-            _navChannel.send(TaskVMAction.CreateTask(response))
+            _navChannel.send(TaskReminderVMAction.CreateTask(response))
 
             _state.update { it.copy(isLoading = false) }
         }
@@ -144,7 +144,7 @@ class TaskViewModel(private val repository: ApiRepository, private val mode: Det
     }
 }
 
-data class TaskState(
+data class TaskReminderState(
     val isLoading: Boolean = false,
 
     val title: String = "Title",
@@ -157,9 +157,9 @@ data class TaskState(
     val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE
 )
 
-sealed class TaskVMAction {
-    data object NavigateBack : TaskVMAction()
-    data object OpenTitleEditor : TaskVMAction()
-    data object OpenDescriptionEditor : TaskVMAction()
-    class CreateTask(val result: Result<Unit, RootError>) : TaskVMAction()
+sealed class TaskReminderVMAction {
+    data object NavigateBack : TaskReminderVMAction()
+    data object OpenTitleEditor : TaskReminderVMAction()
+    data object OpenDescriptionEditor : TaskReminderVMAction()
+    class CreateTask(val result: Result<Unit, RootError>) : TaskReminderVMAction()
 }

@@ -1,5 +1,10 @@
 package com.example.tasky.main.domain
 
+enum class AgendaItemType {
+    TASK,
+    REMINDER
+}
+
 enum class DetailInteractionMode {
     CREATE,
     EDIT,
