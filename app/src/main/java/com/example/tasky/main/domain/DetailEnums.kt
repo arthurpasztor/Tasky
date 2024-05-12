@@ -13,12 +13,12 @@ enum class DetailInteractionMode {
     VIEW
 }
 
-enum class ReminderType(val display: String) {
-    MINUTES_10("10 minutes before"),
-    MINUTES_30("30 minutes before"),
-    HOUR_1("1 hour before"),
-    HOUR_6("6 hour before"),
-    DAY_1("1 day before");
+enum class ReminderType {
+    MINUTES_10,
+    MINUTES_30,
+    HOUR_1,
+    HOUR_6,
+    DAY_1;
 
     fun getReminder(reference: LocalDateTime): LocalDateTime {
         return when (this) {

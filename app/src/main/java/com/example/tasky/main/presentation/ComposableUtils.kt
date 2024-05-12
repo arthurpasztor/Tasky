@@ -106,7 +106,7 @@ fun ReminderSelector(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 10.dp),
-                text = state.reminderType.display,
+                text = stringResource(id = state.getReminderDisplayRes()),
                 style = detailDescriptionStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -129,7 +129,7 @@ fun ReminderSelector(
         ) {
             ReminderType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(text = it.display) },
+                    text = { Text(text = stringResource(id = state.getReminderDisplayRes(it))) },
                     onClick = {
                         onAction.invoke(TaskReminderAction.UpdateReminder(it))
                         isContextMenuVisible = false

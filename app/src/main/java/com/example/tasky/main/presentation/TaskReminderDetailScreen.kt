@@ -87,7 +87,6 @@ fun TaskReminderDetailRoot(
     LaunchedEffect(true) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                TaskReminderVMAction.NavigateBack -> navigator.popBackStack()
                 TaskReminderVMAction.OpenTitleEditor -> {
                     navigator.navigate(
                         TextEditorRootDestination(
@@ -143,7 +142,9 @@ fun TaskReminderDetailRoot(
     TaskReminderDetailScreen(
         state = state,
         onAction = viewModel::onAction
-    )
+    ) {
+        navigator.popBackStack()
+    }
     if (state.isLoading) {
         Box(
             modifier = Modifier
@@ -160,7 +161,8 @@ fun TaskReminderDetailRoot(
 @Composable
 private fun TaskReminderDetailScreen(
     state: TaskReminderState = TaskReminderState(),
-    onAction: (TaskReminderAction) -> Unit = {}
+    onAction: (TaskReminderAction) -> Unit = {},
+    onNavigateBack: () -> Unit = {}
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
@@ -175,7 +177,7 @@ private fun TaskReminderDetailScreen(
         AgendaItemDetailHeader(
             agendaItemType = state.agendaItemType,
             interactionMode = state.interactionMode,
-            onNavigateBack = { onAction.invoke(TaskReminderAction.NavigateBack) },
+            onNavigateBack = { onNavigateBack() },
             onSwitchToEditMode = { onAction(TaskReminderAction.SwitchToEditMode) },
             onSave = {
                 onAction(
@@ -192,8 +194,6 @@ private fun TaskReminderDetailScreen(
                 .background(BackgroundWhite)
                 .padding(horizontal = 16.dp)
         ) {
-
-
             Row(modifier = Modifier.padding(top = 20.dp)) {
                 Box(
                     modifier = Modifier
@@ -337,7 +337,6 @@ private fun TaskReminderDetailScreen(
 }
 
 sealed class TaskReminderAction {
-    data object NavigateBack : TaskReminderAction()
     data object OpenTitleEditor : TaskReminderAction()
     data object OpenDescriptionEditor : TaskReminderAction()
     data object SwitchToEditMode : TaskReminderAction()
