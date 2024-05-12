@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,18 +37,24 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
+import com.example.tasky.main.domain.AgendaItemType
+import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.ReminderType
+import com.example.tasky.main.domain.formatHeaderDate
 import com.example.tasky.main.domain.getInitials
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.Purple40
 import com.example.tasky.ui.theme.PurpleGrey80
 import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.detailDescriptionStyle
+import com.example.tasky.ui.theme.headerStyle
+import java.time.LocalDate
 
 @Preview
 @Composable
@@ -324,5 +332,66 @@ fun ArrowBackButton(
             contentDescription = "back",
             tint = Color.Black,
         )
+    }
+}
+
+@Preview
+@Composable
+fun AgendaItemDetailHeader(
+    agendaItemType: AgendaItemType = AgendaItemType.REMINDER,
+    interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE,
+    onNavigateBack: () -> Unit = {},
+    onSwitchToEditMode: () -> Unit = {},
+    onSave: () -> Unit = {}
+) {
+    val headerPadding = dimensionResource(R.dimen.padding_20)
+
+    val editHeader =
+        stringResource(id = if (agendaItemType == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
+    val headerText = when (interactionMode) {
+        DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
+        DetailInteractionMode.EDIT -> editHeader.uppercase()
+        DetailInteractionMode.VIEW -> LocalDate.now().formatHeaderDate() //TODO change to the current task's date
+    }
+
+    Row {
+        CloseButton { onNavigateBack.invoke() }
+        Spacer(Modifier.weight(1f))
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(end = headerPadding),
+            text = headerText,
+            style = headerStyle
+        )
+        Spacer(Modifier.weight(1f))
+        when (interactionMode) {
+            DetailInteractionMode.CREATE, DetailInteractionMode.EDIT -> {
+                ClickableText(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = headerPadding),
+                    text = AnnotatedString(stringResource(id = R.string.save)),
+                    style = headerStyle,
+                    onClick = { onSave.invoke() }
+                )
+            }
+
+            DetailInteractionMode.VIEW -> {
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(60.dp)
+                        .padding(8.dp),
+                    onClick = { onSwitchToEditMode.invoke() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "create, edit",
+                        tint = Color.White,
+                    )
+                }
+            }
+        }
     }
 }

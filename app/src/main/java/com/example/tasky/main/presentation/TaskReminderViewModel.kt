@@ -24,11 +24,11 @@ import java.util.UUID
 
 class TaskReminderViewModel(
     private val repository: ApiRepository,
-    private val type: AgendaItemType,
-    private val mode: DetailInteractionMode
+    type: AgendaItemType,
+    mode: DetailInteractionMode
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskReminderState(interactionMode = mode))
+    private val _state = MutableStateFlow(TaskReminderState(agendaItemType = type, interactionMode = mode))
     val state = _state.asStateFlow()
 
     private val _navChannel = Channel<TaskReminderVMAction>()
@@ -117,7 +117,7 @@ class TaskReminderViewModel(
             _state.update { it.copy(isLoading = true) }
 
             val payload = collectTaskPayload()
-            val response = if (mode == DetailInteractionMode.CREATE) {
+            val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
                 repository.createTask(payload)
             } else {
                 repository.updateTask(payload)
@@ -133,7 +133,7 @@ class TaskReminderViewModel(
             _state.update { it.copy(isLoading = true) }
 
             val payload = collectReminderPayload()
-            val response = if (mode == DetailInteractionMode.CREATE) {
+            val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
                 repository.createReminder(payload)
             } else {
                 repository.updateReminder(payload)
@@ -186,6 +186,7 @@ data class TaskReminderState(
     val reminderType: ReminderType = ReminderType.MINUTES_30,
     val isDone: Boolean = false,
 
+    val agendaItemType: AgendaItemType = AgendaItemType.TASK,
     val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE
 )
 

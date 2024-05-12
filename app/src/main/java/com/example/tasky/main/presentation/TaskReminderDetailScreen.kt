@@ -142,8 +142,7 @@ fun TaskReminderDetailRoot(
 
     TaskReminderDetailScreen(
         state = state,
-        onAction = viewModel::onAction,
-        type = type
+        onAction = viewModel::onAction
     )
     if (state.isLoading) {
         Box(
@@ -161,76 +160,31 @@ fun TaskReminderDetailRoot(
 @Composable
 private fun TaskReminderDetailScreen(
     state: TaskReminderState = TaskReminderState(),
-    onAction: (TaskReminderAction) -> Unit = {},
-    type: AgendaItemType = AgendaItemType.REMINDER
+    onAction: (TaskReminderAction) -> Unit = {}
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
-    val headerPadding = dimensionResource(R.dimen.padding_20)
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
-
-    val editHeader =
-        stringResource(id = if (type == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
-    val headerText = when (state.interactionMode) {
-        DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
-        DetailInteractionMode.EDIT -> editHeader.uppercase()
-        DetailInteractionMode.VIEW -> LocalDate.now().formatHeaderDate() //TODO change to the current task's date
-    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
-        Row {
-            CloseButton { onAction.invoke(TaskReminderAction.NavigateBack) }
-            Spacer(Modifier.weight(1f))
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = headerPadding),
-                text = headerText,
-                style = headerStyle
-            )
-            Spacer(Modifier.weight(1f))
-            when (state.interactionMode) {
-                DetailInteractionMode.CREATE, DetailInteractionMode.EDIT -> {
-                    ClickableText(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(end = headerPadding),
-                        text = AnnotatedString(stringResource(id = R.string.save)),
-                        style = headerStyle,
-                        onClick = {
-                            onAction(
-                                if (type == AgendaItemType.TASK)
-                                    TaskReminderAction.SaveTask
-                                else
-                                    TaskReminderAction.SaveReminder
-                            )
-                        }
-                    )
-                }
-
-                DetailInteractionMode.VIEW -> {
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .size(60.dp)
-                            .padding(8.dp),
-                        onClick = {
-                            onAction(TaskReminderAction.SwitchToEditMode)
-                        }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "create, edit",
-                            tint = Color.White,
-                        )
-                    }
-                }
-            }
-        }
+        AgendaItemDetailHeader(
+            agendaItemType = state.agendaItemType,
+            interactionMode = state.interactionMode,
+            onNavigateBack = { onAction.invoke(TaskReminderAction.NavigateBack) },
+            onSwitchToEditMode = { onAction(TaskReminderAction.SwitchToEditMode) },
+            onSave = {
+                onAction(
+                    if (state.agendaItemType == AgendaItemType.TASK)
+                        TaskReminderAction.SaveTask
+                    else
+                        TaskReminderAction.SaveReminder
+                )
+            })
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -245,15 +199,20 @@ private fun TaskReminderDetailScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10))
                         .size(18.dp)
-                        .background(if (type == AgendaItemType.TASK) TaskyGreen else ReminderGray)
-                        .border(BorderStroke(1.dp, if (type == AgendaItemType.TASK) TaskyGreen else ReminderBorderGray))
+                        .background(if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderGray)
+                        .border(
+                            BorderStroke(
+                                1.dp,
+                                if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderBorderGray
+                            )
+                        )
                         .align(Alignment.CenterVertically),
                 )
                 Text(
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .align(Alignment.CenterVertically),
-                    text = stringResource(id = if (type == AgendaItemType.TASK) R.string.task else R.string.reminder),
+                    text = stringResource(id = if (state.agendaItemType == AgendaItemType.TASK) R.string.task else R.string.reminder),
                     style = detailTypeStyle,
                 )
             }
