@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
 import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode
@@ -128,19 +129,25 @@ class TaskReminderViewModel(
     }
 
     private fun saveReminder() {
-        //TODO implement
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            val payload = collectReminderPayload()
+            val response = if (mode == DetailInteractionMode.CREATE) {
+                repository.createReminder(payload)
+            } else {
+                repository.updateReminder(payload)
+            }
+            _navChannel.send(TaskReminderVMAction.CreateReminder(response))
+
+            _state.update { it.copy(isLoading = false) }
+        }
     }
 
     private fun collectTaskPayload(): TaskDTO {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
-            val remindAt: LocalDateTime = when (it.reminderType) {
-                ReminderType.MINUTES_10 -> time.minusMinutes(10)
-                ReminderType.MINUTES_30 -> time.minusMinutes(30)
-                ReminderType.HOUR_1 -> time.minusHours(1)
-                ReminderType.HOUR_6 -> time.minusHours(6)
-                ReminderType.DAY_1 -> time.minusDays(1)
-            }
+            val remindAt = it.reminderType.getReminder(time)
 
             return TaskDTO(
                 id = UUID.randomUUID().toString(),
@@ -149,6 +156,21 @@ class TaskReminderViewModel(
                 time = time.getMillis(),
                 remindAt = remindAt.getMillis(),
                 isDone = it.isDone
+            )
+        }
+    }
+
+    private fun collectReminderPayload(): ReminderDTO {
+        _state.value.let {
+            val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
+            val remindAt = it.reminderType.getReminder(time)
+
+            return ReminderDTO(
+                id = UUID.randomUUID().toString(),
+                title = it.title,
+                description = it.description,
+                time = time.getMillis(),
+                remindAt = remindAt.getMillis()
             )
         }
     }
@@ -172,4 +194,5 @@ sealed class TaskReminderVMAction {
     data object OpenTitleEditor : TaskReminderVMAction()
     data object OpenDescriptionEditor : TaskReminderVMAction()
     class CreateTask(val result: Result<Unit, RootError>) : TaskReminderVMAction()
+    class CreateReminder(val result: Result<Unit, RootError>) : TaskReminderVMAction()
 }

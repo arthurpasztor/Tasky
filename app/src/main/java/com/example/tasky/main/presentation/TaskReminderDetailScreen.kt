@@ -116,6 +116,17 @@ fun TaskReminderDetailRoot(
                         is Result.Error -> context.showToast(destination.result.error, TAG)
                     }
                 }
+
+                is TaskReminderVMAction.CreateReminder -> {
+                    when (destination.result) {
+                        is Result.Success -> {
+                            context.showToast(R.string.success_reminder_created)
+                            navigator.popBackStack()
+                        }
+
+                        is Result.Error -> context.showToast(destination.result.error, TAG)
+                    }
+                }
             }
         }
     }

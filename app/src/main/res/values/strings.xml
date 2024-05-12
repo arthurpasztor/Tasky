@@ -46,4 +46,5 @@
     <string name="edit_description">Edit Description</string>
 
     <string name="success_task_created">Task successfully created</string>
+    <string name="success_reminder_created">Reminder successfully created</string>
 </resources>
