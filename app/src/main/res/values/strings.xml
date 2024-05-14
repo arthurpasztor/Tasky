@@ -44,6 +44,11 @@
     <string name="edit_reminder">Edit Reminder</string>
     <string name="edit_title">Edit Title</string>
     <string name="edit_description">Edit Description</string>
+    <string name="reminder_10_minutes">10 minutes before</string>
+    <string name="reminder_30_minutes">30 minutes before</string>
+    <string name="reminder_1_hour">1 hour before</string>
+    <string name="reminder_6_hours">6 hour before</string>
+    <string name="reminder_1_day">1 day before</string>
 
     <string name="success_task_created">Task successfully created</string>
     <string name="success_reminder_created">Reminder successfully created</string>
