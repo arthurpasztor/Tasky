@@ -1,5 +1,6 @@
 package com.example.tasky.main.presentation
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -63,6 +65,8 @@ fun ReminderSelector(
     state: TaskReminderState = TaskReminderState(),
     onAction: (TaskReminderAction) -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     var isContextMenuVisible by rememberSaveable {
         mutableStateOf(false)
     }
@@ -106,7 +110,7 @@ fun ReminderSelector(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 10.dp),
-                text = stringResource(id = state.getReminderDisplayRes()),
+                text = state.reminderType.getReminderString(context),
                 style = detailDescriptionStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -129,7 +133,7 @@ fun ReminderSelector(
         ) {
             ReminderType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(text = stringResource(id = state.getReminderDisplayRes(it))) },
+                    text = { Text(text = it.getReminderString(context)) },
                     onClick = {
                         onAction.invoke(TaskReminderAction.UpdateReminder(it))
                         isContextMenuVisible = false
@@ -137,6 +141,18 @@ fun ReminderSelector(
             }
         }
     }
+}
+
+private fun ReminderType.getReminderString(context: Context): String {
+    return context.getString(
+        when (this) {
+            ReminderType.MINUTES_10 -> R.string.reminder_10_minutes
+            ReminderType.MINUTES_30 -> R.string.reminder_30_minutes
+            ReminderType.HOUR_1 -> R.string.reminder_1_hour
+            ReminderType.HOUR_6 -> R.string.reminder_6_hours
+            ReminderType.DAY_1 -> R.string.reminder_1_day
+        }
+    )
 }
 
 @Preview

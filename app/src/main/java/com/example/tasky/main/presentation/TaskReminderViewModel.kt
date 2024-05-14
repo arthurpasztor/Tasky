@@ -1,9 +1,7 @@
 package com.example.tasky.main.presentation
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.R
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.main.data.ApiRepository
@@ -183,20 +181,7 @@ data class TaskReminderState(
 
     val agendaItemType: AgendaItemType = AgendaItemType.TASK,
     val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE
-) {
-    @StringRes
-    fun getReminderDisplayRes(type: ReminderType? = null): Int {
-        return if (type == null) {
-            getReminderDisplayRes(reminderType)
-        } else when (type) {
-            ReminderType.MINUTES_10 -> R.string.reminder_10_minutes
-            ReminderType.MINUTES_30 -> R.string.reminder_30_minutes
-            ReminderType.HOUR_1 -> R.string.reminder_1_hour
-            ReminderType.HOUR_6 -> R.string.reminder_6_hours
-            ReminderType.DAY_1 -> R.string.reminder_1_day
-        }
-    }
-}
+)
 
 sealed class TaskReminderVMAction {
     data object OpenTitleEditor : TaskReminderVMAction()
