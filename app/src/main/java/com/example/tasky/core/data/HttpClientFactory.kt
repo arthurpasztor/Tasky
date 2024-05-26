@@ -36,12 +36,12 @@ object HttpClientFactory {
 
     fun provideApiClient() = HttpClient(Android) {
 
-        val token = prefs.getEncryptedString(Preferences.KEY_TOKEN, "")
+        val accessToken = prefs.getEncryptedString(Preferences.KEY_ACCESS_TOKEN, "")
 
         install(DefaultRequest) {
             contentType(ContentType.Application.Json)
             header("x-api-key", BuildConfig.API_KEY)
-            header("Authorization", "bearer $token")
+            header("Authorization", "bearer $accessToken")
         }
 
         installAdditionalEngineConfigurations()

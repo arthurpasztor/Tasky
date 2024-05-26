@@ -29,7 +29,9 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
         ) {
             val response = it.body<TokenResponse>()
 
-            prefs.putEncryptedString(Preferences.KEY_TOKEN, response.token)
+            prefs.putEncryptedString(Preferences.KEY_ACCESS_TOKEN, response.accessToken)
+            prefs.putEncryptedString(Preferences.KEY_REFRESH_TOKEN, response.refreshToken)
+            prefs.putEncryptedLong(Preferences.KEY_ACCESS_TOKEN_EXPIRATION_TIME, response.accessTokenExpirationTimestamp)
             prefs.putString(Preferences.KEY_USER_NAME, response.fullName)
 
             unloadKoinModules(apiModule)
