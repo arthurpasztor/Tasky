@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
+import com.example.tasky.core.domain.getMillis
 import com.example.tasky.main.data.ApiRepository
 import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
 import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.ReminderType
-import com.example.tasky.main.domain.getMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

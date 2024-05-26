@@ -36,5 +36,3 @@ fun LocalDate.formatHeaderDate(): String = format(DateTimeFormatter.ofPattern("d
 fun LocalDate.formatDetailDate(): String = format(DateTimeFormatter.ofPattern("MMM dd yyyy"))
 
 fun LocalTime.formatDetailTime(): String = format(DateTimeFormatter.ofPattern("HH:mm"))
-
-fun LocalDateTime.getMillis(): Long = atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

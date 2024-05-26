@@ -41,9 +41,6 @@ class Preferences(context: Context) {
         editor.clear()
         editor.apply()
     }
-    fun getEncryptedString(key: String, default: String): String {
-        return encryptedPreferences.getString(key, default) ?: default
-    }
 
     fun putEncryptedString(key: String, value: String) {
         encryptedPreferences.edit().putString(key, value).apply()
@@ -53,9 +50,19 @@ class Preferences(context: Context) {
         encryptedPreferences.edit().putLong(key, value).apply()
     }
 
+    fun getEncryptedString(key: String, default: String): String {
+        return encryptedPreferences.getString(key, default) ?: default
+    }
+
+    fun getEncryptedLong(key: String, default: Long): Long {
+        return encryptedPreferences.getLong(key, default)
+    }
+
     fun removeEncrypted(key: String) {
         encryptedPreferences.edit().remove(key).apply()
     }
+
+
 
     companion object {
         private const val PREFERENCES_NAME = "TaskyStore"
@@ -64,6 +71,7 @@ class Preferences(context: Context) {
         const val KEY_ACCESS_TOKEN = "access_token"
         const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_USER_NAME = "full_name"
+        const val KEY_USER_ID = "user_id"
         const val KEY_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
     }
 }
