@@ -92,7 +92,6 @@ class AgendaViewModel(
         prefs.removeAll()
         prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN)
         prefs.removeEncrypted(Preferences.KEY_REFRESH_TOKEN)
-        prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN_EXPIRATION_TIME)
     }
 }
 

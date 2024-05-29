@@ -49,10 +49,6 @@ class Preferences(context: Context) {
         encryptedPreferences.edit().putString(key, value).apply()
     }
 
-    fun putEncryptedLong(key: String, value: Long) {
-        encryptedPreferences.edit().putLong(key, value).apply()
-    }
-
     fun removeEncrypted(key: String) {
         encryptedPreferences.edit().remove(key).apply()
     }
@@ -64,6 +60,6 @@ class Preferences(context: Context) {
         const val KEY_ACCESS_TOKEN = "access_token"
         const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_USER_NAME = "full_name"
-        const val KEY_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
+        const val KEY_USER_ID = "user_id"
     }
 }
