@@ -18,5 +18,5 @@ val apiModule = module {
 
     single(named("apiClient")) { HttpClientFactory.provideApiClient() }
 
-    single<ApiRepository> { ApiRepositoryImpl(get(named("apiClient"))) }
+    single<ApiRepository> { ApiRepositoryImpl(get(named("authClient"))) }
 }

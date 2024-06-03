@@ -8,6 +8,7 @@ import com.example.tasky.core.data.dto.AccessTokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -34,20 +35,38 @@ object HttpClientFactory {
 
     private val prefs: Preferences by inject(Preferences::class.java)
 
-    fun provideAuthClient() = HttpClient {
+    fun provideAuthClient() = HttpClient(CIO) {
 
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
+                isLenient = true
                 ignoreUnknownKeys = true
-                explicitNulls = false
             })
         }
-        install(Auth) {
-            headers {
-                Pair("x-api-key", listOf(BuildConfig.API_KEY))
-                Pair(HttpHeaders.ContentType, ContentType.Application.Json)
+
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Log.d("Auth HttpClient", "log: $message")
+                }
             }
+            level = LogLevel.ALL
+        }
+
+        install(DefaultRequest) {
+            contentType(ContentType.Application.Json)
+            header("x-api-key", BuildConfig.API_KEY)
+        }
+
+        engine {
+            requestTimeout = TIME_OUT.toLong()
+        }
+        install(Auth) {
+//            headers {
+//                Pair("x-api-key", listOf(BuildConfig.API_KEY))
+//                Pair(HttpHeaders.ContentType, ContentType.Application.Json)
+//            }
             bearer {
                 loadTokens {
                     BearerTokens(
@@ -59,12 +78,12 @@ object HttpClientFactory {
                     val refreshToken = prefs.getEncryptedString(Preferences.KEY_REFRESH_TOKEN, "")
                     val userId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
                     val response: HttpResponse = client.post("${BuildConfig.BASE_URL}/accessToken") {
-                        contentType(ContentType.Application.Json)
-                        headers {
-                            Pair("x-api-key", listOf(BuildConfig.API_KEY))
-                        }
+//                        contentType(ContentType.Application.Json)
+//                        headers {
+//                            Pair("x-api-key", listOf(BuildConfig.API_KEY))
+//                        }
                         setBody(AccessTokenRequest(refreshToken = refreshToken, userId = userId))
-                        markAsRefreshTokenRequest()
+//                        markAsRefreshTokenRequest()
                     }
 
                     if (response.isSuccess()) {
@@ -80,28 +99,6 @@ object HttpClientFactory {
                     }
                 }
             }
-        }
-
-        install(DefaultRequest) {
-            contentType(ContentType.Application.Json)
-            header("x-api-key", BuildConfig.API_KEY)
-        }
-
-        install(Logging) {
-            logger = object : Logger {
-                override fun log(message: String) {
-                    Log.d("Auth HttpClient", "log: $message")
-                }
-            }
-            level = LogLevel.ALL
-        }
-
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
         }
     }
 
@@ -137,11 +134,6 @@ object HttpClientFactory {
                 ignoreUnknownKeys = true
             })
         }
-        engine {
-            connectTimeout = TIME_OUT
-            socketTimeout = TIME_OUT
-        }
-
         engine {
             connectTimeout = TIME_OUT
             socketTimeout = TIME_OUT
