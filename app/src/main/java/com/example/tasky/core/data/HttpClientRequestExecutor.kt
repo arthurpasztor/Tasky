@@ -6,6 +6,7 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.isSuccess
 import io.ktor.client.HttpClient
+import io.ktor.client.request.parameter
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
@@ -16,6 +17,7 @@ import java.util.concurrent.CancellationException
 suspend inline fun <reified P, R> HttpClient.executeRequest(
     httpMethod: HttpMethod,
     url: String,
+    queryParams: Pair<String, Any>? = null,
     payload: P? = null,
     tag: String,
     handleResponse: (response: HttpResponse) -> Result<R, RootError>
@@ -24,6 +26,7 @@ suspend inline fun <reified P, R> HttpClient.executeRequest(
         val httpResponse = request {
             method = httpMethod
             url(url)
+            queryParams?.let { parameter(it.first, it.second) }
             payload?.let { setBody(it) }
         }
 

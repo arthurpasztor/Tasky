@@ -6,6 +6,8 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.main.data.dto.AgendaDTO
+import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +33,8 @@ class AgendaViewModel(
                 userName = prefs.getString(Preferences.KEY_USER_NAME, "")
             )
         }
+
+        loadDailyAgenda()
     }
 
     fun onAction(action: AgendaAction) {
@@ -59,6 +63,27 @@ class AgendaViewModel(
                 it.copy(
                     selectedDate = date
                 )
+            }
+        }
+
+        loadDailyAgenda()
+    }
+
+    private fun loadDailyAgenda() {
+        viewModelScope.launch {
+            val response = repository.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
+
+            _state.update {
+                when (response) {
+                    is Result.Success -> it.copy(
+                        dailyAgenda = response.data,
+                        dailyAgendaError = null
+                    )
+                    is Result.Error -> it.copy(
+                        dailyAgenda = AgendaDTO.getEmpty(),
+                        dailyAgendaError = response.error
+                    )
+                }
             }
         }
     }
@@ -98,7 +123,9 @@ class AgendaViewModel(
 data class AgendaState(
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
-    val firstDateOfHeader: LocalDate = LocalDate.now()
+    val firstDateOfHeader: LocalDate = LocalDate.now(),
+    val dailyAgenda: AgendaDTO = AgendaDTO.getEmpty(),
+    val dailyAgendaError: RootError? = null
 )
 
 sealed class AgendaResponseAction {
