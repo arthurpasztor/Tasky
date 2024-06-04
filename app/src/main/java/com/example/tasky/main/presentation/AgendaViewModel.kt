@@ -90,7 +90,8 @@ class AgendaViewModel(
 
     private fun clearUserData() {
         prefs.removeAll()
-        prefs.removeEncrypted(Preferences.KEY_TOKEN)
+        prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN)
+        prefs.removeEncrypted(Preferences.KEY_REFRESH_TOKEN)
     }
 }
 

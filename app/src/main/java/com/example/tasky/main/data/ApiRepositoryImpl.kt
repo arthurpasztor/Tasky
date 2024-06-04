@@ -7,6 +7,9 @@ import com.example.tasky.core.data.executeRequest
 import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
+import io.ktor.client.plugins.plugin
 import io.ktor.http.HttpMethod
 
 class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
@@ -28,6 +31,8 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
     }
 
     override suspend fun logout(): Result<Unit, RootError> {
+        client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
+
         return client.executeRequest<Unit, Unit>(
             httpMethod = HttpMethod.Get,
             url = logoutUrl,

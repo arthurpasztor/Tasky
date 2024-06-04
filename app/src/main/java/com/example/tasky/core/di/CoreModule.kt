@@ -1,5 +1,6 @@
 package com.example.tasky.core.di
 
+import com.example.tasky.core.data.HttpClientFactory
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.presentation.RootViewModel
 import org.koin.android.ext.koin.androidApplication
@@ -10,4 +11,6 @@ val coreModule = module {
     viewModelOf(::RootViewModel)
 
     single { Preferences(androidApplication()) }
+
+    single { HttpClientFactory.provideHttpClient() }
 }

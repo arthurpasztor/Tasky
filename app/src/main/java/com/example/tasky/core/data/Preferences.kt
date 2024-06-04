@@ -57,7 +57,9 @@ class Preferences(context: Context) {
         private const val PREFERENCES_NAME = "TaskyStore"
         private const val ENCRYPTED_PREFERENCES_NAME = "EncryptedTaskyStore"
 
-        const val KEY_TOKEN = "JWT_token"
+        const val KEY_ACCESS_TOKEN = "access_token"
+        const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_USER_NAME = "full_name"
+        const val KEY_USER_ID = "user_id"
     }
 }

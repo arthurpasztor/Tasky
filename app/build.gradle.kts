@@ -99,6 +99,7 @@ dependencies {
     implementation("io.ktor:ktor-client-android:${ktorVersion}")
     implementation("io.ktor:ktor-client-core:${ktorCoreVersion}")
     implementation("io.ktor:ktor-client-cio:${ktorCoreVersion}")
+    implementation("io.ktor:ktor-client-auth:${ktorCoreVersion}")
     implementation("io.ktor:ktor-client-logging:${ktorVersion}")
     implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
