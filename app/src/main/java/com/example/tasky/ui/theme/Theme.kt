@@ -76,3 +76,14 @@ val greenSaveButtonStyle = TextStyle(
     fontSize = 16.sp,
     color = TaskyGreen,
 )
+
+val agendaListTitleStyle = TextStyle(
+    fontWeight = FontWeight.Bold,
+    textAlign = TextAlign.Start,
+    fontSize = 22.sp,
+)
+
+val agendaListContentStyle = TextStyle(
+    textAlign = TextAlign.Start,
+    fontSize = 14.sp,
+)

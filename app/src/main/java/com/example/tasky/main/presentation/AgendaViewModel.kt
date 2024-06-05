@@ -6,6 +6,8 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.main.data.dto.AgendaDTO
+import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +33,8 @@ class AgendaViewModel(
                 userName = prefs.getString(Preferences.KEY_USER_NAME, "")
             )
         }
+
+        loadDailyAgenda()
     }
 
     fun onAction(action: AgendaAction) {
@@ -39,6 +43,10 @@ class AgendaViewModel(
             AgendaAction.ClearUserData -> clearUserData()
             is AgendaAction.UpdateSelectedDate -> {
                 updateSelectedDate(action.newSelection, action.forceSelectedDateToFirstPosition)
+            }
+            AgendaAction.PullToRefresh -> {
+                _state.update { it.copy(isRefreshing = true) }
+                loadDailyAgenda(triggerFromPullToRefresh = true)
             }
             AgendaAction.CreateNewEvent -> createNewEvent()
             AgendaAction.CreateNewTask -> createNewTask()
@@ -59,6 +67,31 @@ class AgendaViewModel(
                 it.copy(
                     selectedDate = date
                 )
+            }
+        }
+
+        loadDailyAgenda()
+    }
+
+    private fun loadDailyAgenda(triggerFromPullToRefresh: Boolean = false) {
+        viewModelScope.launch {
+            val response = repository.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
+
+            _state.update {
+                when (response) {
+                    is Result.Success -> it.copy(
+                        dailyAgenda = response.data,
+                        dailyAgendaError = null
+                    )
+                    is Result.Error -> it.copy(
+                        dailyAgenda = AgendaDTO.getEmpty(),
+                        dailyAgendaError = response.error
+                    )
+                }
+            }
+
+            if (triggerFromPullToRefresh) {
+                _state.update { it.copy(isRefreshing = false) }
             }
         }
     }
@@ -98,7 +131,10 @@ class AgendaViewModel(
 data class AgendaState(
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
-    val firstDateOfHeader: LocalDate = LocalDate.now()
+    val firstDateOfHeader: LocalDate = LocalDate.now(),
+    val dailyAgenda: AgendaDTO = AgendaDTO.getSample(),
+    val dailyAgendaError: RootError? = null,
+    val isRefreshing: Boolean = false
 )
 
 sealed class AgendaResponseAction {

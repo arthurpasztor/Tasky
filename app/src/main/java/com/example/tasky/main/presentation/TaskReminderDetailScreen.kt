@@ -12,12 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +41,6 @@ import com.example.tasky.main.domain.DetailItemType
 import com.example.tasky.main.domain.ReminderType
 import com.example.tasky.main.domain.formatDetailDate
 import com.example.tasky.main.domain.formatDetailTime
-import com.example.tasky.main.domain.formatHeaderDate
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.ReminderBorderGray
@@ -55,7 +50,6 @@ import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.detailDescriptionStyle
 import com.example.tasky.ui.theme.detailTitleStyle
 import com.example.tasky.ui.theme.detailTypeStyle
-import com.example.tasky.ui.theme.headerStyle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
@@ -228,13 +222,13 @@ private fun TaskReminderDetailScreen(
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .weight(1f)
                         .padding(start = 10.dp),
                     text = state.title,
                     style = detailTitleStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.weight(1f))
                 ArrowEditButton {
                     onAction.invoke(TaskReminderAction.OpenTitleEditor)
                 }
@@ -244,13 +238,14 @@ private fun TaskReminderDetailScreen(
 
             Row(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
-                    modifier = Modifier.align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1f),
                     text = state.description,
                     style = detailDescriptionStyle,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.weight(1f))
                 ArrowEditButton {
                     onAction.invoke(TaskReminderAction.OpenDescriptionEditor)
                 }
