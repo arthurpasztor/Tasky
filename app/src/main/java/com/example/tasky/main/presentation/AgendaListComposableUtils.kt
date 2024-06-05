@@ -32,12 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tasky.main.data.dto.AgendaDTO
@@ -45,8 +40,10 @@ import com.example.tasky.main.data.dto.AgendaListItem
 import com.example.tasky.main.data.dto.NeedleItem
 import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
-import com.example.tasky.ui.theme.ReminderGray
-import com.example.tasky.ui.theme.TaskyGreen
+import com.example.tasky.main.domain.getAgendaItemBackgroundColor
+import com.example.tasky.main.domain.getAgendaItemContentColor
+import com.example.tasky.main.domain.getAgendaItemHeaderColor
+import com.example.tasky.main.domain.getAgendaItemTitle
 import com.example.tasky.ui.theme.agendaListContentStyle
 import com.example.tasky.ui.theme.agendaListTitleStyle
 
@@ -64,34 +61,10 @@ private fun ReminderItemPreview() {
 
 @Composable
 fun <T : AgendaListItem> AgendaItem(item: T) {
-    val backgroundColor = when (item) {
-        is TaskDTO -> TaskyGreen
-        else -> ReminderGray
-    }
-
-    val headerColor = when (item) {
-        is TaskDTO -> Color.White
-        else -> Color.Black
-    }
-
-    val contentColor = when (item) {
-        is TaskDTO -> Color.White
-        else -> Color.Gray
-    }
-
-    val title = when {
-        item.isItemDone() -> {
-            buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(textDecoration = TextDecoration.LineThrough
-                    )
-                ) {
-                    append(item.getItemTitle())
-                }
-            }
-        }
-        else -> AnnotatedString(item.getItemTitle())
-    }
+    val backgroundColor = item.getAgendaItemBackgroundColor()
+    val headerColor = item.getAgendaItemHeaderColor()
+    val contentColor = item.getAgendaItemContentColor()
+    val title = item.getAgendaItemTitle()
 
     Box(
         modifier = Modifier
