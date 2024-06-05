@@ -222,13 +222,13 @@ private fun TaskReminderDetailScreen(
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .weight(1f)
                         .padding(start = 10.dp),
                     text = state.title,
                     style = detailTitleStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.weight(1f))
                 ArrowEditButton {
                     onAction.invoke(TaskReminderAction.OpenTitleEditor)
                 }
@@ -238,13 +238,14 @@ private fun TaskReminderDetailScreen(
 
             Row(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
-                    modifier = Modifier.align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1f),
                     text = state.description,
                     style = detailDescriptionStyle,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.weight(1f))
                 ArrowEditButton {
                     onAction.invoke(TaskReminderAction.OpenDescriptionEditor)
                 }

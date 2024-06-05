@@ -175,12 +175,35 @@ private fun AgendaScreen(
                     onAction = onAction
                 )
             }
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
                     .background(BackgroundWhite)
             ) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 100.dp)
+                ) {
+                    PullToRefreshLazyColumn(
+                        items = state.dailyAgenda.getAgendaItemsAsList(),
+                        content = {
+                            AgendaItem(it)
+                        },
+                        needleContent = {
+                            Text(
+                                text = "Needle",
+                                modifier = Modifier
+                                    .background(Color.Red)
+                            )
+                        },
+                        isRefreshing = state.isRefreshing,
+                        onRefresh = {
+                            onAction.invoke(AgendaAction.PullToRefresh)
+                        }
+                    )
+                }
+
                 WeekHeader(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -218,6 +241,19 @@ private fun AgendaScreen(
     }
 }
 
+sealed class AgendaAction {
+    data object LogOut : AgendaAction()
+    data object ClearUserData : AgendaAction()
+    class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
+        AgendaAction()
+
+    data object PullToRefresh : AgendaAction()
+
+    data object CreateNewEvent : AgendaAction()
+    data object CreateNewTask : AgendaAction()
+    data object CreateNewReminder : AgendaAction()
+}
+
 @Preview
 @Composable
 fun WeekHeader(
@@ -228,6 +264,7 @@ fun WeekHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .background(Color.White)
             .padding(horizontal = dimensionResource(id = R.dimen.padding_8))
     ) {
         val firstDay = state.firstDateOfHeader
@@ -277,15 +314,4 @@ fun DayBubble(
             fontSize = dimensionResource(R.dimen.font_size_16).value.sp
         )
     }
-}
-
-sealed class AgendaAction {
-    data object LogOut : AgendaAction()
-    data object ClearUserData : AgendaAction()
-    class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
-        AgendaAction()
-
-    data object CreateNewEvent : AgendaAction()
-    data object CreateNewTask : AgendaAction()
-    data object CreateNewReminder : AgendaAction()
 }

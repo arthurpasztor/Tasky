@@ -1,5 +1,6 @@
 package com.example.tasky.main.domain
 
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -41,3 +42,8 @@ fun LocalTime.formatDetailTime(): String = format(DateTimeFormatter.ofPattern("H
 fun LocalDateTime.getMillis(): Long = atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
 fun LocalDate.getUTCMillis(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+
+fun Long.formatAgendaTimestamp(): String {
+    val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
+    return date.format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
+}

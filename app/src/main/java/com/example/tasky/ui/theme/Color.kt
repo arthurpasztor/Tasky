@@ -13,7 +13,7 @@ val Pink40 = Color(0xFF7D5260)
 val BackgroundBlack = Color.Black
 val BackgroundWhite = Color.White
 
-val TaskyGreen = Color(0xFF128D0F)
+val TaskyGreen = Color(0xFF299F70)
 val ReminderGray = Color(0xFFF2F3F7)
 val ReminderBorderGray = Color(0xFFA9B4BE)
 val SelectedDateYellow = Color(0xFFFDEFA8)

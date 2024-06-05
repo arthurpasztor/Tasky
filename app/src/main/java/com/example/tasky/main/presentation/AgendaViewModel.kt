@@ -44,6 +44,10 @@ class AgendaViewModel(
             is AgendaAction.UpdateSelectedDate -> {
                 updateSelectedDate(action.newSelection, action.forceSelectedDateToFirstPosition)
             }
+            AgendaAction.PullToRefresh -> {
+                _state.update { it.copy(isRefreshing = true) }
+                loadDailyAgenda(triggerFromPullToRefresh = true)
+            }
             AgendaAction.CreateNewEvent -> createNewEvent()
             AgendaAction.CreateNewTask -> createNewTask()
             AgendaAction.CreateNewReminder -> createNewReminder()
@@ -69,7 +73,7 @@ class AgendaViewModel(
         loadDailyAgenda()
     }
 
-    private fun loadDailyAgenda() {
+    private fun loadDailyAgenda(triggerFromPullToRefresh: Boolean = false) {
         viewModelScope.launch {
             val response = repository.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
 
@@ -84,6 +88,10 @@ class AgendaViewModel(
                         dailyAgendaError = response.error
                     )
                 }
+            }
+
+            if (triggerFromPullToRefresh) {
+                _state.update { it.copy(isRefreshing = false) }
             }
         }
     }
@@ -124,8 +132,9 @@ data class AgendaState(
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
     val firstDateOfHeader: LocalDate = LocalDate.now(),
-    val dailyAgenda: AgendaDTO = AgendaDTO.getEmpty(),
-    val dailyAgendaError: RootError? = null
+    val dailyAgenda: AgendaDTO = AgendaDTO.getSample(),
+    val dailyAgendaError: RootError? = null,
+    val isRefreshing: Boolean = false
 )
 
 sealed class AgendaResponseAction {
