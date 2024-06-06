@@ -7,6 +7,8 @@ import com.example.tasky.core.data.executeRequest
 import com.example.tasky.main.data.dto.AgendaDTO
 import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
+import com.example.tasky.main.data.dto.toReminderDTO
+import com.example.tasky.main.data.dto.toTaskDTO
 import com.example.tasky.main.domain.AgendaListItem.Reminder
 import com.example.tasky.main.domain.AgendaListItem.Task
 import io.ktor.client.HttpClient
@@ -51,7 +53,7 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         return client.executeRequest<TaskDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = taskUrl,
-            payload = TaskDTO(task),
+            payload = task.toTaskDTO(),
             tag = TAG
         ) {
             Result.Success(Unit)
@@ -66,7 +68,7 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         return client.executeRequest<ReminderDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = reminderUrl,
-            payload = ReminderDTO(reminder),
+            payload = reminder.toReminderDTO(),
             tag = TAG
         ) {
             Result.Success(Unit)

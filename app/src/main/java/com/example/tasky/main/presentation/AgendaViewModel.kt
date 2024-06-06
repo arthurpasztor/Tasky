@@ -6,6 +6,7 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.main.data.dto.toAgenda
 import com.example.tasky.main.domain.Agenda
 import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel

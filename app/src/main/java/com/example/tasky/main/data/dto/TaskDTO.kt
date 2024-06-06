@@ -13,22 +13,4 @@ data class TaskDTO(
     val time: Long,
     val remindAt: Long,
     val isDone: Boolean
-) {
-    constructor(task: Task): this(
-        task.id,
-        task.title,
-        task.description,
-        task.time.getMillis(),
-        task.remindAt.getMillis(),
-        task.isDone
-    )
-
-    fun toTask() = Task(
-        id = id,
-        title = title,
-        description = description,
-        time = time.getLocalDateTimeFromMillis(),
-        remindAt = remindAt.getLocalDateTimeFromMillis(),
-        isDone = isDone
-    )
-}
+)
