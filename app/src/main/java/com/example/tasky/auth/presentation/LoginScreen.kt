@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.core.domain.Result
-import com.example.tasky.core.domain.showToast
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.SignUpRootDestination

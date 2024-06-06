@@ -31,7 +31,6 @@ import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.core.domain.showToast
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
