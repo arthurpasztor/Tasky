@@ -40,11 +40,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.tasky.main.data.dto.AgendaDTO
-import com.example.tasky.main.data.dto.AgendaListItem
-import com.example.tasky.main.data.dto.NeedleItem
-import com.example.tasky.main.data.dto.ReminderDTO
-import com.example.tasky.main.data.dto.TaskDTO
+import com.example.tasky.main.domain.Agenda
+import com.example.tasky.main.domain.AgendaListItem
+import com.example.tasky.main.domain.AgendaListItem.Needle
+import com.example.tasky.main.domain.AgendaListItem.Reminder
+import com.example.tasky.main.domain.AgendaListItem.Task
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
@@ -53,44 +53,46 @@ import com.example.tasky.ui.theme.agendaListTitleStyle
 @Preview
 @Composable
 private fun TaskItemPreview() {
-    AgendaItem(item = TaskDTO.getSampleTask())
+    AgendaItem(item = Task.getSampleTask())
 }
 
 @Preview
 @Composable
 private fun ReminderItemPreview() {
-    AgendaItem(item = ReminderDTO.getSampleReminder())
+    AgendaItem(item = Reminder.getSampleReminder())
 }
 
 @Composable
 fun <T : AgendaListItem> AgendaItem(item: T) {
     val backgroundColor = when (item) {
-        is TaskDTO -> TaskyGreen
+        is Task -> TaskyGreen
         else -> ReminderGray
     }
 
     val headerColor = when (item) {
-        is TaskDTO -> Color.White
+        is Task -> Color.White
         else -> Color.Black
     }
 
     val contentColor = when (item) {
-        is TaskDTO -> Color.White
+        is Task -> Color.White
         else -> Color.Gray
     }
 
     val title = when {
-        item.isItemDone() -> {
+        item.isDone -> {
             buildAnnotatedString {
                 withStyle(
-                    style = SpanStyle(textDecoration = TextDecoration.LineThrough
+                    style = SpanStyle(
+                        textDecoration = TextDecoration.LineThrough
                     )
                 ) {
-                    append(item.getItemTitle())
+                    append(item.title)
                 }
             }
         }
-        else -> AnnotatedString(item.getItemTitle())
+
+        else -> AnnotatedString(item.title)
     }
 
     Box(
@@ -107,7 +109,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
                         .size(18.dp)
                         .padding(start = 20.dp, top = 25.dp)
                         .align(Alignment.Top),
-                    selected = item.isItemDone(),
+                    selected = item.isDone,
                     colors = RadioButtonDefaults.colors(
                         selectedColor = headerColor,
                         unselectedColor = headerColor
@@ -133,7 +135,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
                         modifier = Modifier
                             .align(Alignment.Start)
                             .padding(top = 15.dp),
-                        text = item.getItemDescription(),
+                        text = item.description,
                         style = agendaListContentStyle,
                         color = contentColor,
                         maxLines = 1,
@@ -173,7 +175,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
 fun PullToRefreshLazyColumnPreview() {
     PullToRefreshLazyColumn(
         modifier = Modifier.fillMaxSize(),
-        items = AgendaDTO.getSample().getAgendaItemsAsList(),
+        items = Agenda.getSample().items,
         content = {
             AgendaItem(it)
         },
@@ -190,7 +192,7 @@ fun PullToRefreshLazyColumnPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T: AgendaListItem> PullToRefreshLazyColumn(
+fun <T : AgendaListItem> PullToRefreshLazyColumn(
     modifier: Modifier = Modifier,
     items: List<T>,
     content: @Composable (T) -> Unit,
@@ -209,7 +211,7 @@ fun <T: AgendaListItem> PullToRefreshLazyColumn(
         ) {
             items(items) {
                 when (it) {
-                    is NeedleItem -> needleContent()
+                    is Needle -> needleContent()
                     else -> content(it)
                 }
             }

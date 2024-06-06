@@ -6,7 +6,8 @@ import com.example.tasky.auth.domain.Result
 import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.main.data.ApiRepository
-import com.example.tasky.main.data.dto.AgendaDTO
+import com.example.tasky.main.data.dto.toAgenda
+import com.example.tasky.main.domain.Agenda
 import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,11 +81,11 @@ class AgendaViewModel(
             _state.update {
                 when (response) {
                     is Result.Success -> it.copy(
-                        dailyAgenda = response.data,
+                        dailyAgenda = response.data.toAgenda(),
                         dailyAgendaError = null
                     )
                     is Result.Error -> it.copy(
-                        dailyAgenda = AgendaDTO.getEmpty(),
+                        dailyAgenda = Agenda.getEmpty(),
                         dailyAgendaError = response.error
                     )
                 }
@@ -132,7 +133,7 @@ data class AgendaState(
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
     val firstDateOfHeader: LocalDate = LocalDate.now(),
-    val dailyAgenda: AgendaDTO = AgendaDTO.getSample(),
+    val dailyAgenda: Agenda = Agenda.getSample(),
     val dailyAgendaError: RootError? = null,
     val isRefreshing: Boolean = false
 )

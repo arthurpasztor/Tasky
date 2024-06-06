@@ -7,6 +7,10 @@ import com.example.tasky.core.data.executeRequest
 import com.example.tasky.main.data.dto.AgendaDTO
 import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
+import com.example.tasky.main.data.dto.toReminderDTO
+import com.example.tasky.main.data.dto.toTaskDTO
+import com.example.tasky.main.domain.AgendaListItem.Reminder
+import com.example.tasky.main.domain.AgendaListItem.Task
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -45,33 +49,33 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         }
     }
 
-    override suspend fun createTask(task: TaskDTO): Result<Unit, RootError> {
+    override suspend fun createTask(task: Task): Result<Unit, RootError> {
         return client.executeRequest<TaskDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = taskUrl,
-            payload = task,
+            payload = task.toTaskDTO(),
             tag = TAG
         ) {
             Result.Success(Unit)
         }
     }
 
-    override suspend fun updateTask(task: TaskDTO): Result<Unit, RootError> {
+    override suspend fun updateTask(task: Task): Result<Unit, RootError> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun createReminder(reminder: ReminderDTO): Result<Unit, RootError> {
+    override suspend fun createReminder(reminder: Reminder): Result<Unit, RootError> {
         return client.executeRequest<ReminderDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = reminderUrl,
-            payload = reminder,
+            payload = reminder.toReminderDTO(),
             tag = TAG
         ) {
             Result.Success(Unit)
         }
     }
 
-    override suspend fun updateReminder(reminder: ReminderDTO): Result<Unit, RootError> {
+    override suspend fun updateReminder(reminder: Reminder): Result<Unit, RootError> {
         TODO("Not yet implemented")
     }
 
