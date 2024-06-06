@@ -1,5 +1,7 @@
 package com.example.tasky.main.data.dto
 
+import com.example.tasky.main.domain.Agenda
+import com.example.tasky.main.domain.AgendaListItem
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -7,24 +9,14 @@ class AgendaDTO(
     val tasks: List<TaskDTO> = emptyList(),
     val reminders: List<ReminderDTO> = emptyList()
 ) {
-    fun getAgendaItemsAsList() : List<AgendaListItem> {
+    fun toAgenda(): Agenda {
         val items = mutableListOf<AgendaListItem>().apply {
-            addAll(tasks)
-            addAll(reminders)
+            addAll(tasks.map { it.toTask() })
+            addAll(reminders.map { it.toReminder() })
 
-            sortBy { it.getTimestamp() }
+            sortBy { it.time }
         }
 
-        return items
-    }
-
-    companion object {
-
-        fun getEmpty() = AgendaDTO()
-
-        fun getSample() = AgendaDTO(
-            tasks = listOf(TaskDTO.getSampleTask()),
-            reminders = listOf(ReminderDTO.getSampleReminder())
-        )
+        return Agenda(items)
     }
 }

@@ -43,7 +43,7 @@ fun LocalDateTime.getMillis(): Long = atZone(ZoneId.systemDefault()).toInstant()
 
 fun LocalDate.getUTCMillis(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
-fun Long.formatAgendaTimestamp(): String {
-    val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
-    return date.format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
-}
+fun Long.getLocalDateTimeFromMillis(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
+
+fun LocalDateTime.formatAgendaDateTime(): String = format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
+

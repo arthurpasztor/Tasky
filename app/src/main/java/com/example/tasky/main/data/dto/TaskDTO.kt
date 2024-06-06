@@ -1,8 +1,8 @@
 package com.example.tasky.main.data.dto
 
-import com.example.tasky.main.domain.formatAgendaTimestamp
+import com.example.tasky.main.domain.AgendaListItem
+import com.example.tasky.main.domain.getLocalDateTimeFromMillis
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 @Serializable
 data class TaskDTO(
@@ -12,26 +12,14 @@ data class TaskDTO(
     val time: Long,
     val remindAt: Long,
     val isDone: Boolean
-) : AgendaListItem {
+) {
 
-    override fun getTimestamp() = time
-
-    override fun getItemTitle() = title
-
-    override fun getItemDescription() = description
-
-    override fun getFormattedTime() = time.formatAgendaTimestamp()
-
-    override fun isItemDone() = isDone
-
-    companion object {
-        fun getSampleTask() = TaskDTO(
-            id = UUID.randomUUID().toString(),
-            title = "Sample Task",
-            description = "This is a sample task",
-            time = System.currentTimeMillis(),
-            remindAt = System.currentTimeMillis() + 3600000,
-            isDone = true
-        )
-    }
+    fun toTask() = AgendaListItem.Task(
+        id = id,
+        title = title,
+        description = description,
+        time = time.getLocalDateTimeFromMillis(),
+        remindAt = remindAt.getLocalDateTimeFromMillis(),
+        isDone = isDone
+    )
 }

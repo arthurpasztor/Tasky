@@ -186,7 +186,7 @@ private fun AgendaScreen(
                     .padding(top = 100.dp)
                 ) {
                     PullToRefreshLazyColumn(
-                        items = state.dailyAgenda.getAgendaItemsAsList(),
+                        items = state.dailyAgenda.items,
                         content = {
                             AgendaItem(it)
                         },
