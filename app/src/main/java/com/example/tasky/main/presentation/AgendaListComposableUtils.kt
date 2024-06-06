@@ -40,11 +40,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.tasky.main.domain.Agenda
+import com.example.tasky.main.domain.AgendaDM
 import com.example.tasky.main.domain.AgendaListItem
 import com.example.tasky.main.domain.AgendaListItem.Needle
-import com.example.tasky.main.domain.AgendaListItem.Reminder
-import com.example.tasky.main.domain.AgendaListItem.Task
+import com.example.tasky.main.domain.AgendaListItem.ReminderDM
+import com.example.tasky.main.domain.AgendaListItem.TaskDM
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
@@ -53,29 +53,29 @@ import com.example.tasky.ui.theme.agendaListTitleStyle
 @Preview
 @Composable
 private fun TaskItemPreview() {
-    AgendaItem(item = Task.getSampleTask())
+    AgendaItem(item = TaskDM.getSampleTask())
 }
 
 @Preview
 @Composable
 private fun ReminderItemPreview() {
-    AgendaItem(item = Reminder.getSampleReminder())
+    AgendaItem(item = ReminderDM.getSampleReminder())
 }
 
 @Composable
 fun <T : AgendaListItem> AgendaItem(item: T) {
     val backgroundColor = when (item) {
-        is Task -> TaskyGreen
+        is TaskDM -> TaskyGreen
         else -> ReminderGray
     }
 
     val headerColor = when (item) {
-        is Task -> Color.White
+        is TaskDM -> Color.White
         else -> Color.Black
     }
 
     val contentColor = when (item) {
-        is Task -> Color.White
+        is TaskDM -> Color.White
         else -> Color.Gray
     }
 
@@ -175,7 +175,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
 fun PullToRefreshLazyColumnPreview() {
     PullToRefreshLazyColumn(
         modifier = Modifier.fillMaxSize(),
-        items = Agenda.getSample().items,
+        items = AgendaDM.getSample().items,
         content = {
             AgendaItem(it)
         },

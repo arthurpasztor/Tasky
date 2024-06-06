@@ -10,9 +10,9 @@ import com.example.tasky.main.data.dto.TaskDTO
 import com.example.tasky.main.data.dto.toAgenda
 import com.example.tasky.main.data.dto.toReminderDTO
 import com.example.tasky.main.data.dto.toTaskDTO
-import com.example.tasky.main.domain.Agenda
-import com.example.tasky.main.domain.AgendaListItem.Reminder
-import com.example.tasky.main.domain.AgendaListItem.Task
+import com.example.tasky.main.domain.AgendaDM
+import com.example.tasky.main.domain.AgendaListItem.ReminderDM
+import com.example.tasky.main.domain.AgendaListItem.TaskDM
 import com.example.tasky.main.domain.ApiRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
@@ -52,7 +52,7 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         }
     }
 
-    override suspend fun createTask(task: Task): Result<Unit, RootError> {
+    override suspend fun createTask(task: TaskDM): Result<Unit, RootError> {
         return client.executeRequest<TaskDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = taskUrl,
@@ -63,11 +63,11 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         }
     }
 
-    override suspend fun updateTask(task: Task): Result<Unit, RootError> {
+    override suspend fun updateTask(task: TaskDM): Result<Unit, RootError> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun createReminder(reminder: Reminder): Result<Unit, RootError> {
+    override suspend fun createReminder(reminder: ReminderDM): Result<Unit, RootError> {
         return client.executeRequest<ReminderDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = reminderUrl,
@@ -78,11 +78,11 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         }
     }
 
-    override suspend fun updateReminder(reminder: Reminder): Result<Unit, RootError> {
+    override suspend fun updateReminder(reminder: ReminderDM): Result<Unit, RootError> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDailyAgenda(time: Long): Result<Agenda, RootError> {
+    override suspend fun getDailyAgenda(time: Long): Result<AgendaDM, RootError> {
         val result: Result<AgendaDTO, RootError> = client.executeRequest<Unit, AgendaDTO>(
             httpMethod = HttpMethod.Get,
             url = agendaUrl,
@@ -94,7 +94,7 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
 
         return when (result) {
             is Result.Success ->  Result.Success(result.data.toAgenda())
-            is Result.Error -> Result.Error(result.error)
+            is Result.Error -> result
         }
     }
 

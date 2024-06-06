@@ -4,7 +4,12 @@ import com.example.tasky.BuildConfig
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
 import com.example.tasky.auth.data.dto.TokenResponse
+import com.example.tasky.auth.data.dto.toLoginDM
+import com.example.tasky.auth.data.dto.toLoginRequest
+import com.example.tasky.auth.data.dto.toSignUpRequest
 import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.auth.domain.LoginDM
+import com.example.tasky.auth.domain.SignUpDM
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.Preferences
@@ -18,11 +23,11 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
     private val loginUrl = "${BuildConfig.BASE_URL}/login"
     private val signUpUrl = "${BuildConfig.BASE_URL}/register"
 
-    override suspend fun login(info: LoginRequest): Result<Unit, RootError> {
+    override suspend fun login(info: LoginDM): Result<Unit, RootError> {
         return client.executeRequest<LoginRequest, Unit>(
             httpMethod = HttpMethod.Post,
             url = loginUrl,
-            payload = info,
+            payload = info.toLoginRequest(),
             tag = TAG
         ) {
             val response = it.body<TokenResponse>()
@@ -36,14 +41,19 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
         }
     }
 
-    override suspend fun signUp(info: SignUpRequest): Result<LoginRequest, RootError> {
-        return client.executeRequest<SignUpRequest, LoginRequest>(
+    override suspend fun signUp(info: SignUpDM): Result<LoginDM, RootError> {
+        val result =  client.executeRequest<SignUpRequest, LoginRequest>(
             httpMethod = HttpMethod.Post,
             url = signUpUrl,
-            payload = info,
+            payload = info.toSignUpRequest(),
             tag = TAG
         ) {
             Result.Success(LoginRequest(info.email, info.password))
+        }
+
+        return when (result) {
+            is Result.Success -> Result.Success(result.data.toLoginDM())
+            is Result.Error -> result
         }
     }
 

@@ -6,8 +6,8 @@ import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.main.domain.ApiRepository
 import com.example.tasky.main.domain.AgendaItemType
-import com.example.tasky.main.domain.AgendaListItem.Reminder
-import com.example.tasky.main.domain.AgendaListItem.Task
+import com.example.tasky.main.domain.AgendaListItem.ReminderDM
+import com.example.tasky.main.domain.AgendaListItem.TaskDM
 import com.example.tasky.main.domain.DetailInteractionMode
 import com.example.tasky.main.domain.ReminderType
 import kotlinx.coroutines.channels.Channel
@@ -136,12 +136,12 @@ class TaskReminderViewModel(
         }
     }
 
-    private fun getTaskPayload(): Task {
+    private fun getTaskPayload(): TaskDM {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val remindAt = it.reminderType.getReminder(time)
 
-            return Task(
+            return TaskDM(
                 id = UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,
@@ -152,12 +152,12 @@ class TaskReminderViewModel(
         }
     }
 
-    private fun getReminderPayload(): Reminder {
+    private fun getReminderPayload(): ReminderDM {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val remindAt = it.reminderType.getReminder(time)
 
-            return Reminder(
+            return ReminderDM(
                 id = UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,

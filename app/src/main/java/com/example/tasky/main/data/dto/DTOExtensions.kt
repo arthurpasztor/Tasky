@@ -1,24 +1,24 @@
 package com.example.tasky.main.data.dto
 
-import com.example.tasky.main.domain.Agenda
+import com.example.tasky.main.domain.AgendaDM
 import com.example.tasky.main.domain.AgendaListItem
-import com.example.tasky.main.domain.AgendaListItem.Reminder
-import com.example.tasky.main.domain.AgendaListItem.Task
+import com.example.tasky.main.domain.AgendaListItem.ReminderDM
+import com.example.tasky.main.domain.AgendaListItem.TaskDM
 import com.example.tasky.main.domain.getLocalDateTimeFromMillis
 import com.example.tasky.main.domain.getMillis
 
-fun AgendaDTO.toAgenda(): Agenda {
+fun AgendaDTO.toAgenda(): AgendaDM {
     val items = mutableListOf<AgendaListItem>().apply {
-        addAll(tasks.map { it.toTask() })
-        addAll(reminders.map { it.toReminder() })
+        addAll(tasks.map { it.toTaskDM() })
+        addAll(reminders.map { it.toReminderDM() })
 
         sortBy { it.time }
     }
 
-    return Agenda(items)
+    return AgendaDM(items)
 }
 
-fun TaskDTO.toTask() = Task(
+fun TaskDTO.toTaskDM() = TaskDM(
     id = id,
     title = title,
     description = description,
@@ -27,7 +27,7 @@ fun TaskDTO.toTask() = Task(
     isDone = isDone
 )
 
-fun Task.toTaskDTO() = TaskDTO(
+fun TaskDM.toTaskDTO() = TaskDTO(
     id = id,
     title = title,
     description = description,
@@ -36,7 +36,7 @@ fun Task.toTaskDTO() = TaskDTO(
     isDone = isDone
 )
 
-fun ReminderDTO.toReminder() = Reminder(
+fun ReminderDTO.toReminderDM() = ReminderDM(
     id = id,
     title = title,
     description = description,
@@ -44,7 +44,7 @@ fun ReminderDTO.toReminder() = Reminder(
     remindAt = remindAt.getLocalDateTimeFromMillis()
 )
 
-fun Reminder.toReminderDTO() = ReminderDTO(
+fun ReminderDM.toReminderDTO() = ReminderDTO(
     id = id,
     title = title,
     description = description,

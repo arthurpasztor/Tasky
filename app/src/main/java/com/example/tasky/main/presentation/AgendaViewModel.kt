@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.main.domain.Agenda
+import com.example.tasky.main.domain.AgendaDM
 import com.example.tasky.main.domain.ApiRepository
 import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
@@ -87,7 +87,7 @@ class AgendaViewModel(
                     )
 
                     is Result.Error -> it.copy(
-                        dailyAgenda = Agenda.getEmpty(),
+                        dailyAgenda = AgendaDM.getEmpty(),
                         dailyAgendaError = response.error
                     )
                 }
@@ -135,7 +135,7 @@ data class AgendaState(
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
     val firstDateOfHeader: LocalDate = LocalDate.now(),
-    val dailyAgenda: Agenda = Agenda.getSample(),
+    val dailyAgenda: AgendaDM = AgendaDM.getSample(),
     val dailyAgendaError: RootError? = null,
     val isRefreshing: Boolean = false
 )
