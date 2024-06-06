@@ -6,7 +6,8 @@ import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.main.domain.AgendaDM
-import com.example.tasky.main.domain.ApiRepository
+import com.example.tasky.main.domain.AgendaRepository
+import com.example.tasky.main.domain.AuthRepository
 import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class AgendaViewModel(
-    private val repository: ApiRepository,
+    private val authRepo: AuthRepository,
+    private val agendaRepo: AgendaRepository,
     private val prefs: Preferences
 ) : ViewModel() {
 
@@ -77,7 +79,7 @@ class AgendaViewModel(
 
     private fun loadDailyAgenda(triggerFromPullToRefresh: Boolean = false) {
         viewModelScope.launch {
-            val response = repository.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
+            val response = agendaRepo.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
 
             _state.update {
                 when (response) {
@@ -101,7 +103,7 @@ class AgendaViewModel(
 
     private fun logOut() {
         viewModelScope.launch {
-            val response = repository.logout()
+            val response = authRepo.logout()
             _navChannel.send(AgendaResponseAction.HandleLogoutResponse(response))
         }
     }
