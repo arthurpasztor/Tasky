@@ -1,8 +1,5 @@
 package com.example.tasky.main.data.dto
 
-import com.example.tasky.main.domain.AgendaListItem.Reminder
-import com.example.tasky.main.domain.getLocalDateTimeFromMillis
-import com.example.tasky.main.domain.getMillis
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -1,16 +1,19 @@
 package com.example.tasky.main.data
 
 import com.example.tasky.BuildConfig
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.main.data.dto.AgendaDTO
 import com.example.tasky.main.data.dto.ReminderDTO
 import com.example.tasky.main.data.dto.TaskDTO
+import com.example.tasky.main.data.dto.toAgenda
 import com.example.tasky.main.data.dto.toReminderDTO
 import com.example.tasky.main.data.dto.toTaskDTO
+import com.example.tasky.main.domain.Agenda
 import com.example.tasky.main.domain.AgendaListItem.Reminder
 import com.example.tasky.main.domain.AgendaListItem.Task
+import com.example.tasky.main.domain.ApiRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -79,14 +82,19 @@ class ApiRepositoryImpl(private val client: HttpClient) : ApiRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDailyAgenda(time: Long): Result<AgendaDTO, RootError> {
-        return client.executeRequest<Unit, AgendaDTO>(
+    override suspend fun getDailyAgenda(time: Long): Result<Agenda, RootError> {
+        val result: Result<AgendaDTO, RootError> = client.executeRequest<Unit, AgendaDTO>(
             httpMethod = HttpMethod.Get,
             url = agendaUrl,
             queryParams = Pair(QUERY_PARAM_KEY_TIME, time),
             tag = TAG
         ) {
             Result.Success(it.body())
+        }
+
+        return when (result) {
+            is Result.Success ->  Result.Success(result.data.toAgenda())
+            is Result.Error -> Result.Error(result.error)
         }
     }
 

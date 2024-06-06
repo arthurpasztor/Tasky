@@ -4,12 +4,10 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.auth.domain.Result
+import com.example.tasky.core.domain.Result
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword
 import org.junit.Test
-
-import org.junit.Assert.*
 
 typealias TestSuccess = Result.Success<Unit>
 typealias TestNameError = Result.Error<NameError>

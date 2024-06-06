@@ -1,6 +1,8 @@
 package com.example.tasky.auth.domain
 
 import android.util.Patterns
+import com.example.tasky.core.domain.Error
+import com.example.tasky.core.domain.Result
 
 fun String.validateName(): Result<Unit, NameError> {
     return when {

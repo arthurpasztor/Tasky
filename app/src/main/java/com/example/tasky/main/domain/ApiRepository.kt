@@ -1,8 +1,7 @@
-package com.example.tasky.main.data
+package com.example.tasky.main.domain
 
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
-import com.example.tasky.main.data.dto.AgendaDTO
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.main.domain.AgendaListItem.Reminder
 import com.example.tasky.main.domain.AgendaListItem.Task
 
@@ -16,5 +15,5 @@ interface ApiRepository {
     suspend fun createReminder(reminder: Reminder): Result<Unit, RootError>
     suspend fun updateReminder(reminder: Reminder): Result<Unit, RootError>
 
-    suspend fun getDailyAgenda(time: Long): Result<AgendaDTO, RootError>
+    suspend fun getDailyAgenda(time: Long): Result<Agenda, RootError>
 }

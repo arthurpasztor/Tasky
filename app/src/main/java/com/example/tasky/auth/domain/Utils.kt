@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.example.tasky.R
+import com.example.tasky.core.domain.HttpError
 import io.ktor.client.statement.HttpResponse
 
 sealed class UiText {

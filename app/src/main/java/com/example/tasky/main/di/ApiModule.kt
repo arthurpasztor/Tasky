@@ -1,6 +1,6 @@
 package com.example.tasky.main.di
 
-import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.main.domain.ApiRepository
 import com.example.tasky.main.data.ApiRepositoryImpl
 import com.example.tasky.main.presentation.AgendaViewModel
 import com.example.tasky.main.presentation.TaskReminderViewModel

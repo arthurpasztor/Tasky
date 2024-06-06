@@ -1,6 +1,6 @@
-package com.example.tasky.auth.domain
+package com.example.tasky.core.domain
 
-sealed interface Error
+interface Error
 
 enum class HttpError : Error {
     REDIRECT, //3xx

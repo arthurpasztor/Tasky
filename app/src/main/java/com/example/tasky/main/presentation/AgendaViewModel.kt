@@ -2,12 +2,11 @@ package com.example.tasky.main.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.Preferences
-import com.example.tasky.main.data.ApiRepository
-import com.example.tasky.main.data.dto.toAgenda
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.main.domain.Agenda
+import com.example.tasky.main.domain.ApiRepository
 import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,10 +44,12 @@ class AgendaViewModel(
             is AgendaAction.UpdateSelectedDate -> {
                 updateSelectedDate(action.newSelection, action.forceSelectedDateToFirstPosition)
             }
+
             AgendaAction.PullToRefresh -> {
                 _state.update { it.copy(isRefreshing = true) }
                 loadDailyAgenda(triggerFromPullToRefresh = true)
             }
+
             AgendaAction.CreateNewEvent -> createNewEvent()
             AgendaAction.CreateNewTask -> createNewTask()
             AgendaAction.CreateNewReminder -> createNewReminder()
@@ -81,9 +82,10 @@ class AgendaViewModel(
             _state.update {
                 when (response) {
                     is Result.Success -> it.copy(
-                        dailyAgenda = response.data.toAgenda(),
+                        dailyAgenda = response.data,
                         dailyAgendaError = null
                     )
+
                     is Result.Error -> it.copy(
                         dailyAgenda = Agenda.getEmpty(),
                         dailyAgendaError = response.error

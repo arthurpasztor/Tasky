@@ -2,13 +2,13 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.data.AuthRepository
+import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword

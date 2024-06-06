@@ -1,9 +1,9 @@
-package com.example.tasky.auth.data
+package com.example.tasky.auth.domain
 
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 
 interface AuthRepository {
     suspend fun login(info: LoginRequest): Result<Unit, RootError>

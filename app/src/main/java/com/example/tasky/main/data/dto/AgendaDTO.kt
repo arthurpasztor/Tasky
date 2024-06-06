@@ -1,7 +1,5 @@
 package com.example.tasky.main.data.dto
 
-import com.example.tasky.main.domain.Agenda
-import com.example.tasky.main.domain.AgendaListItem
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -4,8 +4,6 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
-import com.example.tasky.auth.domain.HttpError
-import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.asUiText
 
 fun Context.showToast(@StringRes id: Int) {

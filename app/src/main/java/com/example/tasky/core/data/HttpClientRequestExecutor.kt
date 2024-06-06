@@ -1,10 +1,10 @@
 package com.example.tasky.core.data
 
 import android.util.Log
-import com.example.tasky.auth.domain.HttpError
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.isSuccess
+import com.example.tasky.core.domain.HttpError
+import com.example.tasky.core.domain.RootError
+import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.request.parameter
 import io.ktor.client.request.request

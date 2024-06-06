@@ -4,8 +4,9 @@ import com.example.tasky.BuildConfig
 import com.example.tasky.auth.data.dto.LoginRequest
 import com.example.tasky.auth.data.dto.SignUpRequest
 import com.example.tasky.auth.data.dto.TokenResponse
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
+import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.data.executeRequest
 import io.ktor.client.HttpClient

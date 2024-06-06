@@ -2,8 +2,8 @@ package com.example.tasky.core.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.core.domain.Result
+import com.example.tasky.main.domain.ApiRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
