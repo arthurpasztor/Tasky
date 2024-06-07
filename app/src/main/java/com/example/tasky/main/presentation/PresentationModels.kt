@@ -20,7 +20,6 @@ sealed interface AgendaItemUi {
         override fun getTitle(): String = reminder.title
         override fun getDescription() = reminder.description
         override fun getFormattedTime() = reminder.getFormattedTime()
-
     }
 
     data object NeedleUi: AgendaItemUi

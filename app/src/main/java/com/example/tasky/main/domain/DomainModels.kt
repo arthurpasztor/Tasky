@@ -20,22 +20,17 @@ data class AgendaDM(
 
 sealed class AgendaListItem {
 
-    open val id: String = ""
-    open val title: String = ""
-    open val description: String = ""
     open val time: LocalDateTime = LocalDateTime.now()
-    open val remindAt: LocalDateTime = LocalDateTime.now()
-    open val isDone: Boolean = false
 
     open fun getFormattedTime() : String = ""
 
     data class TaskDM(
-        override val id: String,
-        override val title: String,
-        override val description: String,
+        val id: String = "",
+        val title: String = "",
+        val description: String = "",
         override val time: LocalDateTime,
-        override val remindAt: LocalDateTime,
-        override val isDone: Boolean
+        val remindAt: LocalDateTime = LocalDateTime.now(),
+        val isDone: Boolean
     ): AgendaListItem() {
         override fun getFormattedTime(): String = time.formatAgendaDateTime()
 
@@ -52,11 +47,11 @@ sealed class AgendaListItem {
     }
 
     data class ReminderDM(
-        override val id: String,
-        override val title: String,
-        override val description: String,
+        val id: String = "",
+        val title: String = "",
+        val description: String = "",
         override val time: LocalDateTime,
-        override val remindAt: LocalDateTime
+        val remindAt: LocalDateTime = LocalDateTime.now()
     ): AgendaListItem() {
         override fun getFormattedTime(): String = time.formatAgendaDateTime()
 
