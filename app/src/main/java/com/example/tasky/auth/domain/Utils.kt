@@ -5,7 +5,9 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.example.tasky.R
-import com.example.tasky.core.domain.HttpError
+import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.DataError.HttpError
+import com.example.tasky.core.domain.DataError.LocalError
 import io.ktor.client.statement.HttpResponse
 
 sealed class UiText {
@@ -31,7 +33,7 @@ sealed class UiText {
     }
 }
 
-fun HttpError.asUiText(): UiText {
+fun DataError.asUiText(): UiText {
     return when (this) {
         HttpError.REDIRECT -> UiText.StringResource(R.string.error_redirect)
         HttpError.UNAUTHORIZED -> UiText.StringResource(R.string.error_unauthorized)
@@ -42,6 +44,8 @@ fun HttpError.asUiText(): UiText {
         HttpError.CLIENT_REQUEST -> UiText.StringResource(R.string.error_client)
         HttpError.SERVER_RESPONSE -> UiText.StringResource(R.string.error_server)
         HttpError.UNKNOWN -> UiText.StringResource(R.string.error_unknown)
+        LocalError.DISK_FULL -> UiText.StringResource(R.string.error_disk_full)
+        LocalError.NOT_FOUND -> UiText.StringResource(R.string.error_not_found)
     }
 }
 

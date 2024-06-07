@@ -9,6 +9,7 @@ import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.getUTCMillis
+import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
@@ -153,7 +154,7 @@ data class AgendaState(
 
 sealed class AgendaResponseAction {
     data object HandleLogoutResponseSuccess : AgendaResponseAction()
-    class HandleLogoutResponseError(val error: RootError) : AgendaResponseAction()
+    class HandleLogoutResponseError(val error: DataError) : AgendaResponseAction()
     data object CreateNewEventAction : AgendaResponseAction()
     data object CreateNewTaskAction : AgendaResponseAction()
     data object CreateNewReminderAction : AgendaResponseAction()

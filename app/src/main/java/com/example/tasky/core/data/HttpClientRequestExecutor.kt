@@ -2,8 +2,8 @@ package com.example.tasky.core.data
 
 import android.util.Log
 import com.example.tasky.auth.domain.isSuccess
-import com.example.tasky.core.domain.HttpError
-import com.example.tasky.core.domain.RootError
+import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.DataError.HttpError
 import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.request.parameter
@@ -20,8 +20,8 @@ suspend inline fun <reified P, R> HttpClient.executeRequest(
     queryParams: Pair<String, Any>? = null,
     payload: P? = null,
     tag: String,
-    handleResponse: (response: HttpResponse) -> Result<R, RootError>
-): Result<R, RootError> {
+    handleResponse: (response: HttpResponse) -> Result<R, DataError>
+): Result<R, DataError> {
     return try {
         val httpResponse = request {
             method = httpMethod

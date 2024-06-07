@@ -2,8 +2,6 @@ package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.core.domain.Result
-import com.example.tasky.core.domain.RootError
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
@@ -11,6 +9,7 @@ import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
+import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
@@ -222,7 +221,7 @@ sealed class TaskReminderVMAction {
     data object OpenTitleEditor : TaskReminderVMAction()
     data object OpenDescriptionEditor : TaskReminderVMAction()
     data object CreateTaskSuccess : TaskReminderVMAction()
-    class CreateTaskError(val error: RootError) : TaskReminderVMAction()
+    class CreateTaskError(val error: DataError) : TaskReminderVMAction()
     data object CreateReminderSuccess : TaskReminderVMAction()
-    class CreateReminderError(val error: RootError) : TaskReminderVMAction()
+    class CreateReminderError(val error: DataError) : TaskReminderVMAction()
 }
