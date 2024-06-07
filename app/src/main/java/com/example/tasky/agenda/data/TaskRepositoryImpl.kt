@@ -15,7 +15,7 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
 
     private val taskUrl = "${BuildConfig.BASE_URL}/task"
 
-    override suspend fun createTask(task: AgendaListItem.TaskDM): Result<Unit, RootError> {
+    override suspend fun createTask(task: AgendaListItem.Task): Result<Unit, RootError> {
         return client.executeRequest<TaskDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = taskUrl,
@@ -26,7 +26,7 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
         }
     }
 
-    override suspend fun updateTask(task: AgendaListItem.TaskDM): Result<Unit, RootError> {
+    override suspend fun updateTask(task: AgendaListItem.Task): Result<Unit, RootError> {
         TODO("Not yet implemented")
     }
 

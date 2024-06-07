@@ -3,7 +3,7 @@ package com.example.tasky.auth.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.auth.domain.LoginDM
+import com.example.tasky.auth.domain.Login
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
@@ -47,7 +47,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = LoginDM(_state.value.emailText, _state.value.passwordText)
+            val payload = Login(_state.value.emailText, _state.value.passwordText)
             val response = repository.login(payload)
             _navChannel.send(LoginAuthAction.HandleAuthResponse(response))
 

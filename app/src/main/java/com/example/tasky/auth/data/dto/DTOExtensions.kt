@@ -1,12 +1,10 @@
 package com.example.tasky.auth.data.dto
 
-import com.example.tasky.auth.domain.LoginDM
-import com.example.tasky.auth.domain.SignUpDM
+import com.example.tasky.auth.domain.Login
+import com.example.tasky.auth.domain.SignUp
 
-fun LoginRequest.toLoginDM() = LoginDM(email, password)
+fun LoginDTO.toLogin() = Login(email, password)
 
-fun LoginDM.toLoginRequest() = LoginRequest(email, password)
+fun Login.toLoginDTO() = LoginDTO(email, password)
 
-fun SignUpRequest.toSignUpDM() = SignUpDM(fullName, email, password)
-
-fun SignUpDM.toSignUpRequest() = SignUpRequest(fullName, email, password)
+fun SignUp.toSignUpDTO() = SignUpDTO(fullName, email, password)

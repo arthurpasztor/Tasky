@@ -1,20 +1,20 @@
 package com.example.tasky.agenda.presentation
 
-import com.example.tasky.agenda.domain.AgendaDM
-import com.example.tasky.agenda.domain.AgendaListItem.ReminderDM
-import com.example.tasky.agenda.domain.AgendaListItem.TaskDM
+import com.example.tasky.agenda.domain.Agenda
+import com.example.tasky.agenda.domain.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.AgendaListItem.Task
 
-fun AgendaDM.toAgendaItemUiList(): List<AgendaItemUi> {
+fun Agenda.toAgendaItemUiList(): List<AgendaItemUi> {
     return items.map {
         when (it) {
-            is ReminderDM -> AgendaItemUi.ReminderUi(it)
-            is TaskDM -> AgendaItemUi.TaskUi(it)
+            is Reminder -> AgendaItemUi.ReminderUi(it)
+            is Task -> AgendaItemUi.TaskUi(it)
         }
     }
 }
 
-fun getAgendaSample() = AgendaDM.getSample().toAgendaItemUiList()
+fun getAgendaSample() = Agenda.getSample().toAgendaItemUiList()
 
-fun getTaskSample() = AgendaItemUi.TaskUi(TaskDM.getSampleTask())
+fun getTaskSample() = AgendaItemUi.TaskUi(Task.getSampleTask())
 
-fun getReminderSample() = AgendaItemUi.ReminderUi(ReminderDM.getSampleReminder())
+fun getReminderSample() = AgendaItemUi.ReminderUi(Reminder.getSampleReminder())

@@ -14,7 +14,7 @@ import io.ktor.http.HttpMethod
 class ReminderRepositoryImpl(private val client: HttpClient) : ReminderRepository {
 
     private val reminderUrl = "${BuildConfig.BASE_URL}/reminder"
-    override suspend fun createReminder(reminder: AgendaListItem.ReminderDM): Result<Unit, RootError> {
+    override suspend fun createReminder(reminder: AgendaListItem.Reminder): Result<Unit, RootError> {
         return client.executeRequest<ReminderDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = reminderUrl,
@@ -25,7 +25,7 @@ class ReminderRepositoryImpl(private val client: HttpClient) : ReminderRepositor
         }
     }
 
-    override suspend fun updateReminder(reminder: AgendaListItem.ReminderDM): Result<Unit, RootError> {
+    override suspend fun updateReminder(reminder: AgendaListItem.Reminder): Result<Unit, RootError> {
         TODO("Not yet implemented")
     }
 

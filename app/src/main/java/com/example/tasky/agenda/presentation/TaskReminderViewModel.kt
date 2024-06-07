@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.AgendaListItem.ReminderDM
-import com.example.tasky.agenda.domain.AgendaListItem.TaskDM
+import com.example.tasky.agenda.domain.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.AgendaListItem.Task
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
@@ -138,12 +138,12 @@ class TaskReminderViewModel(
         }
     }
 
-    private fun getTaskPayload(): TaskDM {
+    private fun getTaskPayload(): Task {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val remindAt = it.reminderType.getReminder(time)
 
-            return TaskDM(
+            return Task(
                 id = UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,
@@ -154,12 +154,12 @@ class TaskReminderViewModel(
         }
     }
 
-    private fun getReminderPayload(): ReminderDM {
+    private fun getReminderPayload(): Reminder {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val remindAt = it.reminderType.getReminder(time)
 
-            return ReminderDM(
+            return Reminder(
                 id = UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,

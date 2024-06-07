@@ -3,16 +3,16 @@ package com.example.tasky.agenda.domain
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class AgendaDM(
+data class Agenda(
     val items: List<AgendaListItem> = emptyList()
 ) {
     companion object {
-        fun getEmpty() = AgendaDM()
+        fun getEmpty() = Agenda()
 
-        fun getSample() = AgendaDM(
+        fun getSample() = Agenda(
             listOf(
-                AgendaListItem.TaskDM.getSampleTask(),
-                AgendaListItem.ReminderDM.getSampleReminder()
+                AgendaListItem.Task.getSampleTask(),
+                AgendaListItem.Reminder.getSampleReminder()
             )
         )
     }
@@ -24,7 +24,7 @@ sealed class AgendaListItem {
 
     open fun getFormattedTime() : String = ""
 
-    data class TaskDM(
+    data class Task(
         val id: String = "",
         val title: String = "",
         val description: String = "",
@@ -35,7 +35,7 @@ sealed class AgendaListItem {
         override fun getFormattedTime(): String = time.formatAgendaDateTime()
 
         companion object {
-            fun getSampleTask() = TaskDM(
+            fun getSampleTask() = Task(
                 id = UUID.randomUUID().toString(),
                 title = "Sample Task",
                 description = "This is a sample task",
@@ -46,7 +46,7 @@ sealed class AgendaListItem {
         }
     }
 
-    data class ReminderDM(
+    data class Reminder(
         val id: String = "",
         val title: String = "",
         val description: String = "",
@@ -56,7 +56,7 @@ sealed class AgendaListItem {
         override fun getFormattedTime(): String = time.formatAgendaDateTime()
 
         companion object {
-            fun getSampleReminder() = ReminderDM(
+            fun getSampleReminder() = Reminder(
                 id = UUID.randomUUID().toString(),
                 title = "Sample Reminder",
                 description = "This is a sample reminder",

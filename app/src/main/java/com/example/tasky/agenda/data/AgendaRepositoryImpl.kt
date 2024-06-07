@@ -6,7 +6,7 @@ import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.agenda.data.dto.AgendaDTO
 import com.example.tasky.agenda.data.dto.toAgenda
-import com.example.tasky.agenda.domain.AgendaDM
+import com.example.tasky.agenda.domain.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -16,7 +16,7 @@ class AgendaRepositoryImpl(private val client: HttpClient) : AgendaRepository {
 
     private val agendaUrl = "${BuildConfig.BASE_URL}/agenda"
 
-    override suspend fun getDailyAgenda(time: Long): Result<AgendaDM, RootError> {
+    override suspend fun getDailyAgenda(time: Long): Result<Agenda, RootError> {
         val result: Result<AgendaDTO, RootError> = client.executeRequest<Unit, AgendaDTO>(
             httpMethod = HttpMethod.Get,
             url = agendaUrl,

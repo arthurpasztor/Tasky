@@ -1,11 +1,11 @@
 package com.example.tasky.auth.domain
 
-data class LoginDM(
+data class Login(
     val email: String,
     val password: String
 )
 
-data class SignUpDM(
+data class SignUp(
     val fullName: String,
     val email: String,
     val password: String
