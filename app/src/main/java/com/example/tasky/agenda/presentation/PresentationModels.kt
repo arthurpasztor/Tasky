@@ -1,7 +1,7 @@
 package com.example.tasky.agenda.presentation
 
-import com.example.tasky.agenda.domain.AgendaListItem.Reminder
-import com.example.tasky.agenda.domain.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 
 sealed class AgendaItemUi {
     // Initializers needed because some classes (ex. NeedleUi) don't override the fields

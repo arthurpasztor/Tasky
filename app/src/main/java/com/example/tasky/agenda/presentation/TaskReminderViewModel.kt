@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.AgendaListItem.Reminder
-import com.example.tasky.agenda.domain.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType

@@ -1,8 +1,8 @@
 package com.example.tasky.agenda.presentation
 
-import com.example.tasky.agenda.domain.Agenda
-import com.example.tasky.agenda.domain.AgendaListItem.Reminder
-import com.example.tasky.agenda.domain.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 
 fun Agenda.toAgendaItemUiList(): List<AgendaItemUi> {
     return items.map {

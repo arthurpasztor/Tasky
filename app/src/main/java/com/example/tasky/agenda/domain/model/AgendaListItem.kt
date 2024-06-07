@@ -1,22 +1,8 @@
-package com.example.tasky.agenda.domain
+package com.example.tasky.agenda.domain.model
 
+import com.example.tasky.agenda.domain.formatAgendaDateTime
 import java.time.LocalDateTime
 import java.util.UUID
-
-data class Agenda(
-    val items: List<AgendaListItem> = emptyList()
-) {
-    companion object {
-        fun getEmpty() = Agenda()
-
-        fun getSample() = Agenda(
-            listOf(
-                AgendaListItem.Task.getSampleTask(),
-                AgendaListItem.Reminder.getSampleReminder()
-            )
-        )
-    }
-}
 
 sealed class AgendaListItem {
 

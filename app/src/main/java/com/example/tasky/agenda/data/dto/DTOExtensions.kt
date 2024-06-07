@@ -1,9 +1,9 @@
 package com.example.tasky.agenda.data.dto
 
-import com.example.tasky.agenda.domain.Agenda
-import com.example.tasky.agenda.domain.AgendaListItem
-import com.example.tasky.agenda.domain.AgendaListItem.Reminder
-import com.example.tasky.agenda.domain.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.agenda.domain.model.AgendaListItem
+import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.getLocalDateTimeFromMillis
 import com.example.tasky.agenda.domain.getMillis
 

@@ -6,7 +6,7 @@ import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.agenda.data.dto.TaskDTO
 import com.example.tasky.agenda.data.dto.toTaskDTO
-import com.example.tasky.agenda.domain.AgendaListItem
+import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.TaskRepository
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod

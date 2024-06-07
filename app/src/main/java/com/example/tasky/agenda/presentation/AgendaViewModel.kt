@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.agenda.domain.Agenda
+import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.getUTCMillis
