@@ -12,6 +12,8 @@ import com.example.tasky.agenda.presentation.AgendaViewModel
 import com.example.tasky.agenda.presentation.TaskReminderViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val apiModule = module {
@@ -20,8 +22,8 @@ val apiModule = module {
         TaskReminderViewModel(get(), get(), params[0], params[1])
     }
 
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
-    single<TaskRepository> { TaskRepositoryImpl(get()) }
-    single<ReminderRepository> { ReminderRepositoryImpl(get()) }
-    single<AgendaRepository> { AgendaRepositoryImpl(get()) }
+    singleOf(::AuthRepositoryImpl).bind<AuthRepository>()
+    singleOf(::AgendaRepositoryImpl).bind<AgendaRepository>()
+    singleOf(::TaskRepositoryImpl).bind<TaskRepository>()
+    singleOf(::ReminderRepositoryImpl).bind<ReminderRepository>()
 }
