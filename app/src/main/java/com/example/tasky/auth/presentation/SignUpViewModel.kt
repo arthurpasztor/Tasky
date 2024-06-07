@@ -3,10 +3,8 @@ package com.example.tasky.auth.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.auth.domain.Login
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.auth.domain.SignUp
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
@@ -66,15 +64,16 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = SignUp(
+            val response = repository.signUp(
                 fullName = _state.value.nameText,
                 email = _state.value.emailText,
                 password = _state.value.passwordText
             )
-            val response = repository.signUp(payload)
 
-            if (response is Result.Success<*> && response.data is Login) {
-                loginAfterSignUp(response.data)
+            if (response is Result.Success<*> && response.data is Pair<*, *>) {
+                val email: String = response.data.first as String
+                val password: String = response.data.second as String
+                loginAfterSignUp(email, password)
             } else {
                 _state.update { it.copy(isLoading = false) }
 
@@ -83,9 +82,9 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    private fun loginAfterSignUp(payload: Login) {
+    private fun loginAfterSignUp(email: String, password: String) {
         viewModelScope.launch {
-            val response = repository.login(payload)
+            val response = repository.login(email, password)
             _navChannel.send(SignUpAuthAction.HandleAuthResponse(response))
 
             _state.update { it.copy(isLoading = false) }

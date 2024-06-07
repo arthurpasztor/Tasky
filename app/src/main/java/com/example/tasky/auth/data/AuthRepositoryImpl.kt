@@ -4,12 +4,7 @@ import com.example.tasky.BuildConfig
 import com.example.tasky.auth.data.dto.LoginDTO
 import com.example.tasky.auth.data.dto.SignUpDTO
 import com.example.tasky.auth.data.dto.TokenDTO
-import com.example.tasky.auth.data.dto.toLogin
-import com.example.tasky.auth.data.dto.toLoginDTO
-import com.example.tasky.auth.data.dto.toSignUpDTO
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.auth.domain.Login
-import com.example.tasky.auth.domain.SignUp
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.Preferences
@@ -23,11 +18,11 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
     private val loginUrl = "${BuildConfig.BASE_URL}/login"
     private val signUpUrl = "${BuildConfig.BASE_URL}/register"
 
-    override suspend fun login(info: Login): Result<Unit, RootError> {
+    override suspend fun login(email: String, password: String): Result<Unit, RootError> {
         return client.executeRequest<LoginDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = loginUrl,
-            payload = info.toLoginDTO(),
+            payload = LoginDTO(email, password),
             tag = TAG
         ) {
             val response = it.body<TokenDTO>()
@@ -41,18 +36,18 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
         }
     }
 
-    override suspend fun signUp(info: SignUp): Result<Login, RootError> {
+    override suspend fun signUp(fullName: String, email: String, password: String): Result<Pair<String, String>, RootError> {
         val result =  client.executeRequest<SignUpDTO, LoginDTO>(
             httpMethod = HttpMethod.Post,
             url = signUpUrl,
-            payload = info.toSignUpDTO(),
+            payload = SignUpDTO(fullName, email, password),
             tag = TAG
         ) {
-            Result.Success(LoginDTO(info.email, info.password))
+            Result.Success(LoginDTO(email, password))
         }
 
         return when (result) {
-            is Result.Success -> Result.Success(result.data.toLogin())
+            is Result.Success -> Result.Success(Pair(result.data.email, result.data.password))
             is Result.Error -> result
         }
     }

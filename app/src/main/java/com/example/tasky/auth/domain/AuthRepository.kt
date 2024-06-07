@@ -4,6 +4,6 @@ import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 
 interface AuthRepository {
-    suspend fun login(info: Login): Result<Unit, RootError>
-    suspend fun signUp(info: SignUp): Result<Login, RootError>
+    suspend fun login(email: String, password: String): Result<Unit, RootError>
+    suspend fun signUp(fullName: String, email: String, password: String): Result<Pair<String, String>, RootError>
 }
