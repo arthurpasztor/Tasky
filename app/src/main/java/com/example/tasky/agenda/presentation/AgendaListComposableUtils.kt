@@ -75,19 +75,19 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
     }
 
     val title = when {
-        item.isDone() -> {
+        item.isDone -> {
             buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
                         textDecoration = TextDecoration.LineThrough
                     )
                 ) {
-                    append(item.getTitle())
+                    append(item.title)
                 }
             }
         }
 
-        else -> AnnotatedString(item.getTitle())
+        else -> AnnotatedString(item.title)
     }
 
     Box(
@@ -104,7 +104,7 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
                         .size(18.dp)
                         .padding(start = 20.dp, top = 25.dp)
                         .align(Alignment.Top),
-                    selected = item.isDone(),
+                    selected = item.isDone,
                     colors = RadioButtonDefaults.colors(
                         selectedColor = headerColor,
                         unselectedColor = headerColor
@@ -130,7 +130,7 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
                         modifier = Modifier
                             .align(Alignment.Start)
                             .padding(top = 15.dp),
-                        text = item.getDescription(),
+                        text = item.description,
                         style = agendaListContentStyle,
                         color = contentColor,
                         maxLines = 1,

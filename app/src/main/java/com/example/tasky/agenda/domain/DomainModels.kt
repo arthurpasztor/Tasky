@@ -25,9 +25,9 @@ sealed class AgendaListItem {
     open fun getFormattedTime() : String = ""
 
     data class Task(
-        val id: String = "",
-        val title: String = "",
-        val description: String = "",
+        val id: String,
+        val title: String,
+        val description: String,
         override val time: LocalDateTime,
         val remindAt: LocalDateTime = LocalDateTime.now(),
         val isDone: Boolean
@@ -47,9 +47,9 @@ sealed class AgendaListItem {
     }
 
     data class Reminder(
-        val id: String = "",
-        val title: String = "",
-        val description: String = "",
+        val id: String,
+        val title: String,
+        val description: String,
         override val time: LocalDateTime,
         val remindAt: LocalDateTime = LocalDateTime.now()
     ): AgendaListItem() {
