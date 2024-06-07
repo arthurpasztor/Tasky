@@ -40,11 +40,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.tasky.main.domain.AgendaDM
-import com.example.tasky.main.domain.AgendaListItem
-import com.example.tasky.main.domain.AgendaListItem.Needle
-import com.example.tasky.main.domain.AgendaListItem.ReminderDM
-import com.example.tasky.main.domain.AgendaListItem.TaskDM
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
@@ -53,46 +48,46 @@ import com.example.tasky.ui.theme.agendaListTitleStyle
 @Preview
 @Composable
 private fun TaskItemPreview() {
-    AgendaItem(item = TaskDM.getSampleTask())
+    AgendaItem(item = getTaskSample())
 }
 
 @Preview
 @Composable
 private fun ReminderItemPreview() {
-    AgendaItem(item = ReminderDM.getSampleReminder())
+    AgendaItem(item = getReminderSample())
 }
 
 @Composable
-fun <T : AgendaListItem> AgendaItem(item: T) {
+fun <T : AgendaItemUi> AgendaItem(item: T) {
     val backgroundColor = when (item) {
-        is TaskDM -> TaskyGreen
+        is AgendaItemUi.TaskUi -> TaskyGreen
         else -> ReminderGray
     }
 
     val headerColor = when (item) {
-        is TaskDM -> Color.White
+        is AgendaItemUi.TaskUi -> Color.White
         else -> Color.Black
     }
 
     val contentColor = when (item) {
-        is TaskDM -> Color.White
+        is AgendaItemUi.TaskUi -> Color.White
         else -> Color.Gray
     }
 
     val title = when {
-        item.isDone -> {
+        item.isDone() -> {
             buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
                         textDecoration = TextDecoration.LineThrough
                     )
                 ) {
-                    append(item.title)
+                    append(item.getTitle())
                 }
             }
         }
 
-        else -> AnnotatedString(item.title)
+        else -> AnnotatedString(item.getTitle())
     }
 
     Box(
@@ -109,7 +104,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
                         .size(18.dp)
                         .padding(start = 20.dp, top = 25.dp)
                         .align(Alignment.Top),
-                    selected = item.isDone,
+                    selected = item.isDone(),
                     colors = RadioButtonDefaults.colors(
                         selectedColor = headerColor,
                         unselectedColor = headerColor
@@ -135,7 +130,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
                         modifier = Modifier
                             .align(Alignment.Start)
                             .padding(top = 15.dp),
-                        text = item.description,
+                        text = item.getDescription(),
                         style = agendaListContentStyle,
                         color = contentColor,
                         maxLines = 1,
@@ -175,7 +170,7 @@ fun <T : AgendaListItem> AgendaItem(item: T) {
 fun PullToRefreshLazyColumnPreview() {
     PullToRefreshLazyColumn(
         modifier = Modifier.fillMaxSize(),
-        items = AgendaDM.getSample().items,
+        items = getAgendaSample(),
         content = {
             AgendaItem(it)
         },
@@ -192,7 +187,7 @@ fun PullToRefreshLazyColumnPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T : AgendaListItem> PullToRefreshLazyColumn(
+fun <T : AgendaItemUi> PullToRefreshLazyColumn(
     modifier: Modifier = Modifier,
     items: List<T>,
     content: @Composable (T) -> Unit,
@@ -211,7 +206,7 @@ fun <T : AgendaListItem> PullToRefreshLazyColumn(
         ) {
             items(items) {
                 when (it) {
-                    is Needle -> needleContent()
+                    is AgendaItemUi.NeedleUi -> needleContent()
                     else -> content(it)
                 }
             }

@@ -70,6 +70,4 @@ sealed class AgendaListItem {
             )
         }
     }
-
-    data object Needle : AgendaListItem()
 }
