@@ -10,6 +10,7 @@ import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword
+import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
@@ -70,9 +71,7 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
                 fullName = _state.value.nameText,
                 email = _state.value.emailText,
                 password = _state.value.passwordText
-            ).onSuccess {
-                val email: String = it.first
-                val password: String = it.second
+            ).onSuccess { (email, password) ->
                 loginAfterSignUp(email, password)
             }.onError { error ->
                 _state.update { it.copy(isLoading = false) }
@@ -126,5 +125,5 @@ data class SignUpState(
 sealed class SignUpAuthAction {
     data object NavigateBack : SignUpAuthAction()
     data object HandleAuthResponseSuccess : SignUpAuthAction()
-    class HandleAuthResponseError(val error: RootError) : SignUpAuthAction()
+    class HandleAuthResponseError(val error: DataError) : SignUpAuthAction()
 }

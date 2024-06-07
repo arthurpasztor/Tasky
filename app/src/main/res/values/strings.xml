@@ -30,6 +30,9 @@
     <string name="error_server">Oops, something went wrong. Please try again</string>
     <string name="error_unknown">An unknown error occurred</string>
 
+    <string name="error_disk_full">Disk is full</string>
+    <string name="error_not_found">Not found</string>
+
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
     <string name="at">At</string>

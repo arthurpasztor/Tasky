@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.isEmailValid
+import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
@@ -87,5 +88,5 @@ data class LoginState(
 sealed class LoginAuthAction {
     data object NavigateToSignUpScreen : LoginAuthAction()
     data object HandleAuthResponseSuccess : LoginAuthAction()
-    class HandleAuthResponseError(val error: RootError) : LoginAuthAction()
+    class HandleAuthResponseError(val error: DataError) : LoginAuthAction()
 }

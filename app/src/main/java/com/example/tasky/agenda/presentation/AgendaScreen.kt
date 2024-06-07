@@ -38,9 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.core.domain.Result
 import com.example.tasky.auth.domain.asUiText
-import com.example.tasky.core.domain.HttpError
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.TaskReminderDetailRootDestination
@@ -83,7 +81,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 }
 
                 is AgendaResponseAction.HandleLogoutResponseError -> {
-                    val errorMessage = (destination.error as HttpError).asUiText().asString(context)
+                    val errorMessage = destination.error.asUiText().asString(context)
                     Log.e(TAG, "Error: $errorMessage")
                     Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
                 }
