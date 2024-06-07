@@ -73,23 +73,19 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
     LaunchedEffect(true) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                is AgendaResponseAction.HandleLogoutResponse -> {
-                    when (destination.result) {
-                        is Result.Success -> {
-                            viewModel.onAction(AgendaAction.ClearUserData)
-                            navigator.navigate(LoginRootDestination) {
-                                popUpTo(AgendaRootDestination.route) {
-                                    inclusive = true
-                                }
-                            }
-                        }
-
-                        is Result.Error -> {
-                            val errorMessage = (destination.result.error as HttpError).asUiText().asString(context)
-                            Log.e(TAG, "Error: $errorMessage")
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                AgendaResponseAction.HandleLogoutResponseSuccess -> {
+                    viewModel.onAction(AgendaAction.ClearUserData)
+                    navigator.navigate(LoginRootDestination) {
+                        popUpTo(AgendaRootDestination.route) {
+                            inclusive = true
                         }
                     }
+                }
+
+                is AgendaResponseAction.HandleLogoutResponseError -> {
+                    val errorMessage = (destination.error as HttpError).asUiText().asString(context)
+                    Log.e(TAG, "Error: $errorMessage")
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
                 }
 
                 AgendaResponseAction.CreateNewEventAction -> {

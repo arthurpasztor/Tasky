@@ -9,6 +9,8 @@ import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.getUTCMillis
+import com.example.tasky.core.domain.onError
+import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -79,21 +81,23 @@ class AgendaViewModel(
 
     private fun loadDailyAgenda(triggerFromPullToRefresh: Boolean = false) {
         viewModelScope.launch {
-            val response = agendaRepo.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
-
-            _state.update {
-                when (response) {
-                    is Result.Success -> it.copy(
-                        dailyAgenda = response.data,
-                        dailyAgendaError = null
-                    )
-
-                    is Result.Error -> it.copy(
-                        dailyAgenda = Agenda.getEmpty(),
-                        dailyAgendaError = response.error
-                    )
+            agendaRepo.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
+                .onSuccess { agenda ->
+                    _state.update {
+                         it.copy(
+                            dailyAgenda = agenda,
+                            dailyAgendaError = null
+                        )
+                    }
                 }
-            }
+                .onError { error ->
+                    _state.update {
+                        it.copy(
+                            dailyAgenda = Agenda.getEmpty(),
+                            dailyAgendaError = error
+                        )
+                    }
+                }
 
             if (triggerFromPullToRefresh) {
                 _state.update { it.copy(isRefreshing = false) }
@@ -103,8 +107,13 @@ class AgendaViewModel(
 
     private fun logOut() {
         viewModelScope.launch {
-            val response = authRepo.logout()
-            _navChannel.send(AgendaResponseAction.HandleLogoutResponse(response))
+            authRepo.logout()
+                .onSuccess {
+                    _navChannel.send(AgendaResponseAction.HandleLogoutResponseSuccess)
+                }
+                .onError {
+                    _navChannel.send(AgendaResponseAction.HandleLogoutResponseError(it))
+                }
         }
     }
 
@@ -143,7 +152,8 @@ data class AgendaState(
 )
 
 sealed class AgendaResponseAction {
-    class HandleLogoutResponse(val result: Result<Unit, RootError>) : AgendaResponseAction()
+    data object HandleLogoutResponseSuccess : AgendaResponseAction()
+    class HandleLogoutResponseError(val error: RootError) : AgendaResponseAction()
     data object CreateNewEventAction : AgendaResponseAction()
     data object CreateNewTaskAction : AgendaResponseAction()
     data object CreateNewReminderAction : AgendaResponseAction()

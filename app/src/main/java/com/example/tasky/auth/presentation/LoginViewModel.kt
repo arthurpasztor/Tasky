@@ -3,9 +3,10 @@ package com.example.tasky.auth.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.core.domain.Result
-import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
+import com.example.tasky.core.domain.RootError
+import com.example.tasky.core.domain.onError
+import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,13 +47,20 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val response = repository.login(
+            repository.login(
                 email = _state.value.emailText,
                 password = _state.value.passwordText
             )
-            _navChannel.send(LoginAuthAction.HandleAuthResponse(response))
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false) }
 
-            _state.update { it.copy(isLoading = false) }
+                    _navChannel.send(LoginAuthAction.HandleAuthResponseSuccess)
+                }
+                .onError { error ->
+                    _state.update { it.copy(isLoading = false) }
+
+                    _navChannel.send(LoginAuthAction.HandleAuthResponseError(error))
+                }
         }
     }
 
@@ -78,5 +86,6 @@ data class LoginState(
 
 sealed class LoginAuthAction {
     data object NavigateToSignUpScreen : LoginAuthAction()
-    class HandleAuthResponse(val result: Result<Unit, RootError>) : LoginAuthAction()
+    data object HandleAuthResponseSuccess : LoginAuthAction()
+    class HandleAuthResponseError(val error: RootError) : LoginAuthAction()
 }

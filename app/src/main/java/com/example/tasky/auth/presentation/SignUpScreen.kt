@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
@@ -53,18 +52,17 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
                 SignUpAuthAction.NavigateBack -> navigator.popBackStack()
-                is SignUpAuthAction.HandleAuthResponse -> {
-                    when (destination.result) {
-                        is Result.Success -> {
-                            navigator.navigate(AgendaRootDestination) {
-                                popUpTo(LoginRootDestination.route) {
-                                    inclusive = true
-                                }
-                            }
-                        }
 
-                        is Result.Error -> context.showToast(destination.result.error, TAG)
+                SignUpAuthAction.HandleAuthResponseSuccess -> {
+                    navigator.navigate(AgendaRootDestination) {
+                        popUpTo(LoginRootDestination.route) {
+                            inclusive = true
+                        }
                     }
+                }
+
+                is SignUpAuthAction.HandleAuthResponseError -> {
+                    context.showToast(destination.error, TAG)
                 }
             }
         }
