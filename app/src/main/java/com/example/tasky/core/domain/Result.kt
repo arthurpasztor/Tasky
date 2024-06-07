@@ -1,4 +1,4 @@
-package com.example.tasky.auth.domain
+package com.example.tasky.core.domain
 
 typealias RootError = Error
 

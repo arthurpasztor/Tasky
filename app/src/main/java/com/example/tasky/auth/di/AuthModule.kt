@@ -1,6 +1,6 @@
 package com.example.tasky.auth.di
 
-import com.example.tasky.auth.data.AuthRepository
+import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.data.AuthRepositoryImpl
 import com.example.tasky.auth.presentation.LoginViewModel
 import com.example.tasky.auth.presentation.SignUpViewModel

@@ -2,13 +2,13 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.data.AuthRepository
-import com.example.tasky.auth.data.dto.LoginRequest
-import com.example.tasky.auth.data.dto.SignUpRequest
+import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.auth.domain.LoginDM
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
+import com.example.tasky.auth.domain.SignUpDM
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword
@@ -66,14 +66,14 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = SignUpRequest(
+            val payload = SignUpDM(
                 fullName = _state.value.nameText,
                 email = _state.value.emailText,
                 password = _state.value.passwordText
             )
             val response = repository.signUp(payload)
 
-            if (response is Result.Success<*> && response.data is LoginRequest) {
+            if (response is Result.Success<*> && response.data is LoginDM) {
                 loginAfterSignUp(response.data)
             } else {
                 _state.update { it.copy(isLoading = false) }
@@ -83,7 +83,7 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    private fun loginAfterSignUp(payload: LoginRequest) {
+    private fun loginAfterSignUp(payload: LoginDM) {
         viewModelScope.launch {
             val response = repository.login(payload)
             _navChannel.send(SignUpAuthAction.HandleAuthResponse(response))

@@ -2,15 +2,15 @@ package com.example.tasky.main.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
-import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.main.domain.AgendaItemType
-import com.example.tasky.main.domain.AgendaListItem.Reminder
-import com.example.tasky.main.domain.AgendaListItem.Task
+import com.example.tasky.main.domain.AgendaListItem.ReminderDM
+import com.example.tasky.main.domain.AgendaListItem.TaskDM
 import com.example.tasky.main.domain.DetailInteractionMode
+import com.example.tasky.main.domain.ReminderRepository
 import com.example.tasky.main.domain.ReminderType
-import com.example.tasky.main.domain.getMillis
+import com.example.tasky.main.domain.TaskRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +23,8 @@ import java.time.LocalTime
 import java.util.UUID
 
 class TaskReminderViewModel(
-    private val repository: ApiRepository,
+    private val taskRepo: TaskRepository,
+    private val reminderRepo: ReminderRepository,
     type: AgendaItemType,
     mode: DetailInteractionMode
 ) : ViewModel() {
@@ -111,9 +112,9 @@ class TaskReminderViewModel(
 
             val payload = getTaskPayload()
             val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
-                repository.createTask(payload)
+                taskRepo.createTask(payload)
             } else {
-                repository.updateTask(payload)
+                taskRepo.updateTask(payload)
             }
             _navChannel.send(TaskReminderVMAction.CreateTask(response))
 
@@ -127,9 +128,9 @@ class TaskReminderViewModel(
 
             val payload = getReminderPayload()
             val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
-                repository.createReminder(payload)
+                reminderRepo.createReminder(payload)
             } else {
-                repository.updateReminder(payload)
+                reminderRepo.updateReminder(payload)
             }
             _navChannel.send(TaskReminderVMAction.CreateReminder(response))
 
@@ -137,12 +138,12 @@ class TaskReminderViewModel(
         }
     }
 
-    private fun getTaskPayload(): Task {
+    private fun getTaskPayload(): TaskDM {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val remindAt = it.reminderType.getReminder(time)
 
-            return Task(
+            return TaskDM(
                 id = UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,
@@ -153,12 +154,12 @@ class TaskReminderViewModel(
         }
     }
 
-    private fun getReminderPayload(): Reminder {
+    private fun getReminderPayload(): ReminderDM {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val remindAt = it.reminderType.getReminder(time)
 
-            return Reminder(
+            return ReminderDM(
                 id = UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,

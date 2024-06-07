@@ -32,8 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.core.domain.showToast
+import com.example.tasky.core.domain.Result
+import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.main.domain.AgendaItemType
 import com.example.tasky.main.domain.DetailInteractionMode

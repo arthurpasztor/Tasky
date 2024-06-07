@@ -2,12 +2,12 @@ package com.example.tasky.main.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
 import com.example.tasky.core.data.Preferences
-import com.example.tasky.main.data.ApiRepository
-import com.example.tasky.main.data.dto.toAgenda
-import com.example.tasky.main.domain.Agenda
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
+import com.example.tasky.main.domain.AgendaDM
+import com.example.tasky.main.domain.AgendaRepository
+import com.example.tasky.main.domain.AuthRepository
 import com.example.tasky.main.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class AgendaViewModel(
-    private val repository: ApiRepository,
+    private val authRepo: AuthRepository,
+    private val agendaRepo: AgendaRepository,
     private val prefs: Preferences
 ) : ViewModel() {
 
@@ -45,10 +46,12 @@ class AgendaViewModel(
             is AgendaAction.UpdateSelectedDate -> {
                 updateSelectedDate(action.newSelection, action.forceSelectedDateToFirstPosition)
             }
+
             AgendaAction.PullToRefresh -> {
                 _state.update { it.copy(isRefreshing = true) }
                 loadDailyAgenda(triggerFromPullToRefresh = true)
             }
+
             AgendaAction.CreateNewEvent -> createNewEvent()
             AgendaAction.CreateNewTask -> createNewTask()
             AgendaAction.CreateNewReminder -> createNewReminder()
@@ -76,16 +79,17 @@ class AgendaViewModel(
 
     private fun loadDailyAgenda(triggerFromPullToRefresh: Boolean = false) {
         viewModelScope.launch {
-            val response = repository.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
+            val response = agendaRepo.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
 
             _state.update {
                 when (response) {
                     is Result.Success -> it.copy(
-                        dailyAgenda = response.data.toAgenda(),
+                        dailyAgenda = response.data,
                         dailyAgendaError = null
                     )
+
                     is Result.Error -> it.copy(
-                        dailyAgenda = Agenda.getEmpty(),
+                        dailyAgenda = AgendaDM.getEmpty(),
                         dailyAgendaError = response.error
                     )
                 }
@@ -99,7 +103,7 @@ class AgendaViewModel(
 
     private fun logOut() {
         viewModelScope.launch {
-            val response = repository.logout()
+            val response = authRepo.logout()
             _navChannel.send(AgendaResponseAction.HandleLogoutResponse(response))
         }
     }
@@ -133,7 +137,7 @@ data class AgendaState(
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
     val firstDateOfHeader: LocalDate = LocalDate.now(),
-    val dailyAgenda: Agenda = Agenda.getSample(),
+    val dailyAgenda: AgendaDM = AgendaDM.getSample(),
     val dailyAgendaError: RootError? = null,
     val isRefreshing: Boolean = false
 )

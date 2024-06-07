@@ -2,13 +2,13 @@ package com.example.tasky.core.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.main.data.ApiRepository
+import com.example.tasky.core.domain.Result
+import com.example.tasky.main.domain.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RootViewModel(private val repository: ApiRepository): ViewModel() {
+class RootViewModel(private val repository: AuthRepository): ViewModel() {
 
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn = _isLoggedIn.asStateFlow()

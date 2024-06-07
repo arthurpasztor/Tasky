@@ -2,10 +2,10 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.data.AuthRepository
-import com.example.tasky.auth.data.dto.LoginRequest
-import com.example.tasky.auth.domain.Result
-import com.example.tasky.auth.domain.RootError
+import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.auth.domain.LoginDM
+import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +47,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = LoginRequest(_state.value.emailText, _state.value.passwordText)
+            val payload = LoginDM(_state.value.emailText, _state.value.passwordText)
             val response = repository.login(payload)
             _navChannel.send(LoginAuthAction.HandleAuthResponse(response))
 

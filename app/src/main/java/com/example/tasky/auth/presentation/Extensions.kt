@@ -1,12 +1,12 @@
-package com.example.tasky.core.domain
+package com.example.tasky.auth.presentation
 
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
-import com.example.tasky.auth.domain.HttpError
-import com.example.tasky.auth.domain.RootError
 import com.example.tasky.auth.domain.asUiText
+import com.example.tasky.core.domain.HttpError
+import com.example.tasky.core.domain.RootError
 
 fun Context.showToast(@StringRes id: Int) {
     val errorMessage = getString(id)
