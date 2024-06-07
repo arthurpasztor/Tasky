@@ -1,10 +1,10 @@
-package com.example.tasky.main.data
+package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.executeRequest
-import com.example.tasky.main.domain.AuthRepository
+import com.example.tasky.agenda.domain.AuthRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider

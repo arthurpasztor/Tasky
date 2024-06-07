@@ -1,8 +1,8 @@
-package com.example.tasky.main.domain
+package com.example.tasky.agenda.domain
 
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.main.domain.AgendaListItem.ReminderDM
+import com.example.tasky.agenda.domain.AgendaListItem.ReminderDM
 
 interface ReminderRepository {
     suspend fun createReminder(reminder: ReminderDM): Result<Unit, RootError>

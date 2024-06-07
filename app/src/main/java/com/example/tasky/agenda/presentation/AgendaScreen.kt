@@ -1,4 +1,4 @@
-package com.example.tasky.main.presentation
+package com.example.tasky.agenda.presentation
 
 import android.util.Log
 import android.widget.Toast
@@ -44,8 +44,8 @@ import com.example.tasky.core.domain.HttpError
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.TaskReminderDetailRootDestination
-import com.example.tasky.main.domain.AgendaItemType
-import com.example.tasky.main.domain.DetailInteractionMode
+import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow

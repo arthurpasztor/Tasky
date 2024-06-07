@@ -1,14 +1,14 @@
-package com.example.tasky.main.presentation
+package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.main.domain.AgendaDM
-import com.example.tasky.main.domain.AgendaRepository
-import com.example.tasky.main.domain.AuthRepository
-import com.example.tasky.main.domain.getUTCMillis
+import com.example.tasky.agenda.domain.AgendaDM
+import com.example.tasky.agenda.domain.AgendaRepository
+import com.example.tasky.agenda.domain.AuthRepository
+import com.example.tasky.agenda.domain.getUTCMillis
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

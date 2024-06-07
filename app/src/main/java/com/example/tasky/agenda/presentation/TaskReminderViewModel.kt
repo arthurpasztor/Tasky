@@ -1,16 +1,16 @@
-package com.example.tasky.main.presentation
+package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.main.domain.AgendaItemType
-import com.example.tasky.main.domain.AgendaListItem.ReminderDM
-import com.example.tasky.main.domain.AgendaListItem.TaskDM
-import com.example.tasky.main.domain.DetailInteractionMode
-import com.example.tasky.main.domain.ReminderRepository
-import com.example.tasky.main.domain.ReminderType
-import com.example.tasky.main.domain.TaskRepository
+import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.AgendaListItem.ReminderDM
+import com.example.tasky.agenda.domain.AgendaListItem.TaskDM
+import com.example.tasky.agenda.domain.DetailInteractionMode
+import com.example.tasky.agenda.domain.ReminderRepository
+import com.example.tasky.agenda.domain.ReminderType
+import com.example.tasky.agenda.domain.TaskRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

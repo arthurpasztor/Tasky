@@ -1,4 +1,4 @@
-package com.example.tasky.main.presentation
+package com.example.tasky.agenda.presentation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -35,12 +35,12 @@ import com.example.tasky.R
 import com.example.tasky.core.domain.Result
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.destinations.TextEditorRootDestination
-import com.example.tasky.main.domain.AgendaItemType
-import com.example.tasky.main.domain.DetailInteractionMode
-import com.example.tasky.main.domain.DetailItemType
-import com.example.tasky.main.domain.ReminderType
-import com.example.tasky.main.domain.formatDetailDate
-import com.example.tasky.main.domain.formatDetailTime
+import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.DetailInteractionMode
+import com.example.tasky.agenda.domain.DetailItemType
+import com.example.tasky.agenda.domain.ReminderType
+import com.example.tasky.agenda.domain.formatDetailDate
+import com.example.tasky.agenda.domain.formatDetailTime
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.ReminderBorderGray

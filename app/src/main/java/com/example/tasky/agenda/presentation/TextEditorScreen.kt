@@ -1,4 +1,4 @@
-package com.example.tasky.main.presentation
+package com.example.tasky.agenda.presentation
 
 import android.os.Parcelable
 import androidx.compose.foundation.background
@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
-import com.example.tasky.main.domain.DetailItemType
+import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.greenSaveButtonStyle

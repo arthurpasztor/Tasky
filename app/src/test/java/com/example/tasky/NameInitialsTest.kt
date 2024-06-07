@@ -2,7 +2,7 @@ package com.example.tasky
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.example.tasky.main.domain.getInitials
+import com.example.tasky.agenda.domain.getInitials
 import org.junit.Test
 
 class NameInitialsTest {

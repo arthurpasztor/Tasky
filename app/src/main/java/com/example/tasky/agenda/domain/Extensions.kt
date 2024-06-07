@@ -1,4 +1,4 @@
-package com.example.tasky.main.domain
+package com.example.tasky.agenda.domain
 
 import java.time.Instant
 import java.time.LocalDate

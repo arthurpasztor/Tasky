@@ -1,13 +1,13 @@
-package com.example.tasky.main.data
+package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
-import com.example.tasky.main.data.dto.ReminderDTO
-import com.example.tasky.main.data.dto.toReminderDTO
-import com.example.tasky.main.domain.AgendaListItem
-import com.example.tasky.main.domain.ReminderRepository
+import com.example.tasky.agenda.data.dto.ReminderDTO
+import com.example.tasky.agenda.data.dto.toReminderDTO
+import com.example.tasky.agenda.domain.AgendaListItem
+import com.example.tasky.agenda.domain.ReminderRepository
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod
 

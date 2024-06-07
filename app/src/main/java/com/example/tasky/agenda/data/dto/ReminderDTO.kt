@@ -1,13 +1,12 @@
-package com.example.tasky.main.data.dto
+package com.example.tasky.agenda.data.dto
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TaskDTO(
+data class ReminderDTO(
     val id: String,
     val title: String,
     val description: String,
     val time: Long,
-    val remindAt: Long,
-    val isDone: Boolean
+    val remindAt: Long
 )

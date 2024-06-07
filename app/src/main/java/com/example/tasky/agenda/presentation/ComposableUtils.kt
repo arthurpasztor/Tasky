@@ -1,4 +1,4 @@
-package com.example.tasky.main.presentation
+package com.example.tasky.agenda.presentation
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -45,11 +45,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
-import com.example.tasky.main.domain.AgendaItemType
-import com.example.tasky.main.domain.DetailInteractionMode
-import com.example.tasky.main.domain.ReminderType
-import com.example.tasky.main.domain.formatHeaderDate
-import com.example.tasky.main.domain.getInitials
+import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.DetailInteractionMode
+import com.example.tasky.agenda.domain.ReminderType
+import com.example.tasky.agenda.domain.formatHeaderDate
+import com.example.tasky.agenda.domain.getInitials
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.Purple40
 import com.example.tasky.ui.theme.PurpleGrey80

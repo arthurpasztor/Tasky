@@ -1,4 +1,4 @@
-package com.example.tasky.main.data.dto
+package com.example.tasky.agenda.data.dto
 
 import kotlinx.serialization.Serializable
 
