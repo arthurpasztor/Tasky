@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.core.domain.Result
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.SignUpRootDestination
@@ -56,18 +55,17 @@ fun LoginRoot(navigator: DestinationsNavigator) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
                 LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
-                is LoginAuthAction.HandleAuthResponse -> {
-                    when (destination.result) {
-                        is Result.Success -> {
-                            navigator.navigate(AgendaRootDestination) {
-                                popUpTo(LoginRootDestination.route) {
-                                    inclusive = true
-                                }
-                            }
-                        }
 
-                        is Result.Error -> context.showToast(destination.result.error, TAG)
+                LoginAuthAction.HandleAuthResponseSuccess -> {
+                    navigator.navigate(AgendaRootDestination) {
+                        popUpTo(LoginRootDestination.route) {
+                            inclusive = true
+                        }
                     }
+                }
+
+                is LoginAuthAction.HandleAuthResponseError -> {
+                    context.showToast(destination.error, TAG)
                 }
             }
         }

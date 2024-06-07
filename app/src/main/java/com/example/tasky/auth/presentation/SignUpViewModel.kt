@@ -3,15 +3,15 @@ package com.example.tasky.auth.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.auth.domain.LoginDM
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.auth.domain.SignUpDM
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword
+import com.example.tasky.core.domain.onError
+import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,29 +66,35 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = SignUpDM(
+            repository.signUp(
                 fullName = _state.value.nameText,
                 email = _state.value.emailText,
                 password = _state.value.passwordText
-            )
-            val response = repository.signUp(payload)
-
-            if (response is Result.Success<*> && response.data is LoginDM) {
-                loginAfterSignUp(response.data)
-            } else {
+            ).onSuccess {
+                val email: String = it.first
+                val password: String = it.second
+                loginAfterSignUp(email, password)
+            }.onError { error ->
                 _state.update { it.copy(isLoading = false) }
 
-                _navChannel.send(SignUpAuthAction.HandleAuthResponse(response))
+                _navChannel.send(SignUpAuthAction.HandleAuthResponseError(error))
             }
         }
     }
 
-    private fun loginAfterSignUp(payload: LoginDM) {
+    private fun loginAfterSignUp(email: String, password: String) {
         viewModelScope.launch {
-            val response = repository.login(payload)
-            _navChannel.send(SignUpAuthAction.HandleAuthResponse(response))
+            repository.login(email, password)
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false) }
 
-            _state.update { it.copy(isLoading = false) }
+                    _navChannel.send(SignUpAuthAction.HandleAuthResponseSuccess)
+                }
+                .onError { error ->
+                    _state.update { it.copy(isLoading = false) }
+
+                    _navChannel.send(SignUpAuthAction.HandleAuthResponseError(error))
+                }
         }
     }
 
@@ -119,5 +125,6 @@ data class SignUpState(
 
 sealed class SignUpAuthAction {
     data object NavigateBack : SignUpAuthAction()
-    class HandleAuthResponse(val result: Result<*, RootError>) : SignUpAuthAction()
+    data object HandleAuthResponseSuccess : SignUpAuthAction()
+    class HandleAuthResponseError(val error: RootError) : SignUpAuthAction()
 }

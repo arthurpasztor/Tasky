@@ -1,15 +1,10 @@
 package com.example.tasky.auth.data
 
 import com.example.tasky.BuildConfig
-import com.example.tasky.auth.data.dto.LoginRequest
-import com.example.tasky.auth.data.dto.SignUpRequest
-import com.example.tasky.auth.data.dto.TokenResponse
-import com.example.tasky.auth.data.dto.toLoginDM
-import com.example.tasky.auth.data.dto.toLoginRequest
-import com.example.tasky.auth.data.dto.toSignUpRequest
+import com.example.tasky.auth.data.dto.LoginDTO
+import com.example.tasky.auth.data.dto.SignUpDTO
+import com.example.tasky.auth.data.dto.TokenDTO
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.auth.domain.LoginDM
-import com.example.tasky.auth.domain.SignUpDM
 import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.Preferences
@@ -23,14 +18,14 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
     private val loginUrl = "${BuildConfig.BASE_URL}/login"
     private val signUpUrl = "${BuildConfig.BASE_URL}/register"
 
-    override suspend fun login(info: LoginDM): Result<Unit, RootError> {
-        return client.executeRequest<LoginRequest, Unit>(
+    override suspend fun login(email: String, password: String): Result<Unit, RootError> {
+        return client.executeRequest<LoginDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = loginUrl,
-            payload = info.toLoginRequest(),
+            payload = LoginDTO(email, password),
             tag = TAG
         ) {
-            val response = it.body<TokenResponse>()
+            val response = it.body<TokenDTO>()
 
             prefs.putEncryptedString(Preferences.KEY_ACCESS_TOKEN, response.accessToken)
             prefs.putEncryptedString(Preferences.KEY_REFRESH_TOKEN, response.refreshToken)
@@ -41,18 +36,18 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
         }
     }
 
-    override suspend fun signUp(info: SignUpDM): Result<LoginDM, RootError> {
-        val result =  client.executeRequest<SignUpRequest, LoginRequest>(
+    override suspend fun signUp(fullName: String, email: String, password: String): Result<Pair<String, String>, RootError> {
+        val result =  client.executeRequest<SignUpDTO, LoginDTO>(
             httpMethod = HttpMethod.Post,
             url = signUpUrl,
-            payload = info.toSignUpRequest(),
+            payload = SignUpDTO(fullName, email, password),
             tag = TAG
         ) {
-            Result.Success(LoginRequest(info.email, info.password))
+            Result.Success(LoginDTO(email, password))
         }
 
         return when (result) {
-            is Result.Success -> Result.Success(result.data.toLoginDM())
+            is Result.Success -> Result.Success(Pair(result.data.email, result.data.password))
             is Result.Error -> result
         }
     }
