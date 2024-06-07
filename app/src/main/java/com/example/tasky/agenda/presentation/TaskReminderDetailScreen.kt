@@ -99,26 +99,22 @@ fun TaskReminderDetailRoot(
                     )
                 }
 
-                is TaskReminderVMAction.CreateTask -> {
-                    when (destination.result) {
-                        is Result.Success -> {
-                            context.showToast(R.string.success_task_created)
-                            navigator.popBackStack()
-                        }
-
-                        is Result.Error -> context.showToast(destination.result.error, TAG)
-                    }
+                TaskReminderVMAction.CreateTaskSuccess -> {
+                    context.showToast(R.string.success_task_created)
+                    navigator.popBackStack()
                 }
 
-                is TaskReminderVMAction.CreateReminder -> {
-                    when (destination.result) {
-                        is Result.Success -> {
-                            context.showToast(R.string.success_reminder_created)
-                            navigator.popBackStack()
-                        }
+                is TaskReminderVMAction.CreateTaskError -> {
+                    context.showToast(destination.error, TAG)
+                }
 
-                        is Result.Error -> context.showToast(destination.result.error, TAG)
-                    }
+                TaskReminderVMAction.CreateReminderSuccess -> {
+                    context.showToast(R.string.success_reminder_created)
+                    navigator.popBackStack()
+                }
+
+                is TaskReminderVMAction.CreateReminderError -> {
+                    context.showToast(destination.error, TAG)
                 }
             }
         }

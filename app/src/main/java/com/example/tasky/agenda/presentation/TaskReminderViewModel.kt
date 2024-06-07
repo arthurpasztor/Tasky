@@ -11,6 +11,8 @@ import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
+import com.example.tasky.core.domain.onError
+import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -110,13 +112,29 @@ class TaskReminderViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = getTaskPayload()
-            val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
-                taskRepo.createTask(payload)
-            } else {
-                taskRepo.updateTask(payload)
+            when (_state.value.interactionMode) {
+                DetailInteractionMode.CREATE -> {
+                    taskRepo.createTask(getTaskPayload())
+                        .onSuccess {
+                            _navChannel.send(TaskReminderVMAction.CreateTaskSuccess)
+                        }
+                        .onError {
+                            _navChannel.send(TaskReminderVMAction.CreateTaskError(it))
+                        }
+                }
+
+                DetailInteractionMode.EDIT -> {
+                    taskRepo.updateTask(getTaskPayload())
+                        .onSuccess {
+                            //TODO
+                        }
+                        .onError {
+                            //TODO
+                        }
+                }
+
+                DetailInteractionMode.VIEW -> TODO()
             }
-            _navChannel.send(TaskReminderVMAction.CreateTask(response))
 
             _state.update { it.copy(isLoading = false) }
         }
@@ -126,13 +144,29 @@ class TaskReminderViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val payload = getReminderPayload()
-            val response = if (_state.value.interactionMode == DetailInteractionMode.CREATE) {
-                reminderRepo.createReminder(payload)
-            } else {
-                reminderRepo.updateReminder(payload)
+            when (_state.value.interactionMode) {
+                DetailInteractionMode.CREATE -> {
+                    reminderRepo.createReminder(getReminderPayload())
+                        .onSuccess {
+                            _navChannel.send(TaskReminderVMAction.CreateReminderSuccess)
+                        }
+                        .onError {
+                            _navChannel.send(TaskReminderVMAction.CreateReminderError(it))
+                        }
+                }
+
+                DetailInteractionMode.EDIT -> {
+                    reminderRepo.updateReminder(getReminderPayload())
+                        .onSuccess {
+                            //TODO
+                        }
+                        .onError {
+                            //TODO
+                        }
+                }
+
+                DetailInteractionMode.VIEW -> TODO()
             }
-            _navChannel.send(TaskReminderVMAction.CreateReminder(response))
 
             _state.update { it.copy(isLoading = false) }
         }
@@ -187,6 +221,8 @@ data class TaskReminderState(
 sealed class TaskReminderVMAction {
     data object OpenTitleEditor : TaskReminderVMAction()
     data object OpenDescriptionEditor : TaskReminderVMAction()
-    class CreateTask(val result: Result<Unit, RootError>) : TaskReminderVMAction()
-    class CreateReminder(val result: Result<Unit, RootError>) : TaskReminderVMAction()
+    data object CreateTaskSuccess : TaskReminderVMAction()
+    class CreateTaskError(val error: RootError) : TaskReminderVMAction()
+    data object CreateReminderSuccess : TaskReminderVMAction()
+    class CreateReminderError(val error: RootError) : TaskReminderVMAction()
 }
