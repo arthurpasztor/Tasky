@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +45,7 @@ import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.TaskReminderDetailRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailInteractionMode
+import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
@@ -129,7 +131,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 @Preview
 @Composable
 private fun AgendaScreen(
-    state: AgendaState = AgendaState("Arthur"),
+    state: AgendaState = AgendaState(userName = "Arthur"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
@@ -179,22 +181,30 @@ private fun AgendaScreen(
                     .fillMaxSize()
                     .padding(top = 100.dp)
                 ) {
+                    if (state.isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
                     PullToRefreshLazyColumn(
                         items = state.dailyAgenda.toAgendaItemUiList(),
                         content = {
                             AgendaItem(it)
                         },
                         needleContent = {
-                            Text(
-                                text = "Needle",
-                                modifier = Modifier
-                                    .background(Color.Red)
-                            )
+                            Needle()
                         },
                         isRefreshing = state.isRefreshing,
                         onRefresh = {
                             onAction.invoke(AgendaAction.PullToRefresh)
-                        }
+                        },
+                        isSelectedDateToday = state.selectedDate.isToday()
                     )
                 }
 
@@ -252,7 +262,7 @@ sealed class AgendaAction {
 @Composable
 fun WeekHeader(
     modifier: Modifier = Modifier,
-    state: AgendaState = AgendaState("Arthur"),
+    state: AgendaState = AgendaState(userName = "Arthur"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
     Row(

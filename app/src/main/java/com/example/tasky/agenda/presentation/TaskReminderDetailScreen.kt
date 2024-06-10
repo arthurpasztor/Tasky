@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.core.domain.Result
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
@@ -230,7 +229,7 @@ private fun TaskReminderDetailScreen(
                 }
             }
 
-            Divider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
 
             Row(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
@@ -247,7 +246,7 @@ private fun TaskReminderDetailScreen(
                 }
             }
 
-            Divider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
 
             Row(modifier = Modifier.padding(vertical = 20.dp)) {
                 Text(
@@ -279,7 +278,7 @@ private fun TaskReminderDetailScreen(
                 Spacer(Modifier.weight(1f))
             }
 
-            Divider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
 
             ReminderSelector(
                 modifier = Modifier.padding(vertical = 20.dp),
@@ -287,7 +286,7 @@ private fun TaskReminderDetailScreen(
                 onAction = onAction
             )
 
-            Divider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
         }
     }
 

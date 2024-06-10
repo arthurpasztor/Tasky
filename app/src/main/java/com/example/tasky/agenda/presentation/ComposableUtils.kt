@@ -159,7 +159,7 @@ private fun ReminderType.getReminderString(context: Context): String {
 @Composable
 fun ProfileIcon(
     modifier: Modifier = Modifier,
-    state: AgendaState = AgendaState("Arthur Pasztor"),
+    state: AgendaState = AgendaState(userName = "Arthur Pasztor"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
     var isContextMenuVisible by rememberSaveable {
