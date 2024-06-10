@@ -10,6 +10,10 @@ sealed class AgendaListItem {
 
     open fun getFormattedTime() : String = ""
 
+    fun isAfterNow() = time.isAfter(LocalDateTime.now())
+
+    fun isBeforeNow() = time.isBefore(LocalDateTime.now())
+
     data class Task(
         val id: String,
         val title: String,

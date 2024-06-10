@@ -47,3 +47,4 @@ fun Long.getLocalDateTimeFromMillis(): LocalDateTime = LocalDateTime.ofInstant(I
 
 fun LocalDateTime.formatAgendaDateTime(): String = format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
 
+fun LocalDate.isToday() = this == LocalDate.now()

@@ -52,6 +52,7 @@
     <string name="reminder_1_hour">1 hour before</string>
     <string name="reminder_6_hours">6 hour before</string>
     <string name="reminder_1_day">1 day before</string>
+    <string name="today">Today</string>
 
     <string name="success_task_created">Task successfully created</string>
     <string name="success_reminder_created">Reminder successfully created</string>

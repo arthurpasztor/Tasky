@@ -2,14 +2,14 @@ package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.core.data.Preferences
-import com.example.tasky.core.domain.Result
-import com.example.tasky.core.domain.RootError
-import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.getUTCMillis
+import com.example.tasky.agenda.domain.isToday
+import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
@@ -66,13 +66,15 @@ class AgendaViewModel(
             _state.update {
                 it.copy(
                     selectedDate = date,
-                    firstDateOfHeader = date
+                    isSelectedDateToday = date.isToday(),
+                    firstDateOfHeader = date,
                 )
             }
         } else {
             _state.update {
                 it.copy(
-                    selectedDate = date
+                    selectedDate = date,
+                    isSelectedDateToday = date.isToday(),
                 )
             }
         }
@@ -82,10 +84,13 @@ class AgendaViewModel(
 
     private fun loadDailyAgenda(triggerFromPullToRefresh: Boolean = false) {
         viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
             agendaRepo.getDailyAgenda(_state.value.selectedDate.getUTCMillis())
                 .onSuccess { agenda ->
                     _state.update {
-                         it.copy(
+                        it.copy(
+                            isLoading = false,
                             dailyAgenda = agenda,
                             dailyAgendaError = null
                         )
@@ -94,6 +99,7 @@ class AgendaViewModel(
                 .onError { error ->
                     _state.update {
                         it.copy(
+                            isLoading = false,
                             dailyAgenda = Agenda.getEmpty(),
                             dailyAgendaError = error
                         )
@@ -144,8 +150,10 @@ class AgendaViewModel(
 }
 
 data class AgendaState(
+    val isLoading: Boolean = false,
     val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
+    val isSelectedDateToday: Boolean = false,
     val firstDateOfHeader: LocalDate = LocalDate.now(),
     val dailyAgenda: Agenda = Agenda.getSample(),
     val dailyAgendaError: RootError? = null,
