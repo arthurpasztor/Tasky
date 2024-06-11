@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
+import com.example.tasky.agenda.domain.ReminderRepository
+import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.getUTCMillis
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.RootError
@@ -23,6 +26,8 @@ import java.time.LocalDate
 class AgendaViewModel(
     private val authRepo: AuthRepository,
     private val agendaRepo: AgendaRepository,
+    private val taskRepo: TaskRepository,
+    private val reminderRepo: ReminderRepository,
     private val prefs: Preferences
 ) : ViewModel() {
 
@@ -58,6 +63,28 @@ class AgendaViewModel(
             AgendaAction.CreateNewEvent -> createNewEvent()
             AgendaAction.CreateNewTask -> createNewTask()
             AgendaAction.CreateNewReminder -> createNewReminder()
+
+            is AgendaAction.SetTaskDone -> setTaskDone(action.task)
+        }
+    }
+
+    private fun setTaskDone(task: AgendaListItem.Task) {
+        val taskDone = task.copy(isDone = true)
+
+        viewModelScope.launch {
+            taskRepo.updateTask(taskDone)
+                .onSuccess {
+                    _state.update {
+                        val newAgenda = _state.value.dailyAgenda.copyAgenda().apply { setTaskDone(taskDone) }
+
+                        it.copy(
+                            dailyAgenda = newAgenda
+                        )
+                    }
+                }
+                .onError {
+                    _navChannel.send(AgendaResponseAction.SetTaskDoneError(it))
+                }
         }
     }
 
@@ -155,7 +182,7 @@ data class AgendaState(
     val selectedDate: LocalDate = LocalDate.now(),
     val isSelectedDateToday: Boolean = false,
     val firstDateOfHeader: LocalDate = LocalDate.now(),
-    val dailyAgenda: Agenda = Agenda.getSample(),
+    val dailyAgenda: Agenda = Agenda(),
     val dailyAgendaError: RootError? = null,
     val isRefreshing: Boolean = false
 )
@@ -163,7 +190,10 @@ data class AgendaState(
 sealed class AgendaResponseAction {
     data object HandleLogoutResponseSuccess : AgendaResponseAction()
     class HandleLogoutResponseError(val error: DataError) : AgendaResponseAction()
+
     data object CreateNewEventAction : AgendaResponseAction()
     data object CreateNewTaskAction : AgendaResponseAction()
     data object CreateNewReminderAction : AgendaResponseAction()
+
+    class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
 }

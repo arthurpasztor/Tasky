@@ -56,17 +56,26 @@ import com.example.tasky.ui.theme.agendaListTitleStyle
 @Preview
 @Composable
 private fun TaskItemPreview() {
-    AgendaItem(item = getTaskSample())
+    AgendaItem(
+        item = getTaskSample(),
+        onDoneRadioButtonClicked = {}
+    )
 }
 
 @Preview
 @Composable
 private fun ReminderItemPreview() {
-    AgendaItem(item = getReminderSample())
+    AgendaItem(
+        item = getReminderSample(),
+        onDoneRadioButtonClicked = {}
+    )
 }
 
 @Composable
-fun <T : AgendaItemUi> AgendaItem(item: T) {
+fun <T : AgendaItemUi> AgendaItem(
+    item: T,
+    onDoneRadioButtonClicked: (AgendaItemUi.TaskUi) -> Unit,
+) {
     val backgroundColor = when (item) {
         is AgendaItemUi.TaskUi -> TaskyGreen
         else -> ReminderGray
@@ -117,7 +126,11 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
                         selectedColor = headerColor,
                         unselectedColor = headerColor
                     ),
-                    onClick = { }
+                    onClick = {
+                        if (item is AgendaItemUi.TaskUi) {
+                            onDoneRadioButtonClicked.invoke(item)
+                        }
+                    }
                 )
                 Column(
                     modifier = Modifier
@@ -180,7 +193,10 @@ fun PullToRefreshLazyColumnPreview() {
         modifier = Modifier.fillMaxSize(),
         items = getAgendaSample(),
         content = {
-            AgendaItem(it)
+            AgendaItem(
+                item = it,
+                onDoneRadioButtonClicked = {}
+            )
         },
         needleContent = {
             Needle()
@@ -274,8 +290,8 @@ fun Needle() {
             .size(14.dp)
             .align(Alignment.CenterVertically),
             onDraw = {
-            drawCircle(color = Color.Black)
-        })
+                drawCircle(color = Color.Black)
+            })
         HorizontalDivider(
             modifier = Modifier
                 .align(Alignment.CenterVertically),

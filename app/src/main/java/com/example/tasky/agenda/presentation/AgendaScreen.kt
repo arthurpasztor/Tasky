@@ -1,7 +1,6 @@
 package com.example.tasky.agenda.presentation
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,13 +38,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.TaskReminderDetailRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.isToday
+import com.example.tasky.agenda.domain.model.AgendaListItem
+import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
@@ -83,9 +83,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 }
 
                 is AgendaResponseAction.HandleLogoutResponseError -> {
-                    val errorMessage = destination.error.asUiText().asString(context)
-                    Log.e(TAG, "Error: $errorMessage")
-                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                    context.showToast(destination.error, TAG)
                 }
 
                 AgendaResponseAction.CreateNewEventAction -> {
@@ -117,6 +115,10 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                             inclusive = true
                         }
                     }
+                }
+
+                is AgendaResponseAction.SetTaskDoneError -> {
+                    context.showToast(destination.error, TAG)
                 }
             }
         }
@@ -195,7 +197,11 @@ private fun AgendaScreen(
                     PullToRefreshLazyColumn(
                         items = state.dailyAgenda.toAgendaItemUiList(),
                         content = {
-                            AgendaItem(it)
+                            AgendaItem(
+                                item = it,
+                                onDoneRadioButtonClicked = { taskUi ->
+                                    onAction.invoke(AgendaAction.SetTaskDone(taskUi.task))
+                                })
                         },
                         needleContent = {
                             Needle()
@@ -256,6 +262,7 @@ sealed class AgendaAction {
     data object CreateNewEvent : AgendaAction()
     data object CreateNewTask : AgendaAction()
     data object CreateNewReminder : AgendaAction()
+    class SetTaskDone(val task: AgendaListItem.Task) : AgendaAction()
 }
 
 @Preview
