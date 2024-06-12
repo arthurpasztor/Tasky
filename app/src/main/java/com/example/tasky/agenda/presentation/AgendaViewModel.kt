@@ -2,6 +2,7 @@ package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.ReminderRepository
@@ -69,10 +70,7 @@ class AgendaViewModel(
             is AgendaAction.Edit -> {
                 //TODO
             }
-
-            is AgendaAction.Open -> {
-                //TODO
-            }
+            is AgendaAction.Open -> openAgendaItem(action.itemId, action.itemType)
         }
     }
 
@@ -165,7 +163,7 @@ class AgendaViewModel(
                         }
                     }
                     .onError {
-                        _navChannel.send(AgendaResponseAction.DeleteItemError(it))
+                        _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
                     }
             }
         } else if (item is AgendaItemUi.ReminderUi) {
@@ -179,9 +177,15 @@ class AgendaViewModel(
                         }
                     }
                     .onError {
-                        _navChannel.send(AgendaResponseAction.DeleteItemError(it))
+                        _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
                     }
             }
+        }
+    }
+
+    private fun openAgendaItem(itemId: String, itemType: AgendaItemType) {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.OpenAgendaItem(itemId, itemType))
         }
     }
 
@@ -242,5 +246,6 @@ sealed class AgendaResponseAction {
     data object CreateNewReminderAction : AgendaResponseAction()
 
     class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
-    class DeleteItemError(val error: DataError) : AgendaResponseAction()
+    class DeleteAgendaItemError(val error: DataError) : AgendaResponseAction()
+    class OpenAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
 }

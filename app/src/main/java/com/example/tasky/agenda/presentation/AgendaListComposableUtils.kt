@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
@@ -57,7 +58,7 @@ private fun TaskItemPreview() {
     AgendaItem(
         item = getTaskSample(),
         onDoneRadioButtonClicked = {},
-        onOpen = {},
+        onOpen = { _, _ -> },
         onEdit = {},
         onDelete = {}
     )
@@ -69,7 +70,7 @@ private fun ReminderItemPreview() {
     AgendaItem(
         item = getReminderSample(),
         onDoneRadioButtonClicked = {},
-        onOpen = {},
+        onOpen = { _, _ -> },
         onEdit = {},
         onDelete = {}
     )
@@ -79,7 +80,7 @@ private fun ReminderItemPreview() {
 fun <T : AgendaItemUi> AgendaItem(
     item: T,
     onDoneRadioButtonClicked: (AgendaItemUi.TaskUi) -> Unit,
-    onOpen: (AgendaItemUi) -> Unit,
+    onOpen: (itemId: String, itemType: AgendaItemType) -> Unit,
     onEdit: (AgendaItemUi) -> Unit,
     onDelete: (AgendaItemUi) -> Unit
 ) {
@@ -170,7 +171,7 @@ fun <T : AgendaItemUi> AgendaItem(
                 AgendaItemMoreButton(
                     modifier = Modifier.align(Alignment.Top),
                     tint = headerColor,
-                    onOpen = { onOpen.invoke(item) },
+                    onOpen = { onOpen.invoke(item.id, item.getAgendaItemType()) },
                     onEdit = { onEdit.invoke(item) },
                     onDelete = { deleteAlertDialogState.show() }
                 )
@@ -218,7 +219,7 @@ fun PullToRefreshLazyColumnPreview() {
             AgendaItem(
                 item = it,
                 onDoneRadioButtonClicked = {},
-                onOpen = {},
+                onOpen = { _, _ -> },
                 onEdit = {},
                 onDelete = {}
             )

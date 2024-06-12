@@ -4,7 +4,8 @@ import java.time.LocalDateTime
 
 enum class AgendaItemType {
     TASK,
-    REMINDER
+    REMINDER,
+    UNKNOWN
 }
 
 enum class DetailInteractionMode {
