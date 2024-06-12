@@ -126,6 +126,16 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                         )
                     )
                 }
+
+                is AgendaResponseAction.EditAgendaItem -> {
+                    navigator.navigate(
+                        TaskReminderDetailRootDestination(
+                            type = destination.itemType,
+                            mode = DetailInteractionMode.EDIT,
+                            itemId = destination.itemId
+                        )
+                    )
+                }
             }
         }
     }
@@ -211,8 +221,8 @@ private fun AgendaScreen(
                                 onOpen = { itemId, itemType ->
                                     onAction.invoke(AgendaAction.Open(itemId, itemType))
                                 },
-                                onEdit = { item ->
-                                    onAction.invoke(AgendaAction.Edit(item))
+                                onEdit = { itemId, itemType ->
+                                    onAction.invoke(AgendaAction.Edit(itemId, itemType))
                                 },
                                 onDelete = { item ->
                                     onAction.invoke(AgendaAction.Delete(item))
@@ -280,7 +290,7 @@ sealed class AgendaAction {
     data object CreateNewReminder : AgendaAction()
     class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction()
     class Open(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
-    class Edit(val item: AgendaItemUi) : AgendaAction()
+    class Edit(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
     class Delete(val item: AgendaItemUi) : AgendaAction()
 }
 

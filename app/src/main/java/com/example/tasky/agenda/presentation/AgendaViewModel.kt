@@ -67,9 +67,7 @@ class AgendaViewModel(
 
             is AgendaAction.SetTaskDone -> setTaskDone(action.task.task)
             is AgendaAction.Delete -> deleteItem(action.item)
-            is AgendaAction.Edit -> {
-                //TODO
-            }
+            is AgendaAction.Edit -> editAgendaItem(action.itemId, action.itemType)
             is AgendaAction.Open -> openAgendaItem(action.itemId, action.itemType)
         }
     }
@@ -189,6 +187,12 @@ class AgendaViewModel(
         }
     }
 
+    private fun editAgendaItem(itemId: String, itemType: AgendaItemType) {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.EditAgendaItem(itemId, itemType))
+        }
+    }
+
     private fun logOut() {
         viewModelScope.launch {
             authRepo.logout()
@@ -248,4 +252,5 @@ sealed class AgendaResponseAction {
     class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
     class DeleteAgendaItemError(val error: DataError) : AgendaResponseAction()
     class OpenAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
+    class EditAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
 }
