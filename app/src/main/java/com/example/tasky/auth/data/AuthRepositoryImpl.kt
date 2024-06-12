@@ -6,10 +6,10 @@ import com.example.tasky.auth.data.dto.SignUpDTO
 import com.example.tasky.auth.data.dto.TokenDTO
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.Result
-import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.EmptyResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
@@ -19,7 +19,7 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
     private val loginUrl = "${BuildConfig.BASE_URL}/login"
     private val signUpUrl = "${BuildConfig.BASE_URL}/register"
 
-    override suspend fun login(email: String, password: String): Result<Unit, DataError> {
+    override suspend fun login(email: String, password: String): EmptyResult<DataError> {
         return client.executeRequest<LoginDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = loginUrl,

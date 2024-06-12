@@ -7,6 +7,7 @@ import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod
@@ -15,7 +16,7 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
 
     private val taskUrl = "${BuildConfig.BASE_URL}/task"
 
-    override suspend fun createTask(task: AgendaListItem.Task): Result<Unit, DataError> {
+    override suspend fun createTask(task: AgendaListItem.Task): EmptyResult<DataError> {
         return client.executeRequest<TaskDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = taskUrl,
@@ -26,7 +27,7 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
         }
     }
 
-    override suspend fun updateTask(task: AgendaListItem.Task): Result<Unit, DataError> {
+    override suspend fun updateTask(task: AgendaListItem.Task): EmptyResult<DataError> {
         return client.executeRequest<TaskDTO, Unit>(
             httpMethod = HttpMethod.Put,
             url = taskUrl,
@@ -37,7 +38,7 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
         }
     }
 
-    override suspend fun deleteTask(taskId: String): Result<Unit, DataError> {
+    override suspend fun deleteTask(taskId: String): EmptyResult<DataError> {
         return client.executeRequest<Unit, Unit>(
             httpMethod = HttpMethod.Delete,
             url = taskUrl,

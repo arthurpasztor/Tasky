@@ -7,6 +7,7 @@ import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod
@@ -15,7 +16,7 @@ class ReminderRepositoryImpl(private val client: HttpClient) : ReminderRepositor
 
     private val reminderUrl = "${BuildConfig.BASE_URL}/reminder"
 
-    override suspend fun createReminder(reminder: AgendaListItem.Reminder): Result<Unit, DataError> {
+    override suspend fun createReminder(reminder: AgendaListItem.Reminder): EmptyResult<DataError> {
         return client.executeRequest<ReminderDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = reminderUrl,
@@ -26,7 +27,7 @@ class ReminderRepositoryImpl(private val client: HttpClient) : ReminderRepositor
         }
     }
 
-    override suspend fun updateReminder(reminder: AgendaListItem.Reminder): Result<Unit, DataError> {
+    override suspend fun updateReminder(reminder: AgendaListItem.Reminder): EmptyResult<DataError> {
         return client.executeRequest<ReminderDTO, Unit>(
             httpMethod = HttpMethod.Put,
             url = reminderUrl,
@@ -37,7 +38,7 @@ class ReminderRepositoryImpl(private val client: HttpClient) : ReminderRepositor
         }
     }
 
-    override suspend fun deleteReminder(reminderId: String): Result<Unit, DataError> {
+    override suspend fun deleteReminder(reminderId: String): EmptyResult<DataError> {
         return client.executeRequest<Unit, Unit>(
             httpMethod = HttpMethod.Delete,
             url = reminderUrl,

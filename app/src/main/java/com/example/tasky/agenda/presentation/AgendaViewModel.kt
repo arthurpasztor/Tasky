@@ -69,6 +69,7 @@ class AgendaViewModel(
             is AgendaAction.Edit -> {
                 //TODO
             }
+
             is AgendaAction.Open -> {
                 //TODO
             }
@@ -133,10 +134,16 @@ class AgendaViewModel(
             taskRepo.updateTask(taskDone)
                 .onSuccess {
                     _state.update {
-                        val newAgenda = _state.value.dailyAgenda.copyAgenda().apply { setTaskDone(taskDone) }
-
                         it.copy(
-                            dailyAgenda = newAgenda
+                            dailyAgenda = Agenda(
+                                _state.value.dailyAgenda.items.map { currentItem ->
+                                    if (currentItem is AgendaListItem.Task && currentItem.id == taskDone.id) {
+                                        currentItem.copy(isDone = taskDone.isDone)
+                                    } else {
+                                        currentItem
+                                    }
+                                }.toMutableList()
+                            )
                         )
                     }
                 }

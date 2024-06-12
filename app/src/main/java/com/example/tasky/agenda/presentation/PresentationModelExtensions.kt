@@ -50,11 +50,6 @@ private fun Agenda.addNeedleItem(list: List<AgendaItemUi>): List<AgendaItemUi> {
     return mutableList.toList()
 }
 
-fun Agenda.copyAgenda(): Agenda {
-    val newList = mutableListOf<AgendaListItem>().apply { addAll(items) }
-    return Agenda(newList)
-}
-
 fun Agenda.removeItem(item: AgendaListItem) = Agenda(items.filterNot { it == item }.toMutableList())
 
 fun getAgendaSample() = Agenda.getSample().toAgendaItemUiList()
