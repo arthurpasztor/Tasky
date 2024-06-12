@@ -66,7 +66,7 @@ class AgendaViewModel(
             AgendaAction.CreateNewReminder -> createNewReminder()
 
             is AgendaAction.SetTaskDone -> setTaskDone(action.task.task)
-            is AgendaAction.Delete -> deleteItem(action.item)
+            is AgendaAction.Delete -> deleteItem(action.itemId, action.itemType)
             is AgendaAction.Edit -> editAgendaItem(action.itemId, action.itemType)
             is AgendaAction.Open -> openAgendaItem(action.itemId, action.itemType)
         }
@@ -149,14 +149,14 @@ class AgendaViewModel(
         }
     }
 
-    private fun deleteItem(item: AgendaItemUi) {
-        if (item is AgendaItemUi.TaskUi) {
+    private fun deleteItem(itemId: String, itemType: AgendaItemType) {
+        if (itemType == AgendaItemType.TASK) {
             viewModelScope.launch {
-                taskRepo.deleteTask(item.task.id)
+                taskRepo.deleteTask(itemId)
                     .onSuccess {
                         _state.update {
                             it.copy(
-                                dailyAgenda = _state.value.dailyAgenda.removeItem(item.task)
+                                dailyAgenda = _state.value.dailyAgenda.removeItem(itemId)
                             )
                         }
                     }
@@ -164,13 +164,13 @@ class AgendaViewModel(
                         _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
                     }
             }
-        } else if (item is AgendaItemUi.ReminderUi) {
+        } else if (itemType == AgendaItemType.REMINDER) {
             viewModelScope.launch {
-                reminderRepo.deleteReminder(item.reminder.id)
+                reminderRepo.deleteReminder(itemId)
                     .onSuccess {
                         _state.update {
                             it.copy(
-                                dailyAgenda = _state.value.dailyAgenda.removeItem(item.reminder)
+                                dailyAgenda = _state.value.dailyAgenda.removeItem(itemId)
                             )
                         }
                     }

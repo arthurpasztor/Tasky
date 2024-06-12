@@ -60,7 +60,7 @@ private fun TaskItemPreview() {
         onDoneRadioButtonClicked = {},
         onOpen = { _, _ -> },
         onEdit = { _, _ -> },
-        onDelete = {}
+        onDelete = { _, _ -> }
     )
 }
 
@@ -72,7 +72,7 @@ private fun ReminderItemPreview() {
         onDoneRadioButtonClicked = {},
         onOpen = { _, _ -> },
         onEdit = { _, _ -> },
-        onDelete = {}
+        onDelete = { _, _ -> }
     )
 }
 
@@ -82,7 +82,7 @@ fun <T : AgendaItemUi> AgendaItem(
     onDoneRadioButtonClicked: (AgendaItemUi.TaskUi) -> Unit,
     onOpen: (itemId: String, itemType: AgendaItemType) -> Unit,
     onEdit: (itemId: String, itemType: AgendaItemType) -> Unit,
-    onDelete: (AgendaItemUi) -> Unit
+    onDelete: (itemId: String, itemType: AgendaItemType) -> Unit
 ) {
     val deleteAlertDialogState = rememberMaterialDialogState()
 
@@ -195,7 +195,7 @@ fun <T : AgendaItemUi> AgendaItem(
         buttons = {
             positiveButton(text = stringResource(id = R.string.confirm)) {
                 deleteAlertDialogState.hide()
-                onDelete.invoke(item)
+                onDelete.invoke(item.id, item.getAgendaItemType())
             }
             negativeButton(text = stringResource(id = R.string.cancel)) {
                 deleteAlertDialogState.hide()
@@ -221,7 +221,7 @@ fun PullToRefreshLazyColumnPreview() {
                 onDoneRadioButtonClicked = {},
                 onOpen = { _, _ -> },
                 onEdit = { _, _ -> },
-                onDelete = {}
+                onDelete = { _, _ -> }
             )
         },
         needleContent = {

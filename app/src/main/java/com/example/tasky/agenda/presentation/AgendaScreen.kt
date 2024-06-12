@@ -224,8 +224,8 @@ private fun AgendaScreen(
                                 onEdit = { itemId, itemType ->
                                     onAction.invoke(AgendaAction.Edit(itemId, itemType))
                                 },
-                                onDelete = { item ->
-                                    onAction.invoke(AgendaAction.Delete(item))
+                                onDelete = { itemId, itemType ->
+                                    onAction.invoke(AgendaAction.Delete(itemId, itemType))
                                 }
                             )
                         },
@@ -291,7 +291,7 @@ sealed class AgendaAction {
     class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction()
     class Open(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
     class Edit(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
-    class Delete(val item: AgendaItemUi) : AgendaAction()
+    class Delete(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
 }
 
 @Preview
