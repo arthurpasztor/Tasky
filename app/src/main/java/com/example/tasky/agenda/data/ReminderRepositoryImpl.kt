@@ -49,6 +49,19 @@ class ReminderRepositoryImpl(private val client: HttpClient) : ReminderRepositor
         }
     }
 
+    override suspend fun getReminderDetails(taskId: String): Result<ReminderDTO, DataError> {
+        // TODO implement with real data after DB integration
+        return Result.Success(
+            ReminderDTO(
+                id = "12345",
+                title = "Test reminder title",
+                description = "Test reminder description",
+                time = 1718172948451,
+                remindAt = 1718172348451,
+            )
+        )
+    }
+
     companion object {
         private const val TAG = "ReminderRepository"
 

@@ -49,6 +49,20 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
         }
     }
 
+    override suspend fun getTaskDetails(taskId: String): Result<TaskDTO, DataError> {
+        // TODO implement with real data after DB integration
+        return Result.Success(
+            TaskDTO(
+                id = "12345",
+                title = "Test task title",
+                description = "Test task description",
+                time = 1718173815082,
+                remindAt = 1718172015082,
+                isDone = true
+            )
+        )
+    }
+
     companion object {
         private const val TAG = "TaskRepository"
 

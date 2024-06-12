@@ -78,7 +78,7 @@ fun TaskReminderDetailRoot(
     val TAG = "TaskDetailScreen"
 
     val context = LocalContext.current
-    val viewModel: TaskReminderViewModel = getViewModel(parameters = { parametersOf(type, mode) })
+    val viewModel: TaskReminderViewModel = getViewModel(parameters = { parametersOf(type, mode, itemId) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
@@ -107,18 +107,16 @@ fun TaskReminderDetailRoot(
                     navigator.popBackStack()
                 }
 
-                is TaskReminderVMAction.CreateTaskError -> {
-                    context.showToast(destination.error, TAG)
-                }
+                is TaskReminderVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
 
                 TaskReminderVMAction.CreateReminderSuccess -> {
                     context.showToast(R.string.success_reminder_created)
                     navigator.popBackStack()
                 }
 
-                is TaskReminderVMAction.CreateReminderError -> {
-                    context.showToast(destination.error, TAG)
-                }
+                is TaskReminderVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
+                is TaskReminderVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
+                is TaskReminderVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
             }
         }
     }
@@ -170,6 +168,7 @@ private fun TaskReminderDetailScreen(
         AgendaItemDetailHeader(
             agendaItemType = state.agendaItemType,
             interactionMode = state.interactionMode,
+            headerDate = state.date,
             onNavigateBack = { onNavigateBack() },
             onSwitchToEditMode = { onAction(TaskReminderAction.SwitchToEditMode) },
             onSave = {
