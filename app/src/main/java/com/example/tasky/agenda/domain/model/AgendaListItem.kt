@@ -6,6 +6,7 @@ import java.util.UUID
 
 sealed class AgendaListItem {
 
+    open val id: String = UUID.randomUUID().toString()
     open val time: LocalDateTime = LocalDateTime.now()
 
     open fun getFormattedTime() : String = ""
@@ -15,7 +16,7 @@ sealed class AgendaListItem {
     fun isBeforeNow() = time.isBefore(LocalDateTime.now())
 
     data class Task(
-        val id: String,
+        override val id: String,
         val title: String,
         val description: String,
         override val time: LocalDateTime,
@@ -37,7 +38,7 @@ sealed class AgendaListItem {
     }
 
     data class Reminder(
-        val id: String,
+        override val id: String,
         val title: String,
         val description: String,
         override val time: LocalDateTime,

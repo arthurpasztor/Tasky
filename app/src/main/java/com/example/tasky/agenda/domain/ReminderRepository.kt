@@ -7,4 +7,5 @@ import com.example.tasky.core.domain.Result
 interface ReminderRepository {
     suspend fun createReminder(reminder: Reminder): Result<Unit, DataError>
     suspend fun updateReminder(reminder: Reminder): Result<Unit, DataError>
+    suspend fun deleteReminder(reminderId: String): Result<Unit, DataError>
 }

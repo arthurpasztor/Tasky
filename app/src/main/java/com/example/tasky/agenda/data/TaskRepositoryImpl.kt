@@ -27,10 +27,30 @@ class TaskRepositoryImpl(private val client: HttpClient) : TaskRepository {
     }
 
     override suspend fun updateTask(task: AgendaListItem.Task): Result<Unit, DataError> {
-        TODO("Not yet implemented")
+        return client.executeRequest<TaskDTO, Unit>(
+            httpMethod = HttpMethod.Put,
+            url = taskUrl,
+            payload = task.toTaskDTO(),
+            tag = TAG
+        ) {
+            Result.Success(Unit)
+        }
+    }
+
+    override suspend fun deleteTask(taskId: String): Result<Unit, DataError> {
+        return client.executeRequest<Unit, Unit>(
+            httpMethod = HttpMethod.Delete,
+            url = taskUrl,
+            queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
+            tag = TAG
+        ) {
+            Result.Success(Unit)
+        }
     }
 
     companion object {
         private const val TAG = "TaskRepository"
+
+        private const val QUERY_PARAM_KEY_ID = "taskId"
     }
 }

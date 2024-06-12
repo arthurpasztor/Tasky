@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -288,6 +289,83 @@ fun AddButton(
                 text = { Text(text = stringResource(id = R.string.reminder)) },
                 onClick = {
                     onAction.invoke(AgendaAction.CreateNewReminder)
+                    isContextMenuVisible = false
+                })
+        }
+    }
+}
+
+@Preview
+@Composable
+fun AgendaItemMoreButton(
+    modifier: Modifier = Modifier,
+    tint: Color = Color.White,
+    onOpen: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onDelete: () -> Unit = {}
+) {
+    var isContextMenuVisible by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var pressOffset by remember {
+        mutableStateOf(DpOffset.Zero)
+    }
+    var itemHeight by remember {
+        mutableStateOf(0.dp)
+    }
+    val density = LocalDensity.current
+
+    Box(
+        modifier = modifier
+            .onSizeChanged {
+                itemHeight = with(density) { it.height.toDp() }
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .pointerInput(true) {
+                    detectTapGestures(
+                        onPress = {
+                            isContextMenuVisible = true
+                            pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                        }
+                    )
+                },
+        ) {
+            Icon(
+                modifier = Modifier.align(Alignment.Center),
+                imageVector = Icons.Filled.MoreHoriz,
+                contentDescription = "menu",
+                tint = tint,
+            )
+        }
+
+        DropdownMenu(
+            expanded = isContextMenuVisible,
+            onDismissRequest = {
+                isContextMenuVisible = false
+            },
+            offset = pressOffset.copy(
+                y = pressOffset.y - itemHeight
+            )
+        ) {
+            DropdownMenuItem(
+                text = { Text(text = stringResource(id = R.string.open)) },
+                onClick = {
+                    onOpen.invoke()
+                    isContextMenuVisible = false
+                })
+            DropdownMenuItem(
+                text = { Text(text = stringResource(id = R.string.edit)) },
+                onClick = {
+                    onEdit.invoke()
+                    isContextMenuVisible = false
+                })
+            DropdownMenuItem(
+                text = { Text(text = stringResource(id = R.string.delete)) },
+                onClick = {
+                    onDelete.invoke()
                     isContextMenuVisible = false
                 })
         }

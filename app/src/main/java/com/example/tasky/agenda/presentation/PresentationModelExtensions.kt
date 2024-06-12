@@ -2,6 +2,7 @@ package com.example.tasky.agenda.presentation
 
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 
@@ -48,6 +49,13 @@ private fun Agenda.addNeedleItem(list: List<AgendaItemUi>): List<AgendaItemUi> {
 
     return mutableList.toList()
 }
+
+fun Agenda.copyAgenda(): Agenda {
+    val newList = mutableListOf<AgendaListItem>().apply { addAll(items) }
+    return Agenda(newList)
+}
+
+fun Agenda.removeItem(item: AgendaListItem) = Agenda(items.filterNot { it == item }.toMutableList())
 
 fun getAgendaSample() = Agenda.getSample().toAgendaItemUiList()
 

@@ -18,12 +18,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -52,21 +48,43 @@ import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
 import com.example.tasky.ui.theme.agendaListTitleStyle
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
 @Preview
 @Composable
 private fun TaskItemPreview() {
-    AgendaItem(item = getTaskSample())
+    AgendaItem(
+        item = getTaskSample(),
+        onDoneRadioButtonClicked = {},
+        onOpen = {},
+        onEdit = {},
+        onDelete = {}
+    )
 }
 
 @Preview
 @Composable
 private fun ReminderItemPreview() {
-    AgendaItem(item = getReminderSample())
+    AgendaItem(
+        item = getReminderSample(),
+        onDoneRadioButtonClicked = {},
+        onOpen = {},
+        onEdit = {},
+        onDelete = {}
+    )
 }
 
 @Composable
-fun <T : AgendaItemUi> AgendaItem(item: T) {
+fun <T : AgendaItemUi> AgendaItem(
+    item: T,
+    onDoneRadioButtonClicked: (AgendaItemUi.TaskUi) -> Unit,
+    onOpen: (AgendaItemUi) -> Unit,
+    onEdit: (AgendaItemUi) -> Unit,
+    onDelete: (AgendaItemUi) -> Unit
+) {
+    val deleteAlertDialogState = rememberMaterialDialogState()
+
     val backgroundColor = when (item) {
         is AgendaItemUi.TaskUi -> TaskyGreen
         else -> ReminderGray
@@ -117,7 +135,11 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
                         selectedColor = headerColor,
                         unselectedColor = headerColor
                     ),
-                    onClick = { }
+                    onClick = {
+                        if (item is AgendaItemUi.TaskUi) {
+                            onDoneRadioButtonClicked.invoke(item)
+                        }
+                    }
                 )
                 Column(
                     modifier = Modifier
@@ -145,18 +167,13 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.Top)
-                        .size(60.dp),
-                    onClick = {
-                    }) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreHoriz,
-                        contentDescription = "menu",
-                        tint = headerColor,
-                    )
-                }
+                AgendaItemMoreButton(
+                    modifier = Modifier.align(Alignment.Top),
+                    tint = headerColor,
+                    onOpen = { onOpen.invoke(item) },
+                    onEdit = { onEdit.invoke(item) },
+                    onDelete = { deleteAlertDialogState.show() }
+                )
             }
 
             Text(
@@ -171,6 +188,24 @@ fun <T : AgendaItemUi> AgendaItem(item: T) {
             )
         }
     }
+
+    MaterialDialog(
+        dialogState = deleteAlertDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.confirm)) {
+                deleteAlertDialogState.hide()
+                onDelete.invoke(item)
+            }
+            negativeButton(text = stringResource(id = R.string.cancel)) {
+                deleteAlertDialogState.hide()
+            }
+        }
+    ) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(id = R.string.delete_item_confirmation),
+        )
+    }
 }
 
 @Preview
@@ -180,7 +215,13 @@ fun PullToRefreshLazyColumnPreview() {
         modifier = Modifier.fillMaxSize(),
         items = getAgendaSample(),
         content = {
-            AgendaItem(it)
+            AgendaItem(
+                item = it,
+                onDoneRadioButtonClicked = {},
+                onOpen = {},
+                onEdit = {},
+                onDelete = {}
+            )
         },
         needleContent = {
             Needle()
@@ -274,8 +315,8 @@ fun Needle() {
             .size(14.dp)
             .align(Alignment.CenterVertically),
             onDraw = {
-            drawCircle(color = Color.Black)
-        })
+                drawCircle(color = Color.Black)
+            })
         HorizontalDivider(
             modifier = Modifier
                 .align(Alignment.CenterVertically),
