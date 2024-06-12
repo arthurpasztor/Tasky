@@ -64,27 +64,14 @@ class AgendaViewModel(
             AgendaAction.CreateNewTask -> createNewTask()
             AgendaAction.CreateNewReminder -> createNewReminder()
 
-            is AgendaAction.SetTaskDone -> setTaskDone(action.task)
-        }
-    }
-
-    private fun setTaskDone(task: AgendaListItem.Task) {
-        val taskDone = task.copy(isDone = true)
-
-        viewModelScope.launch {
-            taskRepo.updateTask(taskDone)
-                .onSuccess {
-                    _state.update {
-                        val newAgenda = _state.value.dailyAgenda.copyAgenda().apply { setTaskDone(taskDone) }
-
-                        it.copy(
-                            dailyAgenda = newAgenda
-                        )
-                    }
-                }
-                .onError {
-                    _navChannel.send(AgendaResponseAction.SetTaskDoneError(it))
-                }
+            is AgendaAction.SetTaskDone -> setTaskDone(action.task.task)
+            is AgendaAction.Delete -> deleteItem(action.item)
+            is AgendaAction.Edit -> {
+                //TODO
+            }
+            is AgendaAction.Open -> {
+                //TODO
+            }
         }
     }
 
@@ -135,6 +122,58 @@ class AgendaViewModel(
 
             if (triggerFromPullToRefresh) {
                 _state.update { it.copy(isRefreshing = false) }
+            }
+        }
+    }
+
+    private fun setTaskDone(task: AgendaListItem.Task) {
+        val taskDone = task.copy(isDone = true)
+
+        viewModelScope.launch {
+            taskRepo.updateTask(taskDone)
+                .onSuccess {
+                    _state.update {
+                        val newAgenda = _state.value.dailyAgenda.copyAgenda().apply { setTaskDone(taskDone) }
+
+                        it.copy(
+                            dailyAgenda = newAgenda
+                        )
+                    }
+                }
+                .onError {
+                    _navChannel.send(AgendaResponseAction.SetTaskDoneError(it))
+                }
+        }
+    }
+
+    private fun deleteItem(item: AgendaItemUi) {
+        if (item is AgendaItemUi.TaskUi) {
+            viewModelScope.launch {
+                taskRepo.deleteTask(item.task.id)
+                    .onSuccess {
+                        _state.update {
+                            it.copy(
+                                dailyAgenda = _state.value.dailyAgenda.removeItem(item.task)
+                            )
+                        }
+                    }
+                    .onError {
+                        _navChannel.send(AgendaResponseAction.DeleteItemError(it))
+                    }
+            }
+        } else if (item is AgendaItemUi.ReminderUi) {
+            viewModelScope.launch {
+                reminderRepo.deleteReminder(item.reminder.id)
+                    .onSuccess {
+                        _state.update {
+                            it.copy(
+                                dailyAgenda = _state.value.dailyAgenda.removeItem(item.reminder)
+                            )
+                        }
+                    }
+                    .onError {
+                        _navChannel.send(AgendaResponseAction.DeleteItemError(it))
+                    }
             }
         }
     }
@@ -196,4 +235,5 @@ sealed class AgendaResponseAction {
     data object CreateNewReminderAction : AgendaResponseAction()
 
     class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
+    class DeleteItemError(val error: DataError) : AgendaResponseAction()
 }

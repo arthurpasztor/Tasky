@@ -44,7 +44,6 @@ import com.example.tasky.destinations.TaskReminderDetailRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.isToday
-import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -82,9 +81,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                     }
                 }
 
-                is AgendaResponseAction.HandleLogoutResponseError -> {
-                    context.showToast(destination.error, TAG)
-                }
+                is AgendaResponseAction.HandleLogoutResponseError -> context.showToast(destination.error, TAG)
 
                 AgendaResponseAction.CreateNewEventAction -> {
                     //TODO implement
@@ -117,9 +114,9 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                     }
                 }
 
-                is AgendaResponseAction.SetTaskDoneError -> {
-                    context.showToast(destination.error, TAG)
-                }
+                is AgendaResponseAction.SetTaskDoneError -> context.showToast(destination.error, TAG)
+
+                is AgendaResponseAction.DeleteItemError -> context.showToast(destination.error, TAG)
             }
         }
     }
@@ -200,8 +197,18 @@ private fun AgendaScreen(
                             AgendaItem(
                                 item = it,
                                 onDoneRadioButtonClicked = { taskUi ->
-                                    onAction.invoke(AgendaAction.SetTaskDone(taskUi.task))
-                                })
+                                    onAction.invoke(AgendaAction.SetTaskDone(taskUi))
+                                },
+                                onOpen = { item ->
+                                    onAction.invoke(AgendaAction.Open(item))
+                                },
+                                onEdit = { item ->
+                                    onAction.invoke(AgendaAction.Edit(item))
+                                },
+                                onDelete = { item ->
+                                    onAction.invoke(AgendaAction.Delete(item))
+                                }
+                            )
                         },
                         needleContent = {
                             Needle()
@@ -262,7 +269,10 @@ sealed class AgendaAction {
     data object CreateNewEvent : AgendaAction()
     data object CreateNewTask : AgendaAction()
     data object CreateNewReminder : AgendaAction()
-    class SetTaskDone(val task: AgendaListItem.Task) : AgendaAction()
+    class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction()
+    class Open(val item: AgendaItemUi) : AgendaAction()
+    class Edit(val item: AgendaItemUi) : AgendaAction()
+    class Delete(val item: AgendaItemUi) : AgendaAction()
 }
 
 @Preview

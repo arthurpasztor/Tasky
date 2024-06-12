@@ -35,6 +35,8 @@
 
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete_item_confirmation">Do you really want to delete this item?</string>
     <string name="at">At</string>
     <string name="pick_a_date">Pick a date</string>
     <string name="pick_a_time">Pick a time</string>

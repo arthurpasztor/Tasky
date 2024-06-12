@@ -55,6 +55,8 @@ fun Agenda.copyAgenda(): Agenda {
     return Agenda(newList)
 }
 
+fun Agenda.removeItem(item: AgendaListItem) = Agenda(items.filterNot { it == item }.toMutableList())
+
 fun getAgendaSample() = Agenda.getSample().toAgendaItemUiList()
 
 fun getTaskSample() = AgendaItemUi.TaskUi(Task.getSampleTask())
