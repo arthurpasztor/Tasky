@@ -18,12 +18,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -158,18 +154,13 @@ fun <T : AgendaItemUi> AgendaItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.Top)
-                        .size(60.dp),
-                    onClick = {
-                    }) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreHoriz,
-                        contentDescription = "menu",
-                        tint = headerColor,
-                    )
-                }
+                AgendaItemMoreButton(
+                    modifier = Modifier.align(Alignment.Top),
+                    tint = headerColor,
+                    onOpen = {},
+                    onEdit = {},
+                    onDelete = {}
+                )
             }
 
             Text(
