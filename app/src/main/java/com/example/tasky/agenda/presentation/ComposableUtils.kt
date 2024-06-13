@@ -63,7 +63,7 @@ import java.time.LocalDate
 @Composable
 fun ReminderSelector(
     modifier: Modifier = Modifier,
-    state: TaskReminderState = TaskReminderState(),
+    state: AgendaItemState = AgendaItemState(),
     onAction: (TaskReminderAction) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -442,7 +442,13 @@ fun AgendaItemDetailHeader(
     val headerPadding = dimensionResource(R.dimen.padding_20)
 
     val editHeader =
-        stringResource(id = if (agendaItemType == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
+        stringResource(
+            id = when (agendaItemType) {
+                AgendaItemType.EVENT -> R.string.edit_event
+                AgendaItemType.TASK -> R.string.edit_task
+                else -> R.string.edit_reminder
+            }
+        )
     val headerText = when (interactionMode) {
         DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
         DetailInteractionMode.EDIT -> editHeader.uppercase()

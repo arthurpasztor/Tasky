@@ -31,16 +31,20 @@ class AgendaDetailsViewModel(
     itemId: String? = null
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskReminderState(agendaItemType = type, interactionMode = mode))
+    private val _state = MutableStateFlow(AgendaItemState(agendaItemType = type, interactionMode = mode))
     val state = _state.asStateFlow()
 
     private val _navChannel = Channel<TaskReminderVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
+    private val _eventNavChannel = Channel<EventVMAction>()
+    val eventNavChannel = _eventNavChannel.receiveAsFlow()
+
     init {
         itemId?.let { id ->
             if (mode == DetailInteractionMode.EDIT || mode == DetailInteractionMode.VIEW) {
                 when (type) {
+                    AgendaItemType.EVENT -> loadEvent(id)
                     AgendaItemType.TASK -> loadTask(id)
                     AgendaItemType.REMINDER -> loadReminder(id)
                     AgendaItemType.UNKNOWN -> { /*do nothing*/ }
@@ -64,15 +68,34 @@ class AgendaDetailsViewModel(
         }
     }
 
+    fun onAction(action: EventAction) {
+        when (action) {
+            EventAction.OpenTitleEditor -> openTitleEditor()
+            EventAction.OpenDescriptionEditor -> openDescriptionEditor()
+            EventAction.SwitchToEditMode -> switchToEditMode()
+            is EventAction.UpdateTitle -> updateTitle(action.newTitle)
+            is EventAction.UpdateDescription -> updateDescription(action.newDescription)
+            EventAction.SaveEvent -> saveEvent()
+        }
+    }
+
     private fun openTitleEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskReminderVMAction.OpenTitleEditor)
+            if (_state.value.agendaItemType == AgendaItemType.EVENT) {
+                _eventNavChannel.send(EventVMAction.OpenTitleEditor)
+            } else {
+                _navChannel.send(TaskReminderVMAction.OpenTitleEditor)
+            }
         }
     }
 
     private fun openDescriptionEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskReminderVMAction.OpenDescriptionEditor)
+            if (_state.value.agendaItemType == AgendaItemType.EVENT) {
+                _eventNavChannel.send(EventVMAction.OpenDescriptionEditor)
+            } else {
+                _navChannel.send(TaskReminderVMAction.OpenDescriptionEditor)
+            }
         }
     }
 
@@ -118,6 +141,10 @@ class AgendaDetailsViewModel(
                 description = description
             )
         }
+    }
+
+    private fun saveEvent() {
+        //TODO
     }
 
     private fun saveTask() {
@@ -182,6 +209,10 @@ class AgendaDetailsViewModel(
 
             _state.update { it.copy(isLoading = false) }
         }
+    }
+
+    private fun loadEvent(id: String) {
+        //TODO
     }
 
     private fun loadTask(id: String) {
@@ -263,7 +294,7 @@ class AgendaDetailsViewModel(
     }
 }
 
-data class TaskReminderState(
+data class AgendaItemState(
     val isLoading: Boolean = false,
 
     val title: String = "Title",
@@ -286,4 +317,9 @@ sealed class TaskReminderVMAction {
     class CreateReminderError(val error: DataError) : TaskReminderVMAction()
     class LoadTaskError(val error: DataError) : TaskReminderVMAction()
     class LoadReminderError(val error: DataError) : TaskReminderVMAction()
+}
+
+sealed class EventVMAction {
+    data object OpenTitleEditor : EventVMAction()
+    data object OpenDescriptionEditor : EventVMAction()
 }

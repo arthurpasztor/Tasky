@@ -72,7 +72,7 @@ fun TaskReminderDetailRoot(
     itemId: String? = null
 ) {
 
-    val TAG = "TaskDetailScreen"
+    val TAG = "TaskReminderDetailScreen"
 
     val context = LocalContext.current
     val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, mode, itemId) })
@@ -148,7 +148,7 @@ fun TaskReminderDetailRoot(
 @Preview
 @Composable
 private fun TaskReminderDetailScreen(
-    state: TaskReminderState = TaskReminderState(),
+    state: AgendaItemState = AgendaItemState(),
     onAction: (TaskReminderAction) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {

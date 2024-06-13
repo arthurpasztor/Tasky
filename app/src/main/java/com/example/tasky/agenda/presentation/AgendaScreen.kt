@@ -45,6 +45,7 @@ import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.auth.presentation.showToast
+import com.example.tasky.destinations.EventDetailRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
@@ -84,8 +85,15 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 is AgendaResponseAction.HandleLogoutResponseError -> context.showToast(destination.error, TAG)
 
                 AgendaResponseAction.CreateNewEventAction -> {
-                    //TODO implement
-                    Log.e(TAG, "AgendaRoot: CreateNewEventAction")
+                    navigator.navigate(
+                        EventDetailRootDestination(
+                            mode = DetailInteractionMode.CREATE
+                        )
+                    ) {
+                        popUpTo(LoginRootDestination.route) {
+                            inclusive = true
+                        }
+                    }
                 }
 
                 AgendaResponseAction.CreateNewTaskAction -> {
