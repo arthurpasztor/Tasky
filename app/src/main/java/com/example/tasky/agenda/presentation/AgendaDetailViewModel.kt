@@ -76,6 +76,11 @@ class AgendaDetailsViewModel(
             is EventAction.UpdateTitle -> updateTitle(action.newTitle)
             is EventAction.UpdateDescription -> updateDescription(action.newDescription)
             EventAction.SaveEvent -> saveEvent()
+            is EventAction.UpdateFromDate -> updateFromDate(action.newDate)
+            is EventAction.UpdateFromTime -> updateFromTime(action.newTime)
+            is EventAction.UpdateToDate -> updateToDate(action.newDate)
+            is EventAction.UpdateToTime -> updateToTime(action.newTime)
+            is EventAction.UpdateReminder -> updateReminder(action.newReminder)
         }
     }
 
@@ -115,6 +120,38 @@ class AgendaDetailsViewModel(
         _state.update {
             it.copy(
                 time = time
+            )
+        }
+    }
+
+    private fun updateFromDate(date: LocalDate) {
+        _state.update {
+            it.copy(
+                fromDate = date
+            )
+        }
+    }
+
+    private fun updateFromTime(time: LocalTime) {
+        _state.update {
+            it.copy(
+                fromTime = time
+            )
+        }
+    }
+
+    private fun updateToDate(date: LocalDate) {
+        _state.update {
+            it.copy(
+                toDate = date
+            )
+        }
+    }
+
+    private fun updateToTime(time: LocalTime) {
+        _state.update {
+            it.copy(
+                toTime = time
             )
         }
     }
@@ -305,7 +342,14 @@ data class AgendaItemState(
     val isDone: Boolean = false,
 
     val agendaItemType: AgendaItemType = AgendaItemType.TASK,
-    val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE
+    val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE,
+
+    // Event only items
+    val fromDate: LocalDate = LocalDate.now(),
+    val fromTime: LocalTime = LocalTime.now(),
+    val toDate: LocalDate = LocalDate.now(),
+    val toTime: LocalTime = LocalTime.now(),
+    val isUserEventCreator: Boolean = true
 )
 
 sealed class TaskReminderVMAction {

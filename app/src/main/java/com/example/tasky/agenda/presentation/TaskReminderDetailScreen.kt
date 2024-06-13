@@ -32,14 +32,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.presentation.showToast
-import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.agenda.domain.formatDetailTime
+import com.example.tasky.auth.presentation.showToast
+import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.ReminderBorderGray
@@ -282,9 +282,10 @@ private fun TaskReminderDetailScreen(
 
             ReminderSelector(
                 modifier = Modifier.padding(vertical = 20.dp),
-                state = state,
-                onAction = onAction
-            )
+                state = state
+            ) {
+                onAction.invoke(TaskReminderAction.UpdateReminder(it))
+            }
 
             HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
         }

@@ -64,7 +64,7 @@ import java.time.LocalDate
 fun ReminderSelector(
     modifier: Modifier = Modifier,
     state: AgendaItemState = AgendaItemState(),
-    onAction: (TaskReminderAction) -> Unit = {}
+    onAction: (ReminderType) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -136,7 +136,7 @@ fun ReminderSelector(
                 DropdownMenuItem(
                     text = { Text(text = it.getReminderString(context)) },
                     onClick = {
-                        onAction.invoke(TaskReminderAction.UpdateReminder(it))
+                        onAction.invoke(it)
                         isContextMenuVisible = false
                     })
             }

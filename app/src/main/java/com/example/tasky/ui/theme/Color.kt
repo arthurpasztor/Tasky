@@ -12,6 +12,7 @@ val Pink40 = Color(0xFF7D5260)
 
 val BackgroundBlack = Color.Black
 val BackgroundWhite = Color.White
+val BackgroundGray = Color(0xFFF2F3F7)
 
 val TaskyGreen = Color(0xFF299F70)
 val EventGreen = Color(0xFFD0EC44)
