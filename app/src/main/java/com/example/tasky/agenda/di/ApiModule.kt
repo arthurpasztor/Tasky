@@ -9,7 +9,7 @@ import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.presentation.AgendaViewModel
-import com.example.tasky.agenda.presentation.TaskReminderViewModel
+import com.example.tasky.agenda.presentation.AgendaDetailsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
@@ -19,7 +19,7 @@ import org.koin.dsl.module
 val apiModule = module {
     viewModelOf(::AgendaViewModel)
     viewModel { params ->
-        TaskReminderViewModel(get(), get(), params[0], params[1], params[2])
+        AgendaDetailsViewModel(get(), get(), params[0], params[1], params[2])
     }
 
     singleOf(::AuthRepositoryImpl).bind<AuthRepository>()
