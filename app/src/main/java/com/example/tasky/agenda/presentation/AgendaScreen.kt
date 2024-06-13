@@ -115,8 +115,27 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 }
 
                 is AgendaResponseAction.SetTaskDoneError -> context.showToast(destination.error, TAG)
+                is AgendaResponseAction.DeleteAgendaItemError -> context.showToast(destination.error, TAG)
 
-                is AgendaResponseAction.DeleteItemError -> context.showToast(destination.error, TAG)
+                is AgendaResponseAction.OpenAgendaItem -> {
+                    navigator.navigate(
+                        TaskReminderDetailRootDestination(
+                            type = destination.itemType,
+                            mode = DetailInteractionMode.VIEW,
+                            itemId = destination.itemId
+                        )
+                    )
+                }
+
+                is AgendaResponseAction.EditAgendaItem -> {
+                    navigator.navigate(
+                        TaskReminderDetailRootDestination(
+                            type = destination.itemType,
+                            mode = DetailInteractionMode.EDIT,
+                            itemId = destination.itemId
+                        )
+                    )
+                }
             }
         }
     }
@@ -199,14 +218,14 @@ private fun AgendaScreen(
                                 onDoneRadioButtonClicked = { taskUi ->
                                     onAction.invoke(AgendaAction.SetTaskDone(taskUi))
                                 },
-                                onOpen = { item ->
-                                    onAction.invoke(AgendaAction.Open(item))
+                                onOpen = { itemId, itemType ->
+                                    onAction.invoke(AgendaAction.Open(itemId, itemType))
                                 },
-                                onEdit = { item ->
-                                    onAction.invoke(AgendaAction.Edit(item))
+                                onEdit = { itemId, itemType ->
+                                    onAction.invoke(AgendaAction.Edit(itemId, itemType))
                                 },
-                                onDelete = { item ->
-                                    onAction.invoke(AgendaAction.Delete(item))
+                                onDelete = { itemId, itemType ->
+                                    onAction.invoke(AgendaAction.Delete(itemId, itemType))
                                 }
                             )
                         },
@@ -270,9 +289,9 @@ sealed class AgendaAction {
     data object CreateNewTask : AgendaAction()
     data object CreateNewReminder : AgendaAction()
     class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction()
-    class Open(val item: AgendaItemUi) : AgendaAction()
-    class Edit(val item: AgendaItemUi) : AgendaAction()
-    class Delete(val item: AgendaItemUi) : AgendaAction()
+    class Open(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
+    class Edit(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
+    class Delete(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
 }
 
 @Preview

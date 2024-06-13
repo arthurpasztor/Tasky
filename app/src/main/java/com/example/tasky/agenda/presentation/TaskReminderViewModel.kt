@@ -3,12 +3,13 @@ package com.example.tasky.agenda.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
-import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
+import com.example.tasky.agenda.domain.getLocalDateTimeFromMillis
+import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
@@ -27,7 +28,8 @@ class TaskReminderViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     type: AgendaItemType,
-    mode: DetailInteractionMode
+    mode: DetailInteractionMode,
+    itemId: String? = null
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TaskReminderState(agendaItemType = type, interactionMode = mode))
@@ -35,6 +37,18 @@ class TaskReminderViewModel(
 
     private val _navChannel = Channel<TaskReminderVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
+
+    init {
+        itemId?.let { id ->
+            if (mode == DetailInteractionMode.EDIT || mode == DetailInteractionMode.VIEW) {
+                when (type) {
+                    AgendaItemType.TASK -> loadTask(id)
+                    AgendaItemType.REMINDER -> loadReminder(id)
+                    AgendaItemType.UNKNOWN -> { /*do nothing*/ }
+                }
+            }
+        }
+    }
 
     fun onAction(action: TaskReminderAction) {
         when (action) {
@@ -171,6 +185,53 @@ class TaskReminderViewModel(
         }
     }
 
+    private fun loadTask(id: String) {
+        _state.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            taskRepo.getTaskDetails(id)
+                .onSuccess { task ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            title = task.title,
+                            description = task.description,
+                            date = task.time.getLocalDateTimeFromMillis().toLocalDate(),
+                            time = task.time.getLocalDateTimeFromMillis().toLocalTime(),
+                            isDone = task.isDone
+                        )
+                    }
+                }
+                .onError { error ->
+                    _state.update { it.copy(isLoading = false) }
+                    _navChannel.send(TaskReminderVMAction.LoadTaskError(error))
+                }
+        }
+    }
+
+    private fun loadReminder(id: String) {
+        _state.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            reminderRepo.getReminderDetails(id)
+                .onSuccess { reminder ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            title = reminder.title,
+                            description = reminder.description,
+                            date = reminder.time.getLocalDateTimeFromMillis().toLocalDate(),
+                            time = reminder.time.getLocalDateTimeFromMillis().toLocalTime()
+                        )
+                    }
+                }
+                .onError { error ->
+                    _state.update { it.copy(isLoading = false) }
+                    _navChannel.send(TaskReminderVMAction.LoadReminderError(error))
+                }
+        }
+    }
+
     private fun getTaskPayload(): Task {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
@@ -224,4 +285,6 @@ sealed class TaskReminderVMAction {
     class CreateTaskError(val error: DataError) : TaskReminderVMAction()
     data object CreateReminderSuccess : TaskReminderVMAction()
     class CreateReminderError(val error: DataError) : TaskReminderVMAction()
+    class LoadTaskError(val error: DataError) : TaskReminderVMAction()
+    class LoadReminderError(val error: DataError) : TaskReminderVMAction()
 }

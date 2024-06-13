@@ -50,7 +50,7 @@ private fun Agenda.addNeedleItem(list: List<AgendaItemUi>): List<AgendaItemUi> {
     return mutableList.toList()
 }
 
-fun Agenda.removeItem(item: AgendaListItem) = Agenda(items.filterNot { it == item }.toMutableList())
+fun Agenda.removeItem(itemId: String) = Agenda(items.filterNot { it.id == itemId }.toMutableList())
 
 fun getAgendaSample() = Agenda.getSample().toAgendaItemUiList()
 

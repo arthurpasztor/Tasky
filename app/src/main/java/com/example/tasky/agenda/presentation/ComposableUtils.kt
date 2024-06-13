@@ -434,6 +434,7 @@ fun ArrowBackButton(
 fun AgendaItemDetailHeader(
     agendaItemType: AgendaItemType = AgendaItemType.REMINDER,
     interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE,
+    headerDate: LocalDate = LocalDate.now(),
     onNavigateBack: () -> Unit = {},
     onSwitchToEditMode: () -> Unit = {},
     onSave: () -> Unit = {}
@@ -445,7 +446,7 @@ fun AgendaItemDetailHeader(
     val headerText = when (interactionMode) {
         DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
         DetailInteractionMode.EDIT -> editHeader.uppercase()
-        DetailInteractionMode.VIEW -> LocalDate.now().formatHeaderDate() //TODO change to the current task's date
+        DetailInteractionMode.VIEW -> headerDate.formatHeaderDate()
     }
 
     Row {

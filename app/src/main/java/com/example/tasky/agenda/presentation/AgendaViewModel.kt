@@ -2,6 +2,7 @@ package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.ReminderRepository
@@ -65,14 +66,9 @@ class AgendaViewModel(
             AgendaAction.CreateNewReminder -> createNewReminder()
 
             is AgendaAction.SetTaskDone -> setTaskDone(action.task.task)
-            is AgendaAction.Delete -> deleteItem(action.item)
-            is AgendaAction.Edit -> {
-                //TODO
-            }
-
-            is AgendaAction.Open -> {
-                //TODO
-            }
+            is AgendaAction.Delete -> deleteItem(action.itemId, action.itemType)
+            is AgendaAction.Edit -> editAgendaItem(action.itemId, action.itemType)
+            is AgendaAction.Open -> openAgendaItem(action.itemId, action.itemType)
         }
     }
 
@@ -153,35 +149,47 @@ class AgendaViewModel(
         }
     }
 
-    private fun deleteItem(item: AgendaItemUi) {
-        if (item is AgendaItemUi.TaskUi) {
+    private fun deleteItem(itemId: String, itemType: AgendaItemType) {
+        if (itemType == AgendaItemType.TASK) {
             viewModelScope.launch {
-                taskRepo.deleteTask(item.task.id)
+                taskRepo.deleteTask(itemId)
                     .onSuccess {
                         _state.update {
                             it.copy(
-                                dailyAgenda = _state.value.dailyAgenda.removeItem(item.task)
+                                dailyAgenda = _state.value.dailyAgenda.removeItem(itemId)
                             )
                         }
                     }
                     .onError {
-                        _navChannel.send(AgendaResponseAction.DeleteItemError(it))
+                        _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
                     }
             }
-        } else if (item is AgendaItemUi.ReminderUi) {
+        } else if (itemType == AgendaItemType.REMINDER) {
             viewModelScope.launch {
-                reminderRepo.deleteReminder(item.reminder.id)
+                reminderRepo.deleteReminder(itemId)
                     .onSuccess {
                         _state.update {
                             it.copy(
-                                dailyAgenda = _state.value.dailyAgenda.removeItem(item.reminder)
+                                dailyAgenda = _state.value.dailyAgenda.removeItem(itemId)
                             )
                         }
                     }
                     .onError {
-                        _navChannel.send(AgendaResponseAction.DeleteItemError(it))
+                        _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
                     }
             }
+        }
+    }
+
+    private fun openAgendaItem(itemId: String, itemType: AgendaItemType) {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.OpenAgendaItem(itemId, itemType))
+        }
+    }
+
+    private fun editAgendaItem(itemId: String, itemType: AgendaItemType) {
+        viewModelScope.launch {
+            _navChannel.send(AgendaResponseAction.EditAgendaItem(itemId, itemType))
         }
     }
 
@@ -242,5 +250,7 @@ sealed class AgendaResponseAction {
     data object CreateNewReminderAction : AgendaResponseAction()
 
     class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
-    class DeleteItemError(val error: DataError) : AgendaResponseAction()
+    class DeleteAgendaItemError(val error: DataError) : AgendaResponseAction()
+    class OpenAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
+    class EditAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
 }

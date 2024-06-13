@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
@@ -57,9 +58,9 @@ private fun TaskItemPreview() {
     AgendaItem(
         item = getTaskSample(),
         onDoneRadioButtonClicked = {},
-        onOpen = {},
-        onEdit = {},
-        onDelete = {}
+        onOpen = { _, _ -> },
+        onEdit = { _, _ -> },
+        onDelete = { _, _ -> }
     )
 }
 
@@ -69,9 +70,9 @@ private fun ReminderItemPreview() {
     AgendaItem(
         item = getReminderSample(),
         onDoneRadioButtonClicked = {},
-        onOpen = {},
-        onEdit = {},
-        onDelete = {}
+        onOpen = { _, _ -> },
+        onEdit = { _, _ -> },
+        onDelete = { _, _ -> }
     )
 }
 
@@ -79,9 +80,9 @@ private fun ReminderItemPreview() {
 fun <T : AgendaItemUi> AgendaItem(
     item: T,
     onDoneRadioButtonClicked: (AgendaItemUi.TaskUi) -> Unit,
-    onOpen: (AgendaItemUi) -> Unit,
-    onEdit: (AgendaItemUi) -> Unit,
-    onDelete: (AgendaItemUi) -> Unit
+    onOpen: (itemId: String, itemType: AgendaItemType) -> Unit,
+    onEdit: (itemId: String, itemType: AgendaItemType) -> Unit,
+    onDelete: (itemId: String, itemType: AgendaItemType) -> Unit
 ) {
     val deleteAlertDialogState = rememberMaterialDialogState()
 
@@ -170,8 +171,8 @@ fun <T : AgendaItemUi> AgendaItem(
                 AgendaItemMoreButton(
                     modifier = Modifier.align(Alignment.Top),
                     tint = headerColor,
-                    onOpen = { onOpen.invoke(item) },
-                    onEdit = { onEdit.invoke(item) },
+                    onOpen = { onOpen.invoke(item.id, item.getAgendaItemType()) },
+                    onEdit = { onEdit.invoke(item.id, item.getAgendaItemType()) },
                     onDelete = { deleteAlertDialogState.show() }
                 )
             }
@@ -194,7 +195,7 @@ fun <T : AgendaItemUi> AgendaItem(
         buttons = {
             positiveButton(text = stringResource(id = R.string.confirm)) {
                 deleteAlertDialogState.hide()
-                onDelete.invoke(item)
+                onDelete.invoke(item.id, item.getAgendaItemType())
             }
             negativeButton(text = stringResource(id = R.string.cancel)) {
                 deleteAlertDialogState.hide()
@@ -218,9 +219,9 @@ fun PullToRefreshLazyColumnPreview() {
             AgendaItem(
                 item = it,
                 onDoneRadioButtonClicked = {},
-                onOpen = {},
-                onEdit = {},
-                onDelete = {}
+                onOpen = { _, _ -> },
+                onEdit = { _, _ -> },
+                onDelete = { _, _ -> }
             )
         },
         needleContent = {
