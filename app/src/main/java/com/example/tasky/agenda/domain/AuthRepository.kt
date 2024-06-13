@@ -1,9 +1,9 @@
 package com.example.tasky.agenda.domain
 
 import com.example.tasky.core.domain.DataError
-import com.example.tasky.core.domain.Result
+import com.example.tasky.core.domain.EmptyResult
 
 interface AuthRepository {
-    suspend fun authenticate(): Result<Unit, DataError>
-    suspend fun logout(): Result<Unit, DataError>
+    suspend fun authenticate(): EmptyResult<DataError>
+    suspend fun logout(): EmptyResult<DataError>
 }

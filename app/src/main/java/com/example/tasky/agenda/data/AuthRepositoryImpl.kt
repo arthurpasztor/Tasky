@@ -4,6 +4,7 @@ import com.example.tasky.BuildConfig
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
@@ -16,7 +17,7 @@ class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
     private val tokenCheckUrl = "${BuildConfig.BASE_URL}/authenticate"
     private val logoutUrl = "${BuildConfig.BASE_URL}/logout"
 
-    override suspend fun authenticate(): Result<Unit, DataError> {
+    override suspend fun authenticate(): EmptyResult<DataError> {
         return client.executeRequest<Unit, Unit>(
             httpMethod = HttpMethod.Get,
             url = tokenCheckUrl,
@@ -26,7 +27,7 @@ class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
         }
     }
 
-    override suspend fun logout(): Result<Unit, DataError> {
+    override suspend fun logout(): EmptyResult<DataError> {
         client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
 
         return client.executeRequest<Unit, Unit>(
