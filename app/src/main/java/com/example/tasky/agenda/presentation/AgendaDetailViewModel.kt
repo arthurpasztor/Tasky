@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
-class TaskReminderViewModel(
+class AgendaDetailsViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     type: AgendaItemType,
