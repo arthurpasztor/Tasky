@@ -7,7 +7,6 @@ import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
-import com.example.tasky.agenda.domain.getLocalDateTimeFromMillis
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.core.domain.DataError
@@ -196,8 +195,8 @@ class TaskReminderViewModel(
                             isLoading = false,
                             title = task.title,
                             description = task.description,
-                            date = task.time.getLocalDateTimeFromMillis().toLocalDate(),
-                            time = task.time.getLocalDateTimeFromMillis().toLocalTime(),
+                            date = task.time.toLocalDate(),
+                            time = task.time.toLocalTime(),
                             isDone = task.isDone
                         )
                     }
@@ -220,8 +219,8 @@ class TaskReminderViewModel(
                             isLoading = false,
                             title = reminder.title,
                             description = reminder.description,
-                            date = reminder.time.getLocalDateTimeFromMillis().toLocalDate(),
-                            time = reminder.time.getLocalDateTimeFromMillis().toLocalTime()
+                            date = reminder.time.toLocalDate(),
+                            time = reminder.time.toLocalTime()
                         )
                     }
                 }
