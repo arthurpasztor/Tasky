@@ -47,7 +47,7 @@ class AgendaDetailsViewModel(
         // a non-null itemId means we are viewing or editing an existing item
         itemId?.let { id ->
             when (type) {
-                AgendaItemType.EVENT -> TODO()
+                AgendaItemType.EVENT -> loadEvent(id)
                 AgendaItemType.TASK -> loadTask(id)
                 AgendaItemType.REMINDER -> loadReminder(id)
             }
@@ -64,6 +64,7 @@ class AgendaDetailsViewModel(
             is AgendaDetailAction.UpdateReminder -> updateReminder(action.newReminder)
             is AgendaDetailAction.UpdateTitle -> updateTitle(action.newTitle)
             is AgendaDetailAction.UpdateDescription -> updateDescription(action.newDescription)
+            AgendaDetailAction.SaveEvent -> saveEvent()
             AgendaDetailAction.SaveTask -> saveTask()
             AgendaDetailAction.SaveReminder -> saveReminder()
         }
@@ -125,6 +126,10 @@ class AgendaDetailsViewModel(
         }
     }
 
+    private fun saveEvent() {
+        //TODO
+    }
+
     private fun saveTask() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
@@ -183,6 +188,10 @@ class AgendaDetailsViewModel(
 
             _state.update { it.copy(isLoading = false) }
         }
+    }
+
+    private fun loadEvent(id: String) {
+        //TODO
     }
 
     private fun loadTask(id: String) {

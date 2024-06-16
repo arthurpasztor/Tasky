@@ -82,8 +82,13 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
             is AgendaResponseAction.HandleLogoutResponseError -> context.showToast(destination.error, TAG)
 
             AgendaResponseAction.CreateNewEventAction -> {
-                //TODO implement
-                Log.e(TAG, "AgendaRoot: CreateNewEventAction")
+                navigator.navigate(
+                    AgendaDetailRootDestination(type = AgendaItemType.EVENT)
+                ) {
+                    popUpTo(LoginRootDestination.route) {
+                        inclusive = true
+                    }
+                }
             }
 
             AgendaResponseAction.CreateNewTaskAction -> {

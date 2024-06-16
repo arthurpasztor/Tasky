@@ -31,16 +31,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.presentation.showToast
-import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.agenda.domain.formatDetailTime
+import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
+import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.example.tasky.ui.theme.EventGreen
 import com.example.tasky.ui.theme.ReminderBorderGray
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
@@ -126,10 +127,10 @@ fun AgendaDetailRoot(
 
     AgendaDetailScreen(
         state = state,
-        onAction = viewModel::onAction
-    ) {
-        navigator.popBackStack()
-    }
+        onAction = viewModel::onAction,
+        onNavigateBack = { navigator.popBackStack() }
+    )
+
     if (state.isLoading) {
         Box(
             modifier = Modifier
@@ -165,10 +166,11 @@ private fun AgendaDetailScreen(
             onSwitchToEditMode = { onAction(AgendaDetailAction.SwitchToEditMode) },
             onSave = {
                 onAction(
-                    if (state.agendaItemType == AgendaItemType.TASK)
-                        AgendaDetailAction.SaveTask
-                    else
-                        AgendaDetailAction.SaveReminder
+                    when (state.agendaItemType) {
+                        AgendaItemType.EVENT -> AgendaDetailAction.SaveEvent
+                        AgendaItemType.TASK -> AgendaDetailAction.SaveTask
+                        AgendaItemType.REMINDER -> AgendaDetailAction.SaveReminder
+                    }
                 )
             })
         Column(
@@ -183,11 +185,21 @@ private fun AgendaDetailScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10))
                         .size(18.dp)
-                        .background(if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderGray)
+                        .background(
+                            color = when (state.agendaItemType) {
+                                AgendaItemType.EVENT -> EventGreen
+                                AgendaItemType.TASK -> TaskyGreen
+                                AgendaItemType.REMINDER -> ReminderGray
+                            }
+                        )
                         .border(
                             BorderStroke(
-                                1.dp,
-                                if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderBorderGray
+                                width = 1.dp,
+                                color = when (state.agendaItemType) {
+                                    AgendaItemType.EVENT -> EventGreen
+                                    AgendaItemType.TASK -> TaskyGreen
+                                    AgendaItemType.REMINDER -> ReminderBorderGray
+                                }
                             )
                         )
                         .align(Alignment.CenterVertically),
@@ -196,7 +208,13 @@ private fun AgendaDetailScreen(
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .align(Alignment.CenterVertically),
-                    text = stringResource(id = if (state.agendaItemType == AgendaItemType.TASK) R.string.task else R.string.reminder),
+                    text = stringResource(
+                        id = when (state.agendaItemType) {
+                            AgendaItemType.EVENT -> R.string.event
+                            AgendaItemType.TASK -> R.string.task
+                            AgendaItemType.REMINDER -> R.string.reminder
+                        }
+                    ),
                     style = detailTypeStyle,
                 )
             }
@@ -330,6 +348,7 @@ sealed class AgendaDetailAction {
     class UpdateDate(val newDate: LocalDate) : AgendaDetailAction()
     class UpdateTime(val newTime: LocalTime) : AgendaDetailAction()
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction()
+    data object SaveEvent : AgendaDetailAction()
     data object SaveTask : AgendaDetailAction()
     data object SaveReminder : AgendaDetailAction()
 }

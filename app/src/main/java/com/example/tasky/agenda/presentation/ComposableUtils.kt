@@ -439,8 +439,14 @@ fun AgendaItemDetailHeader(
 ) {
     val headerPadding = dimensionResource(R.dimen.padding_20)
 
-    val editHeader =
-        stringResource(id = if (state.agendaItemType == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
+    val editHeader = stringResource(
+        id = when (state.agendaItemType) {
+            AgendaItemType.EVENT -> R.string.edit_event
+            AgendaItemType.TASK -> R.string.edit_task
+            AgendaItemType.REMINDER -> R.string.edit_reminder
+        }
+    )
+
     val headerText = when {
         state.isCreateMode() -> LocalDate.now().formatHeaderDate()
         state.isEditMode() -> editHeader.uppercase()
