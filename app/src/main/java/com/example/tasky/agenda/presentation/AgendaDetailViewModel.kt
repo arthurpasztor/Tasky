@@ -35,6 +35,7 @@ class AgendaDetailsViewModel(
             agendaItemType = type,
             itemId = itemId,
             editable = editable,
+            extras = if (type == AgendaItemType.EVENT) AgendaItemDetails.EventItemDetail() else null
         )
     )
 
@@ -59,11 +60,13 @@ class AgendaDetailsViewModel(
             AgendaDetailAction.OpenTitleEditor -> openTitleEditor()
             AgendaDetailAction.OpenDescriptionEditor -> openDescriptionEditor()
             AgendaDetailAction.SwitchToEditMode -> switchToEditMode()
-            is AgendaDetailAction.UpdateDate -> updateDate(action.newDate)
-            is AgendaDetailAction.UpdateTime -> updateTime(action.newTime)
-            is AgendaDetailAction.UpdateReminder -> updateReminder(action.newReminder)
             is AgendaDetailAction.UpdateTitle -> updateTitle(action.newTitle)
             is AgendaDetailAction.UpdateDescription -> updateDescription(action.newDescription)
+            is AgendaDetailAction.UpdateDate -> updateDate(action.newDate)
+            is AgendaDetailAction.UpdateTime -> updateTime(action.newTime)
+            is AgendaDetailAction.UpdateEventEndDate -> updateEventEndDate(action.newDate)
+            is AgendaDetailAction.UpdateEventEndTime -> updateEventEndTime(action.newTime)
+            is AgendaDetailAction.UpdateReminder -> updateReminder(action.newReminder)
             AgendaDetailAction.SaveEvent -> saveEvent()
             AgendaDetailAction.SaveTask -> saveTask()
             AgendaDetailAction.SaveReminder -> saveReminder()
@@ -83,7 +86,11 @@ class AgendaDetailsViewModel(
     }
 
     private fun switchToEditMode() {
-        _state.update { it.copy(editable = true) }
+        _state.update {
+            it.copy(
+                editable = true
+            )
+        }
     }
 
     private fun updateDate(date: LocalDate) {
@@ -98,6 +105,22 @@ class AgendaDetailsViewModel(
         _state.update {
             it.copy(
                 time = time
+            )
+        }
+    }
+
+    private fun updateEventEndDate(date: LocalDate) {
+        _state.update {
+            it.copy(
+                extras = (it.extras as? AgendaItemDetails.EventItemDetail)?.copy(toDate = date)
+            )
+        }
+    }
+
+    private fun updateEventEndTime(time: LocalTime) {
+        _state.update {
+            it.copy(
+                extras = (it.extras as? AgendaItemDetails.EventItemDetail)?.copy(toTime = time)
             )
         }
     }
@@ -295,7 +318,7 @@ data class AgendaDetailsState(
     val time: LocalTime = LocalTime.now(),
     val reminderType: ReminderType = ReminderType.MINUTES_30,
 
-    val agendaItemType: AgendaItemType = AgendaItemType.TASK,
+    val agendaItemType: AgendaItemType = AgendaItemType.EVENT,
     val editable: Boolean = true,
 
     val extras: AgendaItemDetails? = null
@@ -305,6 +328,14 @@ data class AgendaDetailsState(
     fun isEditMode() = !itemId.isNullOrBlank() && editable
 
     fun isViewMode() = !itemId.isNullOrBlank() && !editable
+
+    fun getEventDate(): LocalDate {
+        return (extras as? AgendaItemDetails.EventItemDetail)?.toDate ?: LocalDate.now()
+    }
+
+    fun getEventTime(): LocalTime {
+        return (extras as? AgendaItemDetails.EventItemDetail)?.toTime ?: LocalTime.now()
+    }
 }
 
 sealed class AgendaDetailVMAction {

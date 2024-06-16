@@ -154,6 +154,8 @@ private fun AgendaDetailScreen(
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
+    val dateEventEndDialogState = rememberMaterialDialogState()
+    val timeEventEndDialogState = rememberMaterialDialogState()
 
     Column(
         modifier = Modifier
@@ -264,7 +266,13 @@ private fun AgendaDetailScreen(
             Row(modifier = Modifier.padding(vertical = 20.dp)) {
                 Text(
                     modifier = Modifier.align(Alignment.CenterVertically),
-                    text = stringResource(id = R.string.at),
+                    text = stringResource(
+                        id = if (state.agendaItemType == AgendaItemType.EVENT) {
+                            R.string.from
+                        } else {
+                            R.string.at
+                        }
+                    ),
                     style = detailDescriptionStyle,
                     maxLines = 1
                 )
@@ -292,6 +300,43 @@ private fun AgendaDetailScreen(
             }
 
             HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+
+            if (state.agendaItemType == AgendaItemType.EVENT) {
+
+                Row(modifier = Modifier.padding(vertical = 20.dp)) {
+                    Text(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 16.dp),
+                        text = stringResource(id = R.string.to),
+                        style = detailDescriptionStyle,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.weight(1f))
+                    ClickableText(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = AnnotatedString(state.getEventTime().formatDetailTime()),
+                        style = detailDescriptionStyle,
+                        maxLines = 1,
+                        onClick = {
+                            timeEventEndDialogState.show()
+                        }
+                    )
+                    Spacer(Modifier.weight(1f))
+                    ClickableText(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = AnnotatedString(state.getEventDate().formatDetailDate()),
+                        style = detailDescriptionStyle,
+                        maxLines = 1,
+                        onClick = {
+                            dateEventEndDialogState.show()
+                        }
+                    )
+                    Spacer(Modifier.weight(1f))
+                }
+
+                HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            }
 
             ReminderSelector(
                 modifier = Modifier.padding(vertical = 20.dp),
@@ -337,6 +382,39 @@ private fun AgendaDetailScreen(
             onAction(AgendaDetailAction.UpdateTime(it))
         }
     }
+
+    MaterialDialog(
+        dialogState = dateEventEndDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.ok))
+            negativeButton(text = stringResource(id = R.string.cancel))
+        }
+    ) {
+        datepicker(
+            initialDate = state.getEventDate(),
+            title = stringResource(id = R.string.pick_a_date),
+            allowedDateValidator = {
+                it.isAfter(state.date) || it.isEqual(state.date)
+            }
+        ) {
+            onAction(AgendaDetailAction.UpdateEventEndDate(it))
+        }
+    }
+
+    MaterialDialog(
+        dialogState = timeEventEndDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.ok))
+            negativeButton(text = stringResource(id = R.string.cancel))
+        }
+    ) {
+        timepicker(
+            initialTime = state.getEventTime(),
+            title = stringResource(id = R.string.pick_a_time)
+        ) {
+            onAction(AgendaDetailAction.UpdateEventEndTime(it))
+        }
+    }
 }
 
 sealed class AgendaDetailAction {
@@ -347,6 +425,8 @@ sealed class AgendaDetailAction {
     class UpdateDescription(val newDescription: String) : AgendaDetailAction()
     class UpdateDate(val newDate: LocalDate) : AgendaDetailAction()
     class UpdateTime(val newTime: LocalTime) : AgendaDetailAction()
+    class UpdateEventEndDate(val newDate: LocalDate) : AgendaDetailAction()
+    class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction()
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction()
     data object SaveEvent : AgendaDetailAction()
     data object SaveTask : AgendaDetailAction()
