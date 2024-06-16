@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,9 +31,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
@@ -40,6 +47,7 @@ import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
+import com.example.tasky.ui.theme.BackgroundGray
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.EventGreen
 import com.example.tasky.ui.theme.ReminderBorderGray
@@ -180,9 +188,9 @@ private fun AgendaDetailScreen(
                 .fillMaxSize()
                 .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
                 .background(BackgroundWhite)
-                .padding(horizontal = 16.dp)
         ) {
-            Row(modifier = Modifier.padding(top = 20.dp)) {
+            // Label
+            Row(modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp)) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10))
@@ -221,7 +229,8 @@ private fun AgendaDetailScreen(
                 )
             }
 
-            Row(modifier = Modifier.padding(vertical = 16.dp)) {
+            // Title
+            Row(modifier = Modifier.padding(16.dp)) {
                 RadioButton(
                     modifier = Modifier
                         .size(18.dp)
@@ -244,9 +253,10 @@ private fun AgendaDetailScreen(
                 }
             }
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 
-            Row(modifier = Modifier.padding(vertical = 8.dp)) {
+            // Description
+            Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -261,9 +271,45 @@ private fun AgendaDetailScreen(
                 }
             }
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 
-            Row(modifier = Modifier.padding(vertical = 20.dp)) {
+            if (state.isEvent()) {
+                if (state.isUserEventCreator() && (state.isCreateMode() || state.isEditMode())) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .border(BorderStroke(1.dp, BackgroundGray))
+                            .background(BackgroundGray),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "plus",
+                            tint = Color.Gray
+                        )
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = stringResource(id = R.string.add_photos),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                        color = VeryLightGray,
+                        thickness = 1.dp
+                    )
+                }
+            }
+
+            // Date #1
+            Row(modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp)) {
                 Text(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     text = stringResource(
@@ -299,11 +345,12 @@ private fun AgendaDetailScreen(
                 Spacer(Modifier.weight(1f))
             }
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 
-            if (state.agendaItemType == AgendaItemType.EVENT) {
+            // Date #2
+            if (state.isEvent()) {
 
-                Row(modifier = Modifier.padding(vertical = 20.dp)) {
+                Row(modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp)) {
                     Text(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
@@ -335,16 +382,20 @@ private fun AgendaDetailScreen(
                     Spacer(Modifier.weight(1f))
                 }
 
-                HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = VeryLightGray,
+                    thickness = 1.dp
+                )
             }
 
             ReminderSelector(
-                modifier = Modifier.padding(vertical = 20.dp),
+                modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp),
                 state = state,
                 onAction = onAction
             )
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
         }
     }
 

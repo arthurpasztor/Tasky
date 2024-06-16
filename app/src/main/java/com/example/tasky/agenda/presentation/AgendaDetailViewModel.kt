@@ -323,6 +323,8 @@ data class AgendaDetailsState(
 
     val extras: AgendaItemDetails? = null
 ) {
+    fun isEvent() = agendaItemType == AgendaItemType.EVENT
+
     fun isCreateMode() = itemId.isNullOrBlank()
 
     fun isEditMode() = !itemId.isNullOrBlank() && editable
@@ -335,6 +337,10 @@ data class AgendaDetailsState(
 
     fun getEventTime(): LocalTime {
         return (extras as? AgendaItemDetails.EventItemDetail)?.toTime ?: LocalTime.now()
+    }
+
+    fun isUserEventCreator(): Boolean {
+        return (extras as? AgendaItemDetails.EventItemDetail)?.isUserEventCreator ?: true
     }
 }
 
