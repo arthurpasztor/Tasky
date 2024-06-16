@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.destinations.SignUpRootDestination
@@ -49,27 +50,26 @@ fun LoginRoot(navigator: DestinationsNavigator) {
 
     val context = LocalContext.current
     val viewModel: LoginViewModel = koinViewModel()
-
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(true) {
-        viewModel.navChannel.collect { destination ->
-            when (destination) {
-                LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
 
-                LoginAuthAction.HandleAuthResponseSuccess -> {
-                    navigator.navigate(AgendaRootDestination) {
-                        popUpTo(LoginRootDestination.route) {
-                            inclusive = true
-                        }
+    ObserveAsEvents(viewModel.navChannel) { destination ->
+        when (destination) {
+            LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
+
+            LoginAuthAction.HandleAuthResponseSuccess -> {
+                navigator.navigate(AgendaRootDestination) {
+                    popUpTo(LoginRootDestination.route) {
+                        inclusive = true
                     }
                 }
+            }
 
-                is LoginAuthAction.HandleAuthResponseError -> {
-                    context.showToast(destination.error, TAG)
-                }
+            is LoginAuthAction.HandleAuthResponseError -> {
+                context.showToast(destination.error, TAG)
             }
         }
     }
+
     LoginScreen(
         state = state,
         onAction = viewModel::onAction

@@ -22,7 +22,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +42,7 @@ import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.auth.presentation.showToast
+import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.AgendaDetailRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -68,70 +68,68 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
     val viewModel: AgendaViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(true) {
-        viewModel.navChannel.collect { destination ->
-            when (destination) {
-                AgendaResponseAction.HandleLogoutResponseSuccess -> {
-                    viewModel.onAction(AgendaAction.ClearUserData)
-                    navigator.navigate(LoginRootDestination) {
-                        popUpTo(AgendaRootDestination.route) {
-                            inclusive = true
-                        }
+    ObserveAsEvents(viewModel.navChannel) { destination ->
+        when (destination) {
+            AgendaResponseAction.HandleLogoutResponseSuccess -> {
+                viewModel.onAction(AgendaAction.ClearUserData)
+                navigator.navigate(LoginRootDestination) {
+                    popUpTo(AgendaRootDestination.route) {
+                        inclusive = true
                     }
                 }
-
-                is AgendaResponseAction.HandleLogoutResponseError -> context.showToast(destination.error, TAG)
-
-                AgendaResponseAction.CreateNewEventAction -> {
-                    //TODO implement
-                    Log.e(TAG, "AgendaRoot: CreateNewEventAction")
-                }
-
-                AgendaResponseAction.CreateNewTaskAction -> {
-                    navigator.navigate(
-                        AgendaDetailRootDestination(type = AgendaItemType.TASK,)
-                    ) {
-                        popUpTo(LoginRootDestination.route) {
-                            inclusive = true
-                        }
-                    }
-                }
-
-                AgendaResponseAction.CreateNewReminderAction -> {
-                    navigator.navigate(
-                        AgendaDetailRootDestination(type = AgendaItemType.REMINDER,)
-                    ) {
-                        popUpTo(LoginRootDestination.route) {
-                            inclusive = true
-                        }
-                    }
-                }
-
-                is AgendaResponseAction.SetTaskDoneError -> context.showToast(destination.error, TAG)
-                is AgendaResponseAction.DeleteAgendaItemError -> context.showToast(destination.error, TAG)
-
-                is AgendaResponseAction.OpenAgendaItem -> {
-                    navigator.navigate(
-                        AgendaDetailRootDestination(
-                            type = destination.itemType,
-                            itemId = destination.itemId,
-                            editable = false
-                        )
-                    )
-                }
-
-                is AgendaResponseAction.EditAgendaItem -> {
-                    navigator.navigate(
-                        AgendaDetailRootDestination(
-                            type = destination.itemType,
-                            itemId = destination.itemId,
-                            editable = true
-                        )
-                    )
-                }
-
-                AgendaResponseAction.UnknownAgendaItemType -> context.showToast(R.string.agenda_item_type_unknown)
             }
+
+            is AgendaResponseAction.HandleLogoutResponseError -> context.showToast(destination.error, TAG)
+
+            AgendaResponseAction.CreateNewEventAction -> {
+                //TODO implement
+                Log.e(TAG, "AgendaRoot: CreateNewEventAction")
+            }
+
+            AgendaResponseAction.CreateNewTaskAction -> {
+                navigator.navigate(
+                    AgendaDetailRootDestination(type = AgendaItemType.TASK)
+                ) {
+                    popUpTo(LoginRootDestination.route) {
+                        inclusive = true
+                    }
+                }
+            }
+
+            AgendaResponseAction.CreateNewReminderAction -> {
+                navigator.navigate(
+                    AgendaDetailRootDestination(type = AgendaItemType.REMINDER)
+                ) {
+                    popUpTo(LoginRootDestination.route) {
+                        inclusive = true
+                    }
+                }
+            }
+
+            is AgendaResponseAction.SetTaskDoneError -> context.showToast(destination.error, TAG)
+            is AgendaResponseAction.DeleteAgendaItemError -> context.showToast(destination.error, TAG)
+
+            is AgendaResponseAction.OpenAgendaItem -> {
+                navigator.navigate(
+                    AgendaDetailRootDestination(
+                        type = destination.itemType,
+                        itemId = destination.itemId,
+                        editable = false
+                    )
+                )
+            }
+
+            is AgendaResponseAction.EditAgendaItem -> {
+                navigator.navigate(
+                    AgendaDetailRootDestination(
+                        type = destination.itemType,
+                        itemId = destination.itemId,
+                        editable = true
+                    )
+                )
+            }
+
+            AgendaResponseAction.UnknownAgendaItemType -> context.showToast(R.string.agenda_item_type_unknown)
         }
     }
 
@@ -190,9 +188,10 @@ private fun AgendaScreen(
                     .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
                     .background(BackgroundWhite)
             ) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 100.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 100.dp)
                 ) {
                     if (state.isLoading) {
                         Box(

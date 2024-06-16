@@ -17,7 +17,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +38,7 @@ import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.agenda.domain.formatDetailTime
+import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.ReminderBorderGray
@@ -77,43 +77,41 @@ fun AgendaDetailRoot(
     val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, itemId, editable) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(true) {
-        viewModel.navChannel.collect { destination ->
-            when (destination) {
-                AgendaDetailVMAction.OpenTitleEditor -> {
-                    navigator.navigate(
-                        TextEditorRootDestination(
-                            text = state.title,
-                            type = DetailItemType.TITLE,
-                        )
+    ObserveAsEvents(viewModel.navChannel) { destination ->
+        when (destination) {
+            AgendaDetailVMAction.OpenTitleEditor -> {
+                navigator.navigate(
+                    TextEditorRootDestination(
+                        text = state.title,
+                        type = DetailItemType.TITLE,
                     )
-                }
-
-                AgendaDetailVMAction.OpenDescriptionEditor -> {
-                    navigator.navigate(
-                        TextEditorRootDestination(
-                            text = state.description,
-                            type = DetailItemType.DESCRIPTION,
-                        )
-                    )
-                }
-
-                AgendaDetailVMAction.CreateTaskSuccess -> {
-                    context.showToast(R.string.success_task_created)
-                    navigator.popBackStack()
-                }
-
-                is AgendaDetailVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
-
-                AgendaDetailVMAction.CreateReminderSuccess -> {
-                    context.showToast(R.string.success_reminder_created)
-                    navigator.popBackStack()
-                }
-
-                is AgendaDetailVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
-                is AgendaDetailVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
-                is AgendaDetailVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
+                )
             }
+
+            AgendaDetailVMAction.OpenDescriptionEditor -> {
+                navigator.navigate(
+                    TextEditorRootDestination(
+                        text = state.description,
+                        type = DetailItemType.DESCRIPTION,
+                    )
+                )
+            }
+
+            AgendaDetailVMAction.CreateTaskSuccess -> {
+                context.showToast(R.string.success_task_created)
+                navigator.popBackStack()
+            }
+
+            is AgendaDetailVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
+
+            AgendaDetailVMAction.CreateReminderSuccess -> {
+                context.showToast(R.string.success_reminder_created)
+                navigator.popBackStack()
+            }
+
+            is AgendaDetailVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
+            is AgendaDetailVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
+            is AgendaDetailVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
         }
     }
 

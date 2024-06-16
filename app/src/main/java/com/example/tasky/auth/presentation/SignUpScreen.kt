@@ -14,7 +14,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +29,7 @@ import com.example.tasky.R
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
 import com.example.tasky.core.domain.RootError
+import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
@@ -46,27 +46,26 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
 
     val context = LocalContext.current
     val viewModel: SignUpViewModel = koinViewModel()
-
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(true) {
-        viewModel.navChannel.collect { destination ->
-            when (destination) {
-                SignUpAuthAction.NavigateBack -> navigator.popBackStack()
 
-                SignUpAuthAction.HandleAuthResponseSuccess -> {
-                    navigator.navigate(AgendaRootDestination) {
-                        popUpTo(LoginRootDestination.route) {
-                            inclusive = true
-                        }
+    ObserveAsEvents(viewModel.navChannel) { destination ->
+        when (destination) {
+            SignUpAuthAction.NavigateBack -> navigator.popBackStack()
+
+            SignUpAuthAction.HandleAuthResponseSuccess -> {
+                navigator.navigate(AgendaRootDestination) {
+                    popUpTo(LoginRootDestination.route) {
+                        inclusive = true
                     }
                 }
+            }
 
-                is SignUpAuthAction.HandleAuthResponseError -> {
-                    context.showToast(destination.error, TAG)
-                }
+            is SignUpAuthAction.HandleAuthResponseError -> {
+                context.showToast(destination.error, TAG)
             }
         }
     }
+
     SignUpScreen(
         state = state,
         onAction = viewModel::onAction
