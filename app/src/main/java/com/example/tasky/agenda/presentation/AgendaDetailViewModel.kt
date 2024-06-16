@@ -31,7 +31,7 @@ class AgendaDetailsViewModel(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        TaskReminderState(
+        AgendaDetailsState(
             agendaItemType = type,
             itemId = itemId,
             editable = editable,
@@ -40,7 +40,7 @@ class AgendaDetailsViewModel(
 
     val state = _state.asStateFlow()
 
-    private val _navChannel = Channel<TaskReminderVMAction>()
+    private val _navChannel = Channel<AgendaDetailVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
     init {
@@ -54,30 +54,30 @@ class AgendaDetailsViewModel(
         }
     }
 
-    fun onAction(action: TaskReminderAction) {
+    fun onAction(action: AgendaDetailAction) {
         when (action) {
-            TaskReminderAction.OpenTitleEditor -> openTitleEditor()
-            TaskReminderAction.OpenDescriptionEditor -> openDescriptionEditor()
-            TaskReminderAction.SwitchToEditMode -> switchToEditMode()
-            is TaskReminderAction.UpdateDate -> updateDate(action.newDate)
-            is TaskReminderAction.UpdateTime -> updateTime(action.newTime)
-            is TaskReminderAction.UpdateReminder -> updateReminder(action.newReminder)
-            is TaskReminderAction.UpdateTitle -> updateTitle(action.newTitle)
-            is TaskReminderAction.UpdateDescription -> updateDescription(action.newDescription)
-            TaskReminderAction.SaveTask -> saveTask()
-            TaskReminderAction.SaveReminder -> saveReminder()
+            AgendaDetailAction.OpenTitleEditor -> openTitleEditor()
+            AgendaDetailAction.OpenDescriptionEditor -> openDescriptionEditor()
+            AgendaDetailAction.SwitchToEditMode -> switchToEditMode()
+            is AgendaDetailAction.UpdateDate -> updateDate(action.newDate)
+            is AgendaDetailAction.UpdateTime -> updateTime(action.newTime)
+            is AgendaDetailAction.UpdateReminder -> updateReminder(action.newReminder)
+            is AgendaDetailAction.UpdateTitle -> updateTitle(action.newTitle)
+            is AgendaDetailAction.UpdateDescription -> updateDescription(action.newDescription)
+            AgendaDetailAction.SaveTask -> saveTask()
+            AgendaDetailAction.SaveReminder -> saveReminder()
         }
     }
 
     private fun openTitleEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskReminderVMAction.OpenTitleEditor)
+            _navChannel.send(AgendaDetailVMAction.OpenTitleEditor)
         }
     }
 
     private fun openDescriptionEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskReminderVMAction.OpenDescriptionEditor)
+            _navChannel.send(AgendaDetailVMAction.OpenDescriptionEditor)
         }
     }
 
@@ -133,10 +133,10 @@ class AgendaDetailsViewModel(
                 _state.value.isCreateMode() -> {
                     taskRepo.createTask(getTaskPayload())
                         .onSuccess {
-                            _navChannel.send(TaskReminderVMAction.CreateTaskSuccess)
+                            _navChannel.send(AgendaDetailVMAction.CreateTaskSuccess)
                         }
                         .onError {
-                            _navChannel.send(TaskReminderVMAction.CreateTaskError(it))
+                            _navChannel.send(AgendaDetailVMAction.CreateTaskError(it))
                         }
                 }
 
@@ -163,10 +163,10 @@ class AgendaDetailsViewModel(
                 _state.value.isCreateMode() -> {
                     reminderRepo.createReminder(getReminderPayload())
                         .onSuccess {
-                            _navChannel.send(TaskReminderVMAction.CreateReminderSuccess)
+                            _navChannel.send(AgendaDetailVMAction.CreateReminderSuccess)
                         }
                         .onError {
-                            _navChannel.send(TaskReminderVMAction.CreateReminderError(it))
+                            _navChannel.send(AgendaDetailVMAction.CreateReminderError(it))
                         }
                 }
 
@@ -204,7 +204,7 @@ class AgendaDetailsViewModel(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    _navChannel.send(TaskReminderVMAction.LoadTaskError(error))
+                    _navChannel.send(AgendaDetailVMAction.LoadTaskError(error))
                 }
         }
     }
@@ -227,7 +227,7 @@ class AgendaDetailsViewModel(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    _navChannel.send(TaskReminderVMAction.LoadReminderError(error))
+                    _navChannel.send(AgendaDetailVMAction.LoadReminderError(error))
                 }
         }
     }
@@ -276,7 +276,7 @@ sealed interface AgendaItemDetails {
     ) : AgendaItemDetails
 }
 
-data class TaskReminderState(
+data class AgendaDetailsState(
     val isLoading: Boolean = false,
 
     val itemId: String? = null,
@@ -298,13 +298,13 @@ data class TaskReminderState(
     fun isViewMode() = !itemId.isNullOrBlank() && !editable
 }
 
-sealed class TaskReminderVMAction {
-    data object OpenTitleEditor : TaskReminderVMAction()
-    data object OpenDescriptionEditor : TaskReminderVMAction()
-    data object CreateTaskSuccess : TaskReminderVMAction()
-    class CreateTaskError(val error: DataError) : TaskReminderVMAction()
-    data object CreateReminderSuccess : TaskReminderVMAction()
-    class CreateReminderError(val error: DataError) : TaskReminderVMAction()
-    class LoadTaskError(val error: DataError) : TaskReminderVMAction()
-    class LoadReminderError(val error: DataError) : TaskReminderVMAction()
+sealed class AgendaDetailVMAction {
+    data object OpenTitleEditor : AgendaDetailVMAction()
+    data object OpenDescriptionEditor : AgendaDetailVMAction()
+    data object CreateTaskSuccess : AgendaDetailVMAction()
+    class CreateTaskError(val error: DataError) : AgendaDetailVMAction()
+    data object CreateReminderSuccess : AgendaDetailVMAction()
+    class CreateReminderError(val error: DataError) : AgendaDetailVMAction()
+    class LoadTaskError(val error: DataError) : AgendaDetailVMAction()
+    class LoadReminderError(val error: DataError) : AgendaDetailVMAction()
 }

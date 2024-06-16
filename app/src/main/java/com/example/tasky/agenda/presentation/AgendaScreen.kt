@@ -40,10 +40,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.TaskReminderDetailRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.auth.presentation.showToast
+import com.example.tasky.destinations.AgendaDetailRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
@@ -89,7 +89,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 AgendaResponseAction.CreateNewTaskAction -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(type = AgendaItemType.TASK,)
+                        AgendaDetailRootDestination(type = AgendaItemType.TASK,)
                     ) {
                         popUpTo(LoginRootDestination.route) {
                             inclusive = true
@@ -99,7 +99,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 AgendaResponseAction.CreateNewReminderAction -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(type = AgendaItemType.REMINDER,)
+                        AgendaDetailRootDestination(type = AgendaItemType.REMINDER,)
                     ) {
                         popUpTo(LoginRootDestination.route) {
                             inclusive = true
@@ -112,7 +112,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 is AgendaResponseAction.OpenAgendaItem -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(
+                        AgendaDetailRootDestination(
                             type = destination.itemType,
                             itemId = destination.itemId,
                             editable = false
@@ -122,7 +122,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 is AgendaResponseAction.EditAgendaItem -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(
+                        AgendaDetailRootDestination(
                             type = destination.itemType,
                             itemId = destination.itemId,
                             editable = true

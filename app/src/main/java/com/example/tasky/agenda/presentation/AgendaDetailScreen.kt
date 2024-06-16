@@ -63,7 +63,7 @@ import java.time.LocalTime
 
 @Destination
 @Composable
-fun TaskReminderDetailRoot(
+fun AgendaDetailRoot(
     navigator: DestinationsNavigator,
     resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
     type: AgendaItemType,
@@ -80,7 +80,7 @@ fun TaskReminderDetailRoot(
     LaunchedEffect(true) {
         viewModel.navChannel.collect { destination ->
             when (destination) {
-                TaskReminderVMAction.OpenTitleEditor -> {
+                AgendaDetailVMAction.OpenTitleEditor -> {
                     navigator.navigate(
                         TextEditorRootDestination(
                             text = state.title,
@@ -89,7 +89,7 @@ fun TaskReminderDetailRoot(
                     )
                 }
 
-                TaskReminderVMAction.OpenDescriptionEditor -> {
+                AgendaDetailVMAction.OpenDescriptionEditor -> {
                     navigator.navigate(
                         TextEditorRootDestination(
                             text = state.description,
@@ -98,21 +98,21 @@ fun TaskReminderDetailRoot(
                     )
                 }
 
-                TaskReminderVMAction.CreateTaskSuccess -> {
+                AgendaDetailVMAction.CreateTaskSuccess -> {
                     context.showToast(R.string.success_task_created)
                     navigator.popBackStack()
                 }
 
-                is TaskReminderVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
+                is AgendaDetailVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
 
-                TaskReminderVMAction.CreateReminderSuccess -> {
+                AgendaDetailVMAction.CreateReminderSuccess -> {
                     context.showToast(R.string.success_reminder_created)
                     navigator.popBackStack()
                 }
 
-                is TaskReminderVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
-                is TaskReminderVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
-                is TaskReminderVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
+                is AgendaDetailVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
+                is AgendaDetailVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
+                is AgendaDetailVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
             }
         }
     }
@@ -120,13 +120,13 @@ fun TaskReminderDetailRoot(
     resultRecipient.onNavResult { result ->
         if (result is NavResult.Value) {
             when (result.value.type) {
-                DetailItemType.TITLE -> viewModel.onAction(TaskReminderAction.UpdateTitle(result.value.newText))
-                DetailItemType.DESCRIPTION -> viewModel.onAction(TaskReminderAction.UpdateDescription(result.value.newText))
+                DetailItemType.TITLE -> viewModel.onAction(AgendaDetailAction.UpdateTitle(result.value.newText))
+                DetailItemType.DESCRIPTION -> viewModel.onAction(AgendaDetailAction.UpdateDescription(result.value.newText))
             }
         }
     }
 
-    TaskReminderDetailScreen(
+    AgendaDetailScreen(
         state = state,
         onAction = viewModel::onAction
     ) {
@@ -146,9 +146,9 @@ fun TaskReminderDetailRoot(
 
 @Preview
 @Composable
-private fun TaskReminderDetailScreen(
-    state: TaskReminderState = TaskReminderState(),
-    onAction: (TaskReminderAction) -> Unit = {},
+private fun AgendaDetailScreen(
+    state: AgendaDetailsState = AgendaDetailsState(),
+    onAction: (AgendaDetailAction) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
@@ -164,13 +164,13 @@ private fun TaskReminderDetailScreen(
         AgendaItemDetailHeader(
             state = state,
             onNavigateBack = { onNavigateBack() },
-            onSwitchToEditMode = { onAction(TaskReminderAction.SwitchToEditMode) },
+            onSwitchToEditMode = { onAction(AgendaDetailAction.SwitchToEditMode) },
             onSave = {
                 onAction(
                     if (state.agendaItemType == AgendaItemType.TASK)
-                        TaskReminderAction.SaveTask
+                        AgendaDetailAction.SaveTask
                     else
-                        TaskReminderAction.SaveReminder
+                        AgendaDetailAction.SaveReminder
                 )
             })
         Column(
@@ -222,7 +222,7 @@ private fun TaskReminderDetailScreen(
                     overflow = TextOverflow.Ellipsis
                 )
                 ArrowEditButton {
-                    onAction.invoke(TaskReminderAction.OpenTitleEditor)
+                    onAction.invoke(AgendaDetailAction.OpenTitleEditor)
                 }
             }
 
@@ -239,7 +239,7 @@ private fun TaskReminderDetailScreen(
                     overflow = TextOverflow.Ellipsis
                 )
                 ArrowEditButton {
-                    onAction.invoke(TaskReminderAction.OpenDescriptionEditor)
+                    onAction.invoke(AgendaDetailAction.OpenDescriptionEditor)
                 }
             }
 
@@ -303,7 +303,7 @@ private fun TaskReminderDetailScreen(
                 it.isAfter(now) || it.isEqual(now)
             }
         ) {
-            onAction(TaskReminderAction.UpdateDate(it))
+            onAction(AgendaDetailAction.UpdateDate(it))
         }
     }
 
@@ -318,20 +318,20 @@ private fun TaskReminderDetailScreen(
             initialTime = state.time,
             title = stringResource(id = R.string.pick_a_time)
         ) {
-            onAction(TaskReminderAction.UpdateTime(it))
+            onAction(AgendaDetailAction.UpdateTime(it))
         }
     }
 }
 
-sealed class TaskReminderAction {
-    data object OpenTitleEditor : TaskReminderAction()
-    data object OpenDescriptionEditor : TaskReminderAction()
-    data object SwitchToEditMode : TaskReminderAction()
-    class UpdateTitle(val newTitle: String) : TaskReminderAction()
-    class UpdateDescription(val newDescription: String) : TaskReminderAction()
-    class UpdateDate(val newDate: LocalDate) : TaskReminderAction()
-    class UpdateTime(val newTime: LocalTime) : TaskReminderAction()
-    class UpdateReminder(val newReminder: ReminderType) : TaskReminderAction()
-    data object SaveTask : TaskReminderAction()
-    data object SaveReminder : TaskReminderAction()
+sealed class AgendaDetailAction {
+    data object OpenTitleEditor : AgendaDetailAction()
+    data object OpenDescriptionEditor : AgendaDetailAction()
+    data object SwitchToEditMode : AgendaDetailAction()
+    class UpdateTitle(val newTitle: String) : AgendaDetailAction()
+    class UpdateDescription(val newDescription: String) : AgendaDetailAction()
+    class UpdateDate(val newDate: LocalDate) : AgendaDetailAction()
+    class UpdateTime(val newTime: LocalTime) : AgendaDetailAction()
+    class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction()
+    data object SaveTask : AgendaDetailAction()
+    data object SaveReminder : AgendaDetailAction()
 }

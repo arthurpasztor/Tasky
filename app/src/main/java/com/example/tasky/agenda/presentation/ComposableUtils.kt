@@ -62,8 +62,8 @@ import java.time.LocalDate
 @Composable
 fun ReminderSelector(
     modifier: Modifier = Modifier,
-    state: TaskReminderState = TaskReminderState(),
-    onAction: (TaskReminderAction) -> Unit = {}
+    state: AgendaDetailsState = AgendaDetailsState(),
+    onAction: (AgendaDetailAction) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -135,7 +135,7 @@ fun ReminderSelector(
                 DropdownMenuItem(
                     text = { Text(text = it.getReminderString(context)) },
                     onClick = {
-                        onAction.invoke(TaskReminderAction.UpdateReminder(it))
+                        onAction.invoke(AgendaDetailAction.UpdateReminder(it))
                         isContextMenuVisible = false
                     })
             }
@@ -373,10 +373,7 @@ fun AgendaItemMoreButton(
 
 @Preview
 @Composable
-fun CloseButton(
-    modifier: Modifier = Modifier,
-    onAction: () -> Unit = {}
-) {
+fun CloseButton(onAction: () -> Unit = {}) {
     IconButton(
         modifier = Modifier
             .size(60.dp)
@@ -431,7 +428,7 @@ fun ArrowBackButton(
 @Preview
 @Composable
 fun AgendaItemDetailHeader(
-    state: TaskReminderState = TaskReminderState(
+    state: AgendaDetailsState = AgendaDetailsState(
         agendaItemType = AgendaItemType.REMINDER,
         itemId = null,
         date = LocalDate.now()
