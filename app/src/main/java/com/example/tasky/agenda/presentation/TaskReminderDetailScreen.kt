@@ -35,7 +35,6 @@ import com.example.tasky.R
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
@@ -68,14 +67,14 @@ fun TaskReminderDetailRoot(
     navigator: DestinationsNavigator,
     resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
     type: AgendaItemType,
-    mode: DetailInteractionMode,
-    itemId: String? = null
+    itemId: String? = null,
+    editable: Boolean = true
 ) {
 
     val TAG = "TaskDetailScreen"
 
     val context = LocalContext.current
-    val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, mode, itemId) })
+    val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, itemId, editable) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
@@ -163,9 +162,7 @@ private fun TaskReminderDetailScreen(
             .background(BackgroundBlack)
     ) {
         AgendaItemDetailHeader(
-            agendaItemType = state.agendaItemType,
-            interactionMode = state.interactionMode,
-            headerDate = state.date,
+            state = state,
             onNavigateBack = { onNavigateBack() },
             onSwitchToEditMode = { onAction(TaskReminderAction.SwitchToEditMode) },
             onSave = {

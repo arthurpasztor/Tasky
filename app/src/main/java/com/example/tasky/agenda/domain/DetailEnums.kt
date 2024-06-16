@@ -3,15 +3,9 @@ package com.example.tasky.agenda.domain
 import java.time.LocalDateTime
 
 enum class AgendaItemType {
+    EVENT,
     TASK,
-    REMINDER,
-    UNKNOWN
-}
-
-enum class DetailInteractionMode {
-    CREATE,
-    EDIT,
-    VIEW
+    REMINDER
 }
 
 enum class ReminderType {
