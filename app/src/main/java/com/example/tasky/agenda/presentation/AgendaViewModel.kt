@@ -144,7 +144,7 @@ class AgendaViewModel(
                     }
                 }
                 .onError {
-                    _navChannel.send(AgendaResponseAction.SetTaskDoneError(it))
+                    _navChannel.send(AgendaResponseAction.AgendaError(it))
                 }
         }
     }
@@ -161,7 +161,7 @@ class AgendaViewModel(
                         }
                     }
                     .onError {
-                        _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
+                        _navChannel.send(AgendaResponseAction.AgendaError(it))
                     }
             }
         } else if (itemType == AgendaItemType.REMINDER) {
@@ -175,7 +175,7 @@ class AgendaViewModel(
                         }
                     }
                     .onError {
-                        _navChannel.send(AgendaResponseAction.DeleteAgendaItemError(it))
+                        _navChannel.send(AgendaResponseAction.AgendaError(it))
                     }
             }
         }
@@ -184,7 +184,7 @@ class AgendaViewModel(
     private fun openAgendaItem(itemId: String, itemType: AgendaItemType?) {
         viewModelScope.launch {
             itemType?.let {
-                _navChannel.send(AgendaResponseAction.OpenAgendaItem(itemId, itemType))
+                _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, false))
             } ?: _navChannel.send(AgendaResponseAction.UnknownAgendaItemType)
         }
     }
@@ -192,7 +192,7 @@ class AgendaViewModel(
     private fun editAgendaItem(itemId: String, itemType: AgendaItemType?) {
         viewModelScope.launch {
             itemType?.let {
-                _navChannel.send(AgendaResponseAction.EditAgendaItem(itemId, itemType))
+                _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, true))
             } ?: _navChannel.send(AgendaResponseAction.UnknownAgendaItemType)
         }
     }
@@ -204,26 +204,26 @@ class AgendaViewModel(
                     _navChannel.send(AgendaResponseAction.HandleLogoutResponseSuccess)
                 }
                 .onError {
-                    _navChannel.send(AgendaResponseAction.HandleLogoutResponseError(it))
+                    _navChannel.send(AgendaResponseAction.AgendaError(it))
                 }
         }
     }
 
     private fun createNewEvent() {
         viewModelScope.launch {
-            _navChannel.send(AgendaResponseAction.CreateNewEventAction)
+            _navChannel.send(AgendaResponseAction.CreateNewAgendaItem(AgendaItemType.EVENT))
         }
     }
 
     private fun createNewTask() {
         viewModelScope.launch {
-            _navChannel.send(AgendaResponseAction.CreateNewTaskAction)
+            _navChannel.send(AgendaResponseAction.CreateNewAgendaItem(AgendaItemType.TASK))
         }
     }
 
     private fun createNewReminder() {
         viewModelScope.launch {
-            _navChannel.send(AgendaResponseAction.CreateNewReminderAction)
+            _navChannel.send(AgendaResponseAction.CreateNewAgendaItem(AgendaItemType.REMINDER))
         }
     }
 
@@ -245,17 +245,13 @@ data class AgendaState(
     val isRefreshing: Boolean = false
 )
 
-sealed class AgendaResponseAction {
-    data object HandleLogoutResponseSuccess : AgendaResponseAction()
-    class HandleLogoutResponseError(val error: DataError) : AgendaResponseAction()
+sealed interface AgendaResponseAction {
+    data object HandleLogoutResponseSuccess : AgendaResponseAction
 
-    data object CreateNewEventAction : AgendaResponseAction()
-    data object CreateNewTaskAction : AgendaResponseAction()
-    data object CreateNewReminderAction : AgendaResponseAction()
+    class CreateNewAgendaItem(val itemType: AgendaItemType) : AgendaResponseAction
 
-    data object UnknownAgendaItemType : AgendaResponseAction()
-    class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
-    class DeleteAgendaItemError(val error: DataError) : AgendaResponseAction()
-    class OpenAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
-    class EditAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()
+    class OpenAgendaItemDetail(val itemId: String, val itemType: AgendaItemType, val isEditable: Boolean) : AgendaResponseAction
+
+    data object UnknownAgendaItemType : AgendaResponseAction
+    class AgendaError(val error: DataError) : AgendaResponseAction
 }

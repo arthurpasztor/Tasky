@@ -112,7 +112,7 @@ class AgendaDetailsViewModel(
     private fun updateEventEndDate(date: LocalDate) {
         _state.update {
             it.copy(
-                extras = (it.extras as? AgendaItemDetails.EventItemDetail)?.copy(toDate = date)
+                extras = updateDetailsIfEvent { eventExtras -> eventExtras.copy(toDate = date) }
             )
         }
     }
@@ -120,7 +120,7 @@ class AgendaDetailsViewModel(
     private fun updateEventEndTime(time: LocalTime) {
         _state.update {
             it.copy(
-                extras = (it.extras as? AgendaItemDetails.EventItemDetail)?.copy(toTime = time)
+                extras = updateDetailsIfEvent { eventExtras -> eventExtras.copy(toTime = time) }
             )
         }
     }
@@ -149,6 +149,13 @@ class AgendaDetailsViewModel(
         }
     }
 
+    private fun updateDetailsIfEvent(update: (AgendaItemDetails.EventItemDetail) -> AgendaItemDetails.EventItemDetail): AgendaItemDetails? {
+        return when (val details = state.value.extras) {
+            is AgendaItemDetails.EventItemDetail -> update(details)
+            else -> details
+        }
+    }
+
     private fun saveEvent() {
         //TODO
     }
@@ -161,10 +168,10 @@ class AgendaDetailsViewModel(
                 _state.value.isCreateMode() -> {
                     taskRepo.createTask(getTaskPayload())
                         .onSuccess {
-                            _navChannel.send(AgendaDetailVMAction.CreateTaskSuccess)
+                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.TASK))
                         }
                         .onError {
-                            _navChannel.send(AgendaDetailVMAction.CreateTaskError(it))
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
                         }
                 }
 
@@ -191,10 +198,10 @@ class AgendaDetailsViewModel(
                 _state.value.isCreateMode() -> {
                     reminderRepo.createReminder(getReminderPayload())
                         .onSuccess {
-                            _navChannel.send(AgendaDetailVMAction.CreateReminderSuccess)
+                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.REMINDER))
                         }
                         .onError {
-                            _navChannel.send(AgendaDetailVMAction.CreateReminderError(it))
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
                         }
                 }
 
@@ -236,7 +243,7 @@ class AgendaDetailsViewModel(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    _navChannel.send(AgendaDetailVMAction.LoadTaskError(error))
+                    _navChannel.send(AgendaDetailVMAction.AgendaItemError(error))
                 }
         }
     }
@@ -259,7 +266,7 @@ class AgendaDetailsViewModel(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    _navChannel.send(AgendaDetailVMAction.LoadReminderError(error))
+                    _navChannel.send(AgendaDetailVMAction.AgendaItemError(error))
                 }
         }
     }
@@ -297,6 +304,10 @@ class AgendaDetailsViewModel(
 }
 
 sealed interface AgendaItemDetails {
+
+    val asEventDetails: EventItemDetail?
+        get() = this as? EventItemDetail
+
     data class TaskItemDetail(
         val isDone: Boolean = false
     ) : AgendaItemDetails
@@ -332,25 +343,22 @@ data class AgendaDetailsState(
     fun isViewMode() = !itemId.isNullOrBlank() && !editable
 
     fun getEventDate(): LocalDate {
-        return (extras as? AgendaItemDetails.EventItemDetail)?.toDate ?: LocalDate.now()
+        return extras?.asEventDetails?.toDate ?: LocalDate.now()
     }
 
     fun getEventTime(): LocalTime {
-        return (extras as? AgendaItemDetails.EventItemDetail)?.toTime ?: LocalTime.now()
+        return extras?.asEventDetails?.toTime ?: LocalTime.now()
     }
 
     fun isUserEventCreator(): Boolean {
-        return (extras as? AgendaItemDetails.EventItemDetail)?.isUserEventCreator ?: true
+        return extras?.asEventDetails?.isUserEventCreator ?: true
     }
 }
 
 sealed class AgendaDetailVMAction {
     data object OpenTitleEditor : AgendaDetailVMAction()
     data object OpenDescriptionEditor : AgendaDetailVMAction()
-    data object CreateTaskSuccess : AgendaDetailVMAction()
-    class CreateTaskError(val error: DataError) : AgendaDetailVMAction()
-    data object CreateReminderSuccess : AgendaDetailVMAction()
-    class CreateReminderError(val error: DataError) : AgendaDetailVMAction()
-    class LoadTaskError(val error: DataError) : AgendaDetailVMAction()
-    class LoadReminderError(val error: DataError) : AgendaDetailVMAction()
+    class CreateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
+
+    class AgendaItemError(val error: DataError) : AgendaDetailVMAction()
 }

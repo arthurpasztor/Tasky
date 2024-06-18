@@ -79,11 +79,11 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 }
             }
 
-            is AgendaResponseAction.HandleLogoutResponseError -> context.showToast(destination.error, TAG)
+            is AgendaResponseAction.AgendaError -> context.showToast(destination.error, TAG)
 
-            AgendaResponseAction.CreateNewEventAction -> {
+            is AgendaResponseAction.CreateNewAgendaItem -> {
                 navigator.navigate(
-                    AgendaDetailRootDestination(type = AgendaItemType.EVENT)
+                    AgendaDetailRootDestination(type = destination.itemType)
                 ) {
                     popUpTo(LoginRootDestination.route) {
                         inclusive = true
@@ -91,45 +91,12 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 }
             }
 
-            AgendaResponseAction.CreateNewTaskAction -> {
-                navigator.navigate(
-                    AgendaDetailRootDestination(type = AgendaItemType.TASK)
-                ) {
-                    popUpTo(LoginRootDestination.route) {
-                        inclusive = true
-                    }
-                }
-            }
-
-            AgendaResponseAction.CreateNewReminderAction -> {
-                navigator.navigate(
-                    AgendaDetailRootDestination(type = AgendaItemType.REMINDER)
-                ) {
-                    popUpTo(LoginRootDestination.route) {
-                        inclusive = true
-                    }
-                }
-            }
-
-            is AgendaResponseAction.SetTaskDoneError -> context.showToast(destination.error, TAG)
-            is AgendaResponseAction.DeleteAgendaItemError -> context.showToast(destination.error, TAG)
-
-            is AgendaResponseAction.OpenAgendaItem -> {
+            is AgendaResponseAction.OpenAgendaItemDetail -> {
                 navigator.navigate(
                     AgendaDetailRootDestination(
                         type = destination.itemType,
                         itemId = destination.itemId,
-                        editable = false
-                    )
-                )
-            }
-
-            is AgendaResponseAction.EditAgendaItem -> {
-                navigator.navigate(
-                    AgendaDetailRootDestination(
-                        type = destination.itemType,
-                        itemId = destination.itemId,
-                        editable = true
+                        editable = destination.isEditable
                     )
                 )
             }
@@ -276,22 +243,22 @@ private fun AgendaScreen(
     }
 }
 
-sealed class AgendaAction {
-    data object LogOut : AgendaAction()
-    data object ClearUserData : AgendaAction()
+sealed interface AgendaAction {
+    data object LogOut : AgendaAction
+    data object ClearUserData : AgendaAction
     class UpdateSelectedDate(val newSelection: LocalDate, val forceSelectedDateToFirstPosition: Boolean) :
-        AgendaAction()
+        AgendaAction
 
-    data object PullToRefresh : AgendaAction()
+    data object PullToRefresh : AgendaAction
 
-    data object CreateNewEvent : AgendaAction()
-    data object CreateNewTask : AgendaAction()
-    data object CreateNewReminder : AgendaAction()
+    data object CreateNewEvent : AgendaAction
+    data object CreateNewTask : AgendaAction
+    data object CreateNewReminder : AgendaAction
 
-    class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction()
-    class Open(val itemId: String, val itemType: AgendaItemType?) : AgendaAction()
-    class Edit(val itemId: String, val itemType: AgendaItemType?) : AgendaAction()
-    class Delete(val itemId: String, val itemType: AgendaItemType?) : AgendaAction()
+    class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction
+    class Open(val itemId: String, val itemType: AgendaItemType?) : AgendaAction
+    class Edit(val itemId: String, val itemType: AgendaItemType?) : AgendaAction
+    class Delete(val itemId: String, val itemType: AgendaItemType?) : AgendaAction
 }
 
 @Preview

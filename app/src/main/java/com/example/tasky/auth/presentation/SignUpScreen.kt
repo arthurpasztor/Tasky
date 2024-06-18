@@ -182,10 +182,10 @@ fun BackButton(modifier: Modifier = Modifier, action: () -> Unit) {
     }
 }
 
-sealed class SignUpAction {
-    class UpdateName(val name: String) : SignUpAction()
-    class UpdateEmail(val email: String) : SignUpAction()
-    class UpdatePassword(val password: String) : SignUpAction()
-    data object SignUp : SignUpAction()
-    data object NavigateBack : SignUpAction()
+sealed interface SignUpAction {
+    class UpdateName(val name: String) : SignUpAction
+    class UpdateEmail(val email: String) : SignUpAction
+    class UpdatePassword(val password: String) : SignUpAction
+    data object SignUp : SignUpAction
+    data object NavigateBack : SignUpAction
 }

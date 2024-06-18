@@ -85,8 +85,8 @@ data class LoginState(
     val isActionButtonEnabled: Boolean = false
 )
 
-sealed class LoginAuthAction {
-    data object NavigateToSignUpScreen : LoginAuthAction()
-    data object HandleAuthResponseSuccess : LoginAuthAction()
-    class HandleAuthResponseError(val error: DataError) : LoginAuthAction()
+sealed interface LoginAuthAction {
+    data object NavigateToSignUpScreen : LoginAuthAction
+    data object HandleAuthResponseSuccess : LoginAuthAction
+    class HandleAuthResponseError(val error: DataError) : LoginAuthAction
 }

@@ -170,9 +170,9 @@ fun SignUpText(
     }
 }
 
-sealed class LoginAction {
-    class UpdateEmail(val email: String) : LoginAction()
-    class UpdatePassword(val password: String) : LoginAction()
-    data object LogIn : LoginAction()
-    data object NavigateToSignUp : LoginAction()
+sealed interface LoginAction {
+    class UpdateEmail(val email: String) : LoginAction
+    class UpdatePassword(val password: String) : LoginAction
+    data object LogIn : LoginAction
+    data object NavigateToSignUp : LoginAction
 }

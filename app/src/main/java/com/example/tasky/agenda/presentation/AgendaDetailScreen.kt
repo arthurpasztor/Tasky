@@ -106,21 +106,19 @@ fun AgendaDetailRoot(
                 )
             }
 
-            AgendaDetailVMAction.CreateTaskSuccess -> {
-                context.showToast(R.string.success_task_created)
+            is AgendaDetailVMAction.CreateAgendaItemSuccess -> {
+                context.showToast(
+                    when (destination.itemType) {
+                        AgendaItemType.EVENT -> TODO()
+                        AgendaItemType.TASK -> R.string.success_task_created
+                        AgendaItemType.REMINDER -> R.string.success_reminder_created
+                    }
+                )
+
                 navigator.popBackStack()
             }
 
-            is AgendaDetailVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
-
-            AgendaDetailVMAction.CreateReminderSuccess -> {
-                context.showToast(R.string.success_reminder_created)
-                navigator.popBackStack()
-            }
-
-            is AgendaDetailVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
-            is AgendaDetailVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
-            is AgendaDetailVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
+            is AgendaDetailVMAction.AgendaItemError -> context.showToast(destination.error, TAG)
         }
     }
 
@@ -153,10 +151,20 @@ fun AgendaDetailRoot(
 
 @Preview
 @Composable
+private fun AgendaDetailScreenPreview() {
+    AgendaDetailScreen(
+        state = AgendaDetailsState(),
+        onAction = {},
+        onNavigateBack = {}
+    )
+}
+
+
+@Composable
 private fun AgendaDetailScreen(
-    state: AgendaDetailsState = AgendaDetailsState(),
-    onAction: (AgendaDetailAction) -> Unit = {},
-    onNavigateBack: () -> Unit = {}
+    state: AgendaDetailsState,
+    onAction: (AgendaDetailAction) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
@@ -468,18 +476,18 @@ private fun AgendaDetailScreen(
     }
 }
 
-sealed class AgendaDetailAction {
-    data object OpenTitleEditor : AgendaDetailAction()
-    data object OpenDescriptionEditor : AgendaDetailAction()
-    data object SwitchToEditMode : AgendaDetailAction()
-    class UpdateTitle(val newTitle: String) : AgendaDetailAction()
-    class UpdateDescription(val newDescription: String) : AgendaDetailAction()
-    class UpdateDate(val newDate: LocalDate) : AgendaDetailAction()
-    class UpdateTime(val newTime: LocalTime) : AgendaDetailAction()
-    class UpdateEventEndDate(val newDate: LocalDate) : AgendaDetailAction()
-    class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction()
-    class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction()
-    data object SaveEvent : AgendaDetailAction()
-    data object SaveTask : AgendaDetailAction()
-    data object SaveReminder : AgendaDetailAction()
+sealed interface AgendaDetailAction {
+    data object OpenTitleEditor : AgendaDetailAction
+    data object OpenDescriptionEditor : AgendaDetailAction
+    data object SwitchToEditMode : AgendaDetailAction
+    class UpdateTitle(val newTitle: String) : AgendaDetailAction
+    class UpdateDescription(val newDescription: String) : AgendaDetailAction
+    class UpdateDate(val newDate: LocalDate) : AgendaDetailAction
+    class UpdateTime(val newTime: LocalTime) : AgendaDetailAction
+    class UpdateEventEndDate(val newDate: LocalDate) : AgendaDetailAction
+    class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction
+    class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction
+    data object SaveEvent : AgendaDetailAction
+    data object SaveTask : AgendaDetailAction
+    data object SaveReminder : AgendaDetailAction
 }
