@@ -7,8 +7,9 @@ import androidx.annotation.StringRes
 import com.example.tasky.auth.domain.asUiText
 import com.example.tasky.core.domain.DataError
 
-fun Context.showToast(@StringRes id: Int) {
+fun Context.showToast(@StringRes id: Int, tag: String = "") {
     val errorMessage = getString(id)
+    Log.e(tag, "Error: $errorMessage")
     Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
 }
 

@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatHeaderDate
 import com.example.tasky.agenda.domain.getInitials
@@ -63,8 +62,8 @@ import java.time.LocalDate
 @Composable
 fun ReminderSelector(
     modifier: Modifier = Modifier,
-    state: TaskReminderState = TaskReminderState(),
-    onAction: (TaskReminderAction) -> Unit = {}
+    state: AgendaDetailsState = AgendaDetailsState(),
+    onAction: (AgendaDetailAction) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -136,7 +135,7 @@ fun ReminderSelector(
                 DropdownMenuItem(
                     text = { Text(text = it.getReminderString(context)) },
                     onClick = {
-                        onAction.invoke(TaskReminderAction.UpdateReminder(it))
+                        onAction.invoke(AgendaDetailAction.UpdateReminder(it))
                         isContextMenuVisible = false
                     })
             }
@@ -374,10 +373,7 @@ fun AgendaItemMoreButton(
 
 @Preview
 @Composable
-fun CloseButton(
-    modifier: Modifier = Modifier,
-    onAction: () -> Unit = {}
-) {
+fun CloseButton(onAction: () -> Unit = {}) {
     IconButton(
         modifier = Modifier
             .size(60.dp)
@@ -432,9 +428,11 @@ fun ArrowBackButton(
 @Preview
 @Composable
 fun AgendaItemDetailHeader(
-    agendaItemType: AgendaItemType = AgendaItemType.REMINDER,
-    interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE,
-    headerDate: LocalDate = LocalDate.now(),
+    state: AgendaDetailsState = AgendaDetailsState(
+        agendaItemType = AgendaItemType.REMINDER,
+        itemId = null,
+        date = LocalDate.now()
+    ),
     onNavigateBack: () -> Unit = {},
     onSwitchToEditMode: () -> Unit = {},
     onSave: () -> Unit = {}
@@ -442,11 +440,12 @@ fun AgendaItemDetailHeader(
     val headerPadding = dimensionResource(R.dimen.padding_20)
 
     val editHeader =
-        stringResource(id = if (agendaItemType == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
-    val headerText = when (interactionMode) {
-        DetailInteractionMode.CREATE -> LocalDate.now().formatHeaderDate()
-        DetailInteractionMode.EDIT -> editHeader.uppercase()
-        DetailInteractionMode.VIEW -> headerDate.formatHeaderDate()
+        stringResource(id = if (state.agendaItemType == AgendaItemType.TASK) R.string.edit_task else R.string.edit_reminder)
+    val headerText = when {
+        state.isCreateMode() -> LocalDate.now().formatHeaderDate()
+        state.isEditMode() -> editHeader.uppercase()
+        state.isViewMode() -> state.date.formatHeaderDate()
+        else -> ""
     }
 
     Row {
@@ -460,19 +459,8 @@ fun AgendaItemDetailHeader(
             style = headerStyle
         )
         Spacer(Modifier.weight(1f))
-        when (interactionMode) {
-            DetailInteractionMode.CREATE, DetailInteractionMode.EDIT -> {
-                ClickableText(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = headerPadding),
-                    text = AnnotatedString(stringResource(id = R.string.save)),
-                    style = headerStyle,
-                    onClick = { onSave.invoke() }
-                )
-            }
-
-            DetailInteractionMode.VIEW -> {
+        when {
+            state.isViewMode() -> {
                 IconButton(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -486,6 +474,16 @@ fun AgendaItemDetailHeader(
                         tint = Color.White,
                     )
                 }
+            }
+            else -> {
+                ClickableText(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = headerPadding),
+                    text = AnnotatedString(stringResource(id = R.string.save)),
+                    style = headerStyle,
+                    onClick = { onSave.invoke() }
+                )
             }
         }
     }

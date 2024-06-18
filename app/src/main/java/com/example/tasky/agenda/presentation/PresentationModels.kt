@@ -4,6 +4,20 @@ import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 
+enum class AgendaItemUiType {
+    EVENT,
+    TASK,
+    REMINDER,
+    UNKNOWN;
+
+    fun toAgendaItemType(): AgendaItemType? = when (this) {
+        EVENT -> AgendaItemType.EVENT
+        TASK -> AgendaItemType.TASK
+        REMINDER -> AgendaItemType.REMINDER
+        UNKNOWN -> null
+    }
+}
+
 sealed class AgendaItemUi {
     // Initializers needed because some classes (ex. NeedleUi) don't override the fields
     open val id: String = ""
@@ -13,7 +27,7 @@ sealed class AgendaItemUi {
 
     open fun getFormattedTime(): String = ""
 
-    open fun getAgendaItemType(): AgendaItemType = AgendaItemType.UNKNOWN
+    open fun getAgendaItemType(): AgendaItemUiType = AgendaItemUiType.UNKNOWN
 
     data class TaskUi(val task: Task): AgendaItemUi() {
         override val id = task.id
@@ -23,7 +37,7 @@ sealed class AgendaItemUi {
 
         override fun getFormattedTime() = task.getFormattedTime()
 
-        override fun getAgendaItemType() = AgendaItemType.TASK
+        override fun getAgendaItemType() = AgendaItemUiType.TASK
     }
 
     data class ReminderUi(val reminder: Reminder): AgendaItemUi() {
@@ -33,7 +47,7 @@ sealed class AgendaItemUi {
 
         override fun getFormattedTime() = reminder.getFormattedTime()
 
-        override fun getAgendaItemType() = AgendaItemType.REMINDER
+        override fun getAgendaItemType() = AgendaItemUiType.REMINDER
     }
 
     data object NeedleUi: AgendaItemUi()

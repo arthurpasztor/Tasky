@@ -44,7 +44,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
-import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
@@ -80,9 +79,9 @@ private fun ReminderItemPreview() {
 fun <T : AgendaItemUi> AgendaItem(
     item: T,
     onDoneRadioButtonClicked: (AgendaItemUi.TaskUi) -> Unit,
-    onOpen: (itemId: String, itemType: AgendaItemType) -> Unit,
-    onEdit: (itemId: String, itemType: AgendaItemType) -> Unit,
-    onDelete: (itemId: String, itemType: AgendaItemType) -> Unit
+    onOpen: (itemId: String, itemType: AgendaItemUiType) -> Unit,
+    onEdit: (itemId: String, itemType: AgendaItemUiType) -> Unit,
+    onDelete: (itemId: String, itemType: AgendaItemUiType) -> Unit
 ) {
     val deleteAlertDialogState = rememberMaterialDialogState()
 

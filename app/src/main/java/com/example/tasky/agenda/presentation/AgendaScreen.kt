@@ -40,11 +40,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.TaskReminderDetailRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.auth.presentation.showToast
+import com.example.tasky.destinations.AgendaDetailRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
@@ -90,10 +89,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 AgendaResponseAction.CreateNewTaskAction -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(
-                            type = AgendaItemType.TASK,
-                            mode = DetailInteractionMode.CREATE
-                        )
+                        AgendaDetailRootDestination(type = AgendaItemType.TASK,)
                     ) {
                         popUpTo(LoginRootDestination.route) {
                             inclusive = true
@@ -103,10 +99,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 AgendaResponseAction.CreateNewReminderAction -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(
-                            type = AgendaItemType.REMINDER,
-                            mode = DetailInteractionMode.CREATE
-                        )
+                        AgendaDetailRootDestination(type = AgendaItemType.REMINDER,)
                     ) {
                         popUpTo(LoginRootDestination.route) {
                             inclusive = true
@@ -119,23 +112,25 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
                 is AgendaResponseAction.OpenAgendaItem -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(
+                        AgendaDetailRootDestination(
                             type = destination.itemType,
-                            mode = DetailInteractionMode.VIEW,
-                            itemId = destination.itemId
+                            itemId = destination.itemId,
+                            editable = false
                         )
                     )
                 }
 
                 is AgendaResponseAction.EditAgendaItem -> {
                     navigator.navigate(
-                        TaskReminderDetailRootDestination(
+                        AgendaDetailRootDestination(
                             type = destination.itemType,
-                            mode = DetailInteractionMode.EDIT,
-                            itemId = destination.itemId
+                            itemId = destination.itemId,
+                            editable = true
                         )
                     )
                 }
+
+                AgendaResponseAction.UnknownAgendaItemType -> context.showToast(R.string.agenda_item_type_unknown)
             }
         }
     }
@@ -219,13 +214,13 @@ private fun AgendaScreen(
                                     onAction.invoke(AgendaAction.SetTaskDone(taskUi))
                                 },
                                 onOpen = { itemId, itemType ->
-                                    onAction.invoke(AgendaAction.Open(itemId, itemType))
+                                    onAction.invoke(AgendaAction.Open(itemId, itemType.toAgendaItemType()))
                                 },
                                 onEdit = { itemId, itemType ->
-                                    onAction.invoke(AgendaAction.Edit(itemId, itemType))
+                                    onAction.invoke(AgendaAction.Edit(itemId, itemType.toAgendaItemType()))
                                 },
                                 onDelete = { itemId, itemType ->
-                                    onAction.invoke(AgendaAction.Delete(itemId, itemType))
+                                    onAction.invoke(AgendaAction.Delete(itemId, itemType.toAgendaItemType()))
                                 }
                             )
                         },
@@ -288,10 +283,11 @@ sealed class AgendaAction {
     data object CreateNewEvent : AgendaAction()
     data object CreateNewTask : AgendaAction()
     data object CreateNewReminder : AgendaAction()
+
     class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction()
-    class Open(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
-    class Edit(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
-    class Delete(val itemId: String, val itemType: AgendaItemType) : AgendaAction()
+    class Open(val itemId: String, val itemType: AgendaItemType?) : AgendaAction()
+    class Edit(val itemId: String, val itemType: AgendaItemType?) : AgendaAction()
+    class Delete(val itemId: String, val itemType: AgendaItemType?) : AgendaAction()
 }
 
 @Preview

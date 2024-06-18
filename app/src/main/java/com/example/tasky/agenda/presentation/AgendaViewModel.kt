@@ -149,7 +149,7 @@ class AgendaViewModel(
         }
     }
 
-    private fun deleteItem(itemId: String, itemType: AgendaItemType) {
+    private fun deleteItem(itemId: String, itemType: AgendaItemType?) {
         if (itemType == AgendaItemType.TASK) {
             viewModelScope.launch {
                 taskRepo.deleteTask(itemId)
@@ -181,15 +181,19 @@ class AgendaViewModel(
         }
     }
 
-    private fun openAgendaItem(itemId: String, itemType: AgendaItemType) {
+    private fun openAgendaItem(itemId: String, itemType: AgendaItemType?) {
         viewModelScope.launch {
-            _navChannel.send(AgendaResponseAction.OpenAgendaItem(itemId, itemType))
+            itemType?.let {
+                _navChannel.send(AgendaResponseAction.OpenAgendaItem(itemId, itemType))
+            } ?: _navChannel.send(AgendaResponseAction.UnknownAgendaItemType)
         }
     }
 
-    private fun editAgendaItem(itemId: String, itemType: AgendaItemType) {
+    private fun editAgendaItem(itemId: String, itemType: AgendaItemType?) {
         viewModelScope.launch {
-            _navChannel.send(AgendaResponseAction.EditAgendaItem(itemId, itemType))
+            itemType?.let {
+                _navChannel.send(AgendaResponseAction.EditAgendaItem(itemId, itemType))
+            } ?: _navChannel.send(AgendaResponseAction.UnknownAgendaItemType)
         }
     }
 
@@ -249,6 +253,7 @@ sealed class AgendaResponseAction {
     data object CreateNewTaskAction : AgendaResponseAction()
     data object CreateNewReminderAction : AgendaResponseAction()
 
+    data object UnknownAgendaItemType : AgendaResponseAction()
     class SetTaskDoneError(val error: DataError) : AgendaResponseAction()
     class DeleteAgendaItemError(val error: DataError) : AgendaResponseAction()
     class OpenAgendaItem(val itemId: String, val itemType: AgendaItemType) : AgendaResponseAction()

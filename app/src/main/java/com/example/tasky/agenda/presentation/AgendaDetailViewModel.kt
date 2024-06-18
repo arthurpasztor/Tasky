@@ -3,7 +3,6 @@ package com.example.tasky.agenda.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.DetailInteractionMode
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
@@ -27,57 +26,63 @@ class AgendaDetailsViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     type: AgendaItemType,
-    mode: DetailInteractionMode,
-    itemId: String? = null
+    itemId: String? = null,
+    editable: Boolean = true
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskReminderState(agendaItemType = type, interactionMode = mode))
+    private val _state = MutableStateFlow(
+        AgendaDetailsState(
+            agendaItemType = type,
+            itemId = itemId,
+            editable = editable,
+        )
+    )
+
     val state = _state.asStateFlow()
 
-    private val _navChannel = Channel<TaskReminderVMAction>()
+    private val _navChannel = Channel<AgendaDetailVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
     init {
+        // a non-null itemId means we are viewing or editing an existing item
         itemId?.let { id ->
-            if (mode == DetailInteractionMode.EDIT || mode == DetailInteractionMode.VIEW) {
-                when (type) {
-                    AgendaItemType.TASK -> loadTask(id)
-                    AgendaItemType.REMINDER -> loadReminder(id)
-                    AgendaItemType.UNKNOWN -> { /*do nothing*/ }
-                }
+            when (type) {
+                AgendaItemType.EVENT -> TODO()
+                AgendaItemType.TASK -> loadTask(id)
+                AgendaItemType.REMINDER -> loadReminder(id)
             }
         }
     }
 
-    fun onAction(action: TaskReminderAction) {
+    fun onAction(action: AgendaDetailAction) {
         when (action) {
-            TaskReminderAction.OpenTitleEditor -> openTitleEditor()
-            TaskReminderAction.OpenDescriptionEditor -> openDescriptionEditor()
-            TaskReminderAction.SwitchToEditMode -> switchToEditMode()
-            is TaskReminderAction.UpdateDate -> updateDate(action.newDate)
-            is TaskReminderAction.UpdateTime -> updateTime(action.newTime)
-            is TaskReminderAction.UpdateReminder -> updateReminder(action.newReminder)
-            is TaskReminderAction.UpdateTitle -> updateTitle(action.newTitle)
-            is TaskReminderAction.UpdateDescription -> updateDescription(action.newDescription)
-            TaskReminderAction.SaveTask -> saveTask()
-            TaskReminderAction.SaveReminder -> saveReminder()
+            AgendaDetailAction.OpenTitleEditor -> openTitleEditor()
+            AgendaDetailAction.OpenDescriptionEditor -> openDescriptionEditor()
+            AgendaDetailAction.SwitchToEditMode -> switchToEditMode()
+            is AgendaDetailAction.UpdateDate -> updateDate(action.newDate)
+            is AgendaDetailAction.UpdateTime -> updateTime(action.newTime)
+            is AgendaDetailAction.UpdateReminder -> updateReminder(action.newReminder)
+            is AgendaDetailAction.UpdateTitle -> updateTitle(action.newTitle)
+            is AgendaDetailAction.UpdateDescription -> updateDescription(action.newDescription)
+            AgendaDetailAction.SaveTask -> saveTask()
+            AgendaDetailAction.SaveReminder -> saveReminder()
         }
     }
 
     private fun openTitleEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskReminderVMAction.OpenTitleEditor)
+            _navChannel.send(AgendaDetailVMAction.OpenTitleEditor)
         }
     }
 
     private fun openDescriptionEditor() {
         viewModelScope.launch {
-            _navChannel.send(TaskReminderVMAction.OpenDescriptionEditor)
+            _navChannel.send(AgendaDetailVMAction.OpenDescriptionEditor)
         }
     }
 
     private fun switchToEditMode() {
-        _state.update { it.copy(interactionMode = DetailInteractionMode.EDIT) }
+        _state.update { it.copy(editable = true) }
     }
 
     private fun updateDate(date: LocalDate) {
@@ -124,18 +129,18 @@ class AgendaDetailsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            when (_state.value.interactionMode) {
-                DetailInteractionMode.CREATE -> {
+            when {
+                _state.value.isCreateMode() -> {
                     taskRepo.createTask(getTaskPayload())
                         .onSuccess {
-                            _navChannel.send(TaskReminderVMAction.CreateTaskSuccess)
+                            _navChannel.send(AgendaDetailVMAction.CreateTaskSuccess)
                         }
                         .onError {
-                            _navChannel.send(TaskReminderVMAction.CreateTaskError(it))
+                            _navChannel.send(AgendaDetailVMAction.CreateTaskError(it))
                         }
                 }
 
-                DetailInteractionMode.EDIT -> {
+                _state.value.isEditMode() -> {
                     taskRepo.updateTask(getTaskPayload())
                         .onSuccess {
                             //TODO
@@ -144,8 +149,6 @@ class AgendaDetailsViewModel(
                             //TODO
                         }
                 }
-
-                DetailInteractionMode.VIEW -> TODO()
             }
 
             _state.update { it.copy(isLoading = false) }
@@ -156,18 +159,18 @@ class AgendaDetailsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            when (_state.value.interactionMode) {
-                DetailInteractionMode.CREATE -> {
+            when {
+                _state.value.isCreateMode() -> {
                     reminderRepo.createReminder(getReminderPayload())
                         .onSuccess {
-                            _navChannel.send(TaskReminderVMAction.CreateReminderSuccess)
+                            _navChannel.send(AgendaDetailVMAction.CreateReminderSuccess)
                         }
                         .onError {
-                            _navChannel.send(TaskReminderVMAction.CreateReminderError(it))
+                            _navChannel.send(AgendaDetailVMAction.CreateReminderError(it))
                         }
                 }
 
-                DetailInteractionMode.EDIT -> {
+                _state.value.isEditMode() -> {
                     reminderRepo.updateReminder(getReminderPayload())
                         .onSuccess {
                             //TODO
@@ -176,8 +179,6 @@ class AgendaDetailsViewModel(
                             //TODO
                         }
                 }
-
-                DetailInteractionMode.VIEW -> TODO()
             }
 
             _state.update { it.copy(isLoading = false) }
@@ -197,13 +198,13 @@ class AgendaDetailsViewModel(
                             description = task.description,
                             date = task.time.toLocalDate(),
                             time = task.time.toLocalTime(),
-                            isDone = task.isDone
+                            extras = AgendaItemDetails.TaskItemDetail(task.isDone),
                         )
                     }
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    _navChannel.send(TaskReminderVMAction.LoadTaskError(error))
+                    _navChannel.send(AgendaDetailVMAction.LoadTaskError(error))
                 }
         }
     }
@@ -226,7 +227,7 @@ class AgendaDetailsViewModel(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    _navChannel.send(TaskReminderVMAction.LoadReminderError(error))
+                    _navChannel.send(AgendaDetailVMAction.LoadReminderError(error))
                 }
         }
     }
@@ -242,7 +243,7 @@ class AgendaDetailsViewModel(
                 description = it.description,
                 time = time,
                 remindAt = remindAt,
-                isDone = it.isDone
+                isDone = (it.extras as? AgendaItemDetails.TaskItemDetail)?.isDone ?: false
             )
         }
     }
@@ -263,27 +264,47 @@ class AgendaDetailsViewModel(
     }
 }
 
-data class TaskReminderState(
+sealed interface AgendaItemDetails {
+    data class TaskItemDetail(
+        val isDone: Boolean = false
+    ) : AgendaItemDetails
+
+    data class EventItemDetail(
+        val toDate: LocalDate = LocalDate.now(),
+        val toTime: LocalTime = LocalTime.now(),
+        val isUserEventCreator: Boolean = true
+    ) : AgendaItemDetails
+}
+
+data class AgendaDetailsState(
     val isLoading: Boolean = false,
 
+    val itemId: String? = null,
     val title: String = "Title",
     val description: String = "Description",
     val date: LocalDate = LocalDate.now(),
     val time: LocalTime = LocalTime.now(),
     val reminderType: ReminderType = ReminderType.MINUTES_30,
-    val isDone: Boolean = false,
 
     val agendaItemType: AgendaItemType = AgendaItemType.TASK,
-    val interactionMode: DetailInteractionMode = DetailInteractionMode.CREATE
-)
+    val editable: Boolean = true,
 
-sealed class TaskReminderVMAction {
-    data object OpenTitleEditor : TaskReminderVMAction()
-    data object OpenDescriptionEditor : TaskReminderVMAction()
-    data object CreateTaskSuccess : TaskReminderVMAction()
-    class CreateTaskError(val error: DataError) : TaskReminderVMAction()
-    data object CreateReminderSuccess : TaskReminderVMAction()
-    class CreateReminderError(val error: DataError) : TaskReminderVMAction()
-    class LoadTaskError(val error: DataError) : TaskReminderVMAction()
-    class LoadReminderError(val error: DataError) : TaskReminderVMAction()
+    val extras: AgendaItemDetails? = null
+) {
+    fun isCreateMode() = itemId.isNullOrBlank()
+
+    fun isEditMode() = !itemId.isNullOrBlank() && editable
+
+    fun isViewMode() = !itemId.isNullOrBlank() && !editable
+}
+
+sealed class AgendaDetailVMAction {
+    data object OpenTitleEditor : AgendaDetailVMAction()
+    data object OpenDescriptionEditor : AgendaDetailVMAction()
+    data object CreateTaskSuccess : AgendaDetailVMAction()
+    class CreateTaskError(val error: DataError) : AgendaDetailVMAction()
+    data object CreateReminderSuccess : AgendaDetailVMAction()
+    class CreateReminderError(val error: DataError) : AgendaDetailVMAction()
+    class LoadTaskError(val error: DataError) : AgendaDetailVMAction()
+    class LoadReminderError(val error: DataError) : AgendaDetailVMAction()
 }
