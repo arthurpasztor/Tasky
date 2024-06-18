@@ -8,13 +8,13 @@ enum class AgendaItemUiType {
     EVENT,
     TASK,
     REMINDER,
-    UNKNOWN;
+    NEEDLE;
 
     fun toAgendaItemType(): AgendaItemType? = when (this) {
         EVENT -> AgendaItemType.EVENT
         TASK -> AgendaItemType.TASK
         REMINDER -> AgendaItemType.REMINDER
-        UNKNOWN -> null
+        NEEDLE -> null
     }
 }
 
@@ -27,7 +27,7 @@ sealed class AgendaItemUi {
 
     open fun getFormattedTime(): String = ""
 
-    open fun getAgendaItemType(): AgendaItemUiType = AgendaItemUiType.UNKNOWN
+    abstract fun getAgendaItemType(): AgendaItemUiType
 
     data class TaskUi(val task: Task): AgendaItemUi() {
         override val id = task.id
@@ -50,5 +50,7 @@ sealed class AgendaItemUi {
         override fun getAgendaItemType() = AgendaItemUiType.REMINDER
     }
 
-    data object NeedleUi: AgendaItemUi()
+    data object NeedleUi: AgendaItemUi() {
+        override fun getAgendaItemType(): AgendaItemUiType = AgendaItemUiType.NEEDLE
+    }
 }

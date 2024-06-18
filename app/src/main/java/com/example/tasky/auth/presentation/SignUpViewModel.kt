@@ -122,8 +122,8 @@ data class SignUpState(
     val isActionButtonEnabled: Boolean = false
 )
 
-sealed class SignUpAuthAction {
-    data object NavigateBack : SignUpAuthAction()
-    data object HandleAuthResponseSuccess : SignUpAuthAction()
-    class HandleAuthResponseError(val error: DataError) : SignUpAuthAction()
+sealed interface SignUpAuthAction {
+    data object NavigateBack : SignUpAuthAction
+    data object HandleAuthResponseSuccess : SignUpAuthAction
+    class HandleAuthResponseError(val error: DataError) : SignUpAuthAction
 }

@@ -10,12 +10,12 @@ import com.example.tasky.core.domain.DataError.HttpError
 import com.example.tasky.core.domain.DataError.LocalError
 import io.ktor.client.statement.HttpResponse
 
-sealed class UiText {
-    data class DynamicString(val value: String) : UiText()
+sealed interface UiText {
+    data class DynamicString(val value: String) : UiText
     class StringResource(
         @StringRes val id: Int,
         val args: Array<Any> = arrayOf()
-    ) : UiText()
+    ) : UiText
 
     @Composable
     fun asString(): String {
