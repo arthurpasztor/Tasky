@@ -8,16 +8,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,20 +31,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.auth.presentation.showToast
-import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.agenda.domain.formatDetailTime
+import com.example.tasky.auth.presentation.showToast
+import com.example.tasky.core.presentation.ObserveAsEvents
+import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
+import com.example.tasky.ui.theme.BackgroundGray
 import com.example.tasky.ui.theme.BackgroundWhite
+import com.example.tasky.ui.theme.EventGreen
 import com.example.tasky.ui.theme.ReminderBorderGray
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
@@ -77,43 +86,41 @@ fun AgendaDetailRoot(
     val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, itemId, editable) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(true) {
-        viewModel.navChannel.collect { destination ->
-            when (destination) {
-                AgendaDetailVMAction.OpenTitleEditor -> {
-                    navigator.navigate(
-                        TextEditorRootDestination(
-                            text = state.title,
-                            type = DetailItemType.TITLE,
-                        )
+    ObserveAsEvents(viewModel.navChannel) { destination ->
+        when (destination) {
+            AgendaDetailVMAction.OpenTitleEditor -> {
+                navigator.navigate(
+                    TextEditorRootDestination(
+                        text = state.title,
+                        type = DetailItemType.TITLE,
                     )
-                }
-
-                AgendaDetailVMAction.OpenDescriptionEditor -> {
-                    navigator.navigate(
-                        TextEditorRootDestination(
-                            text = state.description,
-                            type = DetailItemType.DESCRIPTION,
-                        )
-                    )
-                }
-
-                AgendaDetailVMAction.CreateTaskSuccess -> {
-                    context.showToast(R.string.success_task_created)
-                    navigator.popBackStack()
-                }
-
-                is AgendaDetailVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
-
-                AgendaDetailVMAction.CreateReminderSuccess -> {
-                    context.showToast(R.string.success_reminder_created)
-                    navigator.popBackStack()
-                }
-
-                is AgendaDetailVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
-                is AgendaDetailVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
-                is AgendaDetailVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
+                )
             }
+
+            AgendaDetailVMAction.OpenDescriptionEditor -> {
+                navigator.navigate(
+                    TextEditorRootDestination(
+                        text = state.description,
+                        type = DetailItemType.DESCRIPTION,
+                    )
+                )
+            }
+
+            AgendaDetailVMAction.CreateTaskSuccess -> {
+                context.showToast(R.string.success_task_created)
+                navigator.popBackStack()
+            }
+
+            is AgendaDetailVMAction.CreateTaskError -> context.showToast(destination.error, TAG)
+
+            AgendaDetailVMAction.CreateReminderSuccess -> {
+                context.showToast(R.string.success_reminder_created)
+                navigator.popBackStack()
+            }
+
+            is AgendaDetailVMAction.CreateReminderError -> context.showToast(destination.error, TAG)
+            is AgendaDetailVMAction.LoadReminderError -> context.showToast(destination.error, TAG)
+            is AgendaDetailVMAction.LoadTaskError -> context.showToast(destination.error, TAG)
         }
     }
 
@@ -128,10 +135,10 @@ fun AgendaDetailRoot(
 
     AgendaDetailScreen(
         state = state,
-        onAction = viewModel::onAction
-    ) {
-        navigator.popBackStack()
-    }
+        onAction = viewModel::onAction,
+        onNavigateBack = { navigator.popBackStack() }
+    )
+
     if (state.isLoading) {
         Box(
             modifier = Modifier
@@ -155,6 +162,8 @@ private fun AgendaDetailScreen(
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
+    val dateEventEndDialogState = rememberMaterialDialogState()
+    val timeEventEndDialogState = rememberMaterialDialogState()
 
     Column(
         modifier = Modifier
@@ -167,10 +176,11 @@ private fun AgendaDetailScreen(
             onSwitchToEditMode = { onAction(AgendaDetailAction.SwitchToEditMode) },
             onSave = {
                 onAction(
-                    if (state.agendaItemType == AgendaItemType.TASK)
-                        AgendaDetailAction.SaveTask
-                    else
-                        AgendaDetailAction.SaveReminder
+                    when (state.agendaItemType) {
+                        AgendaItemType.EVENT -> AgendaDetailAction.SaveEvent
+                        AgendaItemType.TASK -> AgendaDetailAction.SaveTask
+                        AgendaItemType.REMINDER -> AgendaDetailAction.SaveReminder
+                    }
                 )
             })
         Column(
@@ -178,18 +188,28 @@ private fun AgendaDetailScreen(
                 .fillMaxSize()
                 .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
                 .background(BackgroundWhite)
-                .padding(horizontal = 16.dp)
         ) {
-            Row(modifier = Modifier.padding(top = 20.dp)) {
+            // Label
+            Row(modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp)) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10))
                         .size(18.dp)
-                        .background(if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderGray)
+                        .background(
+                            color = when (state.agendaItemType) {
+                                AgendaItemType.EVENT -> EventGreen
+                                AgendaItemType.TASK -> TaskyGreen
+                                AgendaItemType.REMINDER -> ReminderGray
+                            }
+                        )
                         .border(
                             BorderStroke(
-                                1.dp,
-                                if (state.agendaItemType == AgendaItemType.TASK) TaskyGreen else ReminderBorderGray
+                                width = 1.dp,
+                                color = when (state.agendaItemType) {
+                                    AgendaItemType.EVENT -> EventGreen
+                                    AgendaItemType.TASK -> TaskyGreen
+                                    AgendaItemType.REMINDER -> ReminderBorderGray
+                                }
                             )
                         )
                         .align(Alignment.CenterVertically),
@@ -198,12 +218,19 @@ private fun AgendaDetailScreen(
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .align(Alignment.CenterVertically),
-                    text = stringResource(id = if (state.agendaItemType == AgendaItemType.TASK) R.string.task else R.string.reminder),
+                    text = stringResource(
+                        id = when (state.agendaItemType) {
+                            AgendaItemType.EVENT -> R.string.event
+                            AgendaItemType.TASK -> R.string.task
+                            AgendaItemType.REMINDER -> R.string.reminder
+                        }
+                    ),
                     style = detailTypeStyle,
                 )
             }
 
-            Row(modifier = Modifier.padding(vertical = 16.dp)) {
+            // Title
+            Row(modifier = Modifier.padding(16.dp)) {
                 RadioButton(
                     modifier = Modifier
                         .size(18.dp)
@@ -226,9 +253,10 @@ private fun AgendaDetailScreen(
                 }
             }
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 
-            Row(modifier = Modifier.padding(vertical = 8.dp)) {
+            // Description
+            Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -243,12 +271,54 @@ private fun AgendaDetailScreen(
                 }
             }
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 
-            Row(modifier = Modifier.padding(vertical = 20.dp)) {
+            if (state.isEvent()) {
+                if (state.isUserEventCreator() && (state.isCreateMode() || state.isEditMode())) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .border(BorderStroke(1.dp, BackgroundGray))
+                            .background(BackgroundGray),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "plus",
+                            tint = Color.Gray
+                        )
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = stringResource(id = R.string.add_photos),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                        color = VeryLightGray,
+                        thickness = 1.dp
+                    )
+                }
+            }
+
+            // Date #1
+            Row(modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp)) {
                 Text(
                     modifier = Modifier.align(Alignment.CenterVertically),
-                    text = stringResource(id = R.string.at),
+                    text = stringResource(
+                        id = if (state.agendaItemType == AgendaItemType.EVENT) {
+                            R.string.from
+                        } else {
+                            R.string.at
+                        }
+                    ),
                     style = detailDescriptionStyle,
                     maxLines = 1
                 )
@@ -275,15 +345,57 @@ private fun AgendaDetailScreen(
                 Spacer(Modifier.weight(1f))
             }
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
+
+            // Date #2
+            if (state.isEvent()) {
+
+                Row(modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp)) {
+                    Text(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 16.dp),
+                        text = stringResource(id = R.string.to),
+                        style = detailDescriptionStyle,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.weight(1f))
+                    ClickableText(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = AnnotatedString(state.getEventTime().formatDetailTime()),
+                        style = detailDescriptionStyle,
+                        maxLines = 1,
+                        onClick = {
+                            timeEventEndDialogState.show()
+                        }
+                    )
+                    Spacer(Modifier.weight(1f))
+                    ClickableText(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = AnnotatedString(state.getEventDate().formatDetailDate()),
+                        style = detailDescriptionStyle,
+                        maxLines = 1,
+                        onClick = {
+                            dateEventEndDialogState.show()
+                        }
+                    )
+                    Spacer(Modifier.weight(1f))
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = VeryLightGray,
+                    thickness = 1.dp
+                )
+            }
 
             ReminderSelector(
-                modifier = Modifier.padding(vertical = 20.dp),
+                modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp),
                 state = state,
                 onAction = onAction
             )
 
-            HorizontalDivider(color = VeryLightGray, thickness = 1.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
         }
     }
 
@@ -321,6 +433,39 @@ private fun AgendaDetailScreen(
             onAction(AgendaDetailAction.UpdateTime(it))
         }
     }
+
+    MaterialDialog(
+        dialogState = dateEventEndDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.ok))
+            negativeButton(text = stringResource(id = R.string.cancel))
+        }
+    ) {
+        datepicker(
+            initialDate = state.getEventDate(),
+            title = stringResource(id = R.string.pick_a_date),
+            allowedDateValidator = {
+                it.isAfter(state.date) || it.isEqual(state.date)
+            }
+        ) {
+            onAction(AgendaDetailAction.UpdateEventEndDate(it))
+        }
+    }
+
+    MaterialDialog(
+        dialogState = timeEventEndDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.ok))
+            negativeButton(text = stringResource(id = R.string.cancel))
+        }
+    ) {
+        timepicker(
+            initialTime = state.getEventTime(),
+            title = stringResource(id = R.string.pick_a_time)
+        ) {
+            onAction(AgendaDetailAction.UpdateEventEndTime(it))
+        }
+    }
 }
 
 sealed class AgendaDetailAction {
@@ -331,7 +476,10 @@ sealed class AgendaDetailAction {
     class UpdateDescription(val newDescription: String) : AgendaDetailAction()
     class UpdateDate(val newDate: LocalDate) : AgendaDetailAction()
     class UpdateTime(val newTime: LocalTime) : AgendaDetailAction()
+    class UpdateEventEndDate(val newDate: LocalDate) : AgendaDetailAction()
+    class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction()
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction()
+    data object SaveEvent : AgendaDetailAction()
     data object SaveTask : AgendaDetailAction()
     data object SaveReminder : AgendaDetailAction()
 }

@@ -14,9 +14,11 @@ val BackgroundBlack = Color.Black
 val BackgroundWhite = Color.White
 
 val TaskyGreen = Color(0xFF299F70)
+val EventGreen = Color(0xFFD0EC44)
 val ReminderGray = Color(0xFFF2F3F7)
 val ReminderBorderGray = Color(0xFFA9B4BE)
 val SelectedDateYellow = Color(0xFFFDEFA8)
 val UnselectedDateTransparent = Color.Transparent
+val BackgroundGray = Color(0xFFF2F3F7)
 
 val VeryLightGray = Color(0xFFEEF6FF)
