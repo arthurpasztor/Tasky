@@ -70,6 +70,7 @@ class AgendaDetailsViewModel(
             AgendaDetailAction.SaveEvent -> saveEvent()
             AgendaDetailAction.SaveTask -> saveTask()
             AgendaDetailAction.SaveReminder -> saveReminder()
+            is AgendaDetailAction.UpdateAttendeeSelection -> updateAttendeeSelection(action.selection)
         }
     }
 
@@ -145,6 +146,14 @@ class AgendaDetailsViewModel(
         _state.update {
             it.copy(
                 description = description
+            )
+        }
+    }
+
+    private fun updateAttendeeSelection(selection: AttendeeSelection) {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras -> eventExtras.copy(attendeeSelection = selection) }
             )
         }
     }
@@ -315,7 +324,9 @@ sealed interface AgendaItemDetails {
     data class EventItemDetail(
         val toDate: LocalDate = LocalDate.now(),
         val toTime: LocalTime = LocalTime.now(),
-        val isUserEventCreator: Boolean = true
+        val isUserEventCreator: Boolean = true,
+
+        val attendeeSelection: AttendeeSelection = AttendeeSelection.ALL
     ) : AgendaItemDetails
 }
 
@@ -353,6 +364,16 @@ data class AgendaDetailsState(
     fun isUserEventCreator(): Boolean {
         return extras?.asEventDetails?.isUserEventCreator ?: true
     }
+
+    fun getAttendeeSelectionAll() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.ALL
+    fun getAttendeeSelectionGoing() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.GOING
+    fun getAttendeeSelectionNotGoing() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.NOT_GOING
+}
+
+enum class AttendeeSelection {
+    ALL,
+    GOING,
+    NOT_GOING
 }
 
 sealed class AgendaDetailVMAction {

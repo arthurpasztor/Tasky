@@ -87,3 +87,17 @@ val agendaListContentStyle = TextStyle(
     textAlign = TextAlign.Start,
     fontSize = 14.sp,
 )
+
+val toggleSelectedStyle = TextStyle(
+    textAlign = TextAlign.Center,
+    lineHeight = 20.sp,
+    fontSize = 14.sp,
+    color = Color.White,
+)
+
+val toggleUnselectedStyle = TextStyle(
+    textAlign = TextAlign.Center,
+    lineHeight = 20.sp,
+    fontSize = 14.sp,
+    color = Color.Gray,
+)

@@ -2,10 +2,12 @@ package com.example.tasky.agenda.presentation
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -51,11 +53,14 @@ import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatHeaderDate
 import com.example.tasky.agenda.domain.getInitials
 import com.example.tasky.ui.theme.BackgroundBlack
+import com.example.tasky.ui.theme.BackgroundGray
 import com.example.tasky.ui.theme.Purple40
 import com.example.tasky.ui.theme.PurpleGrey80
 import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.detailDescriptionStyle
 import com.example.tasky.ui.theme.headerStyle
+import com.example.tasky.ui.theme.toggleSelectedStyle
+import com.example.tasky.ui.theme.toggleUnselectedStyle
 import java.time.LocalDate
 
 @Preview
@@ -481,6 +486,7 @@ fun AgendaItemDetailHeader(
                     )
                 }
             }
+
             else -> {
                 ClickableText(
                     modifier = Modifier
@@ -492,5 +498,79 @@ fun AgendaItemDetailHeader(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun AddAttendeeButton(modifier: Modifier = Modifier, onAction: () -> Unit = {}) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(25))
+            .background(BackgroundGray)
+            .clickable { onAction.invoke() },
+    ) {
+        Icon(
+            modifier = Modifier.align(Alignment.Center),
+            imageVector = Icons.Default.Add,
+            contentDescription = "back",
+            tint = Color.Gray,
+        )
+    }
+}
+
+@Preview
+@Composable
+fun AttendeeToggleToolbar(
+    state: AgendaDetailsState = AgendaDetailsState(
+        extras = AgendaItemDetails.EventItemDetail(attendeeSelection = AttendeeSelection.ALL)),
+    onAction: (AgendaDetailAction) -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clip(RoundedCornerShape(50))
+                .background(if (state.getAttendeeSelectionAll()) Color.Black else BackgroundGray)
+                .padding(vertical = 8.dp)
+                .weight(1f)
+                .clickable {
+                    onAction(AgendaDetailAction.UpdateAttendeeSelection(AttendeeSelection.ALL))
+                },
+            text = stringResource(id = R.string.all),
+            style = if (state.getAttendeeSelectionAll()) toggleSelectedStyle else toggleUnselectedStyle,
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clip(RoundedCornerShape(50))
+                .background(if (state.getAttendeeSelectionGoing()) Color.Black else BackgroundGray)
+                .padding(vertical = 8.dp)
+                .weight(1f)
+                .clickable {
+                    onAction(AgendaDetailAction.UpdateAttendeeSelection(AttendeeSelection.GOING))
+                },
+            text = stringResource(id = R.string.going),
+            style = if (state.getAttendeeSelectionGoing()) toggleSelectedStyle else toggleUnselectedStyle,
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clip(RoundedCornerShape(50))
+                .background(if (state.getAttendeeSelectionNotGoing()) Color.Black else BackgroundGray)
+                .padding(vertical = 8.dp)
+                .weight(1f)
+                .clickable {
+                    onAction.invoke(AgendaDetailAction.UpdateAttendeeSelection(AttendeeSelection.NOT_GOING))
+                },
+            text = stringResource(id = R.string.not_going),
+            style = if (state.getAttendeeSelectionNotGoing()) toggleSelectedStyle else toggleUnselectedStyle,
+        )
     }
 }
