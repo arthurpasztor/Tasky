@@ -1,11 +1,14 @@
 package com.example.tasky.agenda.data.dto
 
-import com.example.tasky.agenda.domain.model.Agenda
-import com.example.tasky.agenda.domain.model.AgendaListItem
-import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
-import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.getLocalDateTimeFromMillis
 import com.example.tasky.agenda.domain.getMillis
+import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.agenda.domain.model.AgendaListItem
+import com.example.tasky.agenda.domain.model.AgendaListItem.Event
+import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
+import com.example.tasky.agenda.domain.model.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.Photo
 
 fun AgendaDTO.toAgenda(): Agenda {
     val items = mutableListOf<AgendaListItem>().apply {
@@ -50,4 +53,58 @@ fun Reminder.toReminderDTO() = ReminderDTO(
     description = description,
     time = time.getMillis(),
     remindAt = remindAt.getMillis()
+)
+
+fun EventDTO.toEvent() = Event(
+    id = id,
+    title = title,
+    description = description,
+    time = from.getLocalDateTimeFromMillis(),
+    to = to.getLocalDateTimeFromMillis(),
+    remindAt = remindAt.getLocalDateTimeFromMillis(),
+    host = host,
+    isUserEventCreator = isUserEventCreator,
+    attendees = attendees.map { it.toAttendee() },
+    photos = photos.map { it.toPhoto() }
+)
+
+fun Event.toEventDTO() = EventDTO(
+    id = id,
+    title = title,
+    description = description,
+    from = time.getMillis(),
+    to = to.getMillis(),
+    remindAt = remindAt.getMillis(),
+    host = host,
+    isUserEventCreator = isUserEventCreator,
+    attendees = attendees.map { it.toAttendeeDTO() },
+    photos = photos.map { it.toPhotoDTO() }
+)
+
+fun AttendeeDTO.toAttendee() = Attendee(
+    email = email,
+    fullName = fullName,
+    userId = userId,
+    eventId = eventId,
+    isGoing = isGoing,
+    remindAt = remindAt.getLocalDateTimeFromMillis()
+)
+
+fun Attendee.toAttendeeDTO() = AttendeeDTO(
+    email = email,
+    fullName = fullName,
+    userId = userId,
+    eventId = eventId,
+    isGoing = isGoing,
+    remindAt = remindAt.getMillis()
+)
+
+fun PhotoDTO.toPhoto() = Photo(
+    key = key,
+    url = url
+)
+
+fun Photo.toPhotoDTO() = PhotoDTO(
+    key = key,
+    url = url
 )

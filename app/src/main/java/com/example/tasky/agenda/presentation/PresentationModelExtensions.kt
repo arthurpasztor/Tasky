@@ -2,13 +2,14 @@ package com.example.tasky.agenda.presentation
 
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.agenda.domain.model.Agenda
-import com.example.tasky.agenda.domain.model.AgendaListItem
+import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 
 fun Agenda.toAgendaItemUiList(): List<AgendaItemUi> {
     var agendaItemUiList = items.map {
         when (it) {
+            is Event -> AgendaItemUi.EventUi(it)
             is Reminder -> AgendaItemUi.ReminderUi(it)
             is Task -> AgendaItemUi.TaskUi(it)
         }
@@ -53,6 +54,8 @@ private fun Agenda.addNeedleItem(list: List<AgendaItemUi>): List<AgendaItemUi> {
 fun Agenda.removeItem(itemId: String) = Agenda(items.filterNot { it.id == itemId }.toMutableList())
 
 fun getAgendaSample() = Agenda.getSample().toAgendaItemUiList()
+
+fun getEventSample() = AgendaItemUi.EventUi(Event.getSampleEvent())
 
 fun getTaskSample() = AgendaItemUi.TaskUi(Task.getSampleTask())
 

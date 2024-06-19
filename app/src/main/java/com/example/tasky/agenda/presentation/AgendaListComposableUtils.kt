@@ -44,12 +44,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
+import com.example.tasky.ui.theme.EventGreen
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen
 import com.example.tasky.ui.theme.agendaListContentStyle
 import com.example.tasky.ui.theme.agendaListTitleStyle
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+
+@Preview
+@Composable
+private fun EventItemPreview() {
+    AgendaItem(
+        item = getEventSample(),
+        onDoneRadioButtonClicked = {},
+        onOpen = { _, _ -> },
+        onEdit = { _, _ -> },
+        onDelete = { _, _ -> }
+    )
+}
 
 @Preview
 @Composable
@@ -86,17 +99,23 @@ fun <T : AgendaItemUi> AgendaItem(
     val deleteAlertDialogState = rememberMaterialDialogState()
 
     val backgroundColor = when (item) {
+        is AgendaItemUi.EventUi -> EventGreen
         is AgendaItemUi.TaskUi -> TaskyGreen
+        is AgendaItemUi.ReminderUi -> ReminderGray
         else -> ReminderGray
     }
 
     val headerColor = when (item) {
+        is AgendaItemUi.EventUi -> Color.Black
         is AgendaItemUi.TaskUi -> Color.White
+        is AgendaItemUi.ReminderUi -> Color.Black
         else -> Color.Black
     }
 
     val contentColor = when (item) {
+        is AgendaItemUi.EventUi -> Color.Gray
         is AgendaItemUi.TaskUi -> Color.White
+        is AgendaItemUi.ReminderUi -> Color.Gray
         else -> Color.Gray
     }
 

@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.presentation
 
 import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 
@@ -28,6 +29,16 @@ sealed class AgendaItemUi {
     open fun getFormattedTime(): String = ""
 
     abstract fun getAgendaItemType(): AgendaItemUiType
+
+    data class EventUi(val event: Event): AgendaItemUi() {
+        override val id = event.id
+        override val title = event.title
+        override val description = event.description
+
+        override fun getFormattedTime() = event.getFormattedTime()
+
+        override fun getAgendaItemType() = AgendaItemUiType.EVENT
+    }
 
     data class TaskUi(val task: Task): AgendaItemUi() {
         override val id = task.id
