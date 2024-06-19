@@ -101,3 +101,5 @@ val toggleUnselectedStyle = TextStyle(
     fontSize = 14.sp,
     color = Color.Gray,
 )
+
+val attendeeLabelStyle = toggleUnselectedStyle

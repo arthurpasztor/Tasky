@@ -104,7 +104,7 @@ data class Attendee(
     companion object {
         fun getSampleAttendeeGoing() = Attendee(
             email = "john.c.calhoun@examplepetstore.com",
-            fullName = "John Doe",
+            fullName = "Kevin Malone",
             userId = "user123",
             eventId = "event123",
             isGoing = true,
@@ -113,7 +113,7 @@ data class Attendee(
 
         fun getSampleAttendeeNotGoing() = Attendee(
             email = "dwight.c.calhoun@examplepetstore.com",
-            fullName = "Dwight Doe",
+            fullName = "Dwight Schrute",
             userId = "user789",
             eventId = "event123",
             isGoing = false,

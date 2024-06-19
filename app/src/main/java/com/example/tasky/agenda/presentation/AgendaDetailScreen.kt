@@ -43,6 +43,7 @@ import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.agenda.domain.formatDetailTime
+import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.TextEditorRootDestination
@@ -154,13 +155,16 @@ fun AgendaDetailRoot(
 private fun AgendaDetailScreenPreview() {
     AgendaDetailScreen(
         state = AgendaDetailsState(
-            extras = AgendaItemDetails.EventItemDetail(attendeeSelection = AttendeeSelection.ALL)
+            extras = AgendaItemDetails.EventItemDetail(
+                attendeeSelection = AttendeeSelection.ALL,
+                attendees = listOf(Attendee.getSampleAttendeeGoing()),
+                nonAttendees = listOf(Attendee.getSampleAttendeeNotGoing())
+            )
         ),
         onAction = {},
         onNavigateBack = {}
     )
 }
-
 
 @Composable
 private fun AgendaDetailScreen(
@@ -437,6 +441,32 @@ private fun AgendaDetailScreen(
                 }
 
                 AttendeeToggleToolbar(state, onAction)
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    if (state.isAllAttendeesSelected() || state.isGoingAttendeesSelected()) {
+                        AttendeeList(
+                            modifier = Modifier,
+                            labelRes = R.string.going,
+                            list = state.getAttendees(),
+                            creatorFullName = state.getCurrentUserFullNameIfEventCreator(),
+                            onRemoveAttendee = {
+                                onAction(AgendaDetailAction.RemoveAttendee(it))
+                            }
+                        )
+                    }
+                    if (state.isAllAttendeesSelected() || state.isNotGoingAttendeesSelected()) {
+                        AttendeeList(
+                            modifier = Modifier.align(Alignment.Start),
+                            labelRes = R.string.not_going,
+                            list = state.getNonAttendees(),
+                            onRemoveAttendee = {
+                                onAction(AgendaDetailAction.RemoveAttendee(it))
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -528,4 +558,5 @@ sealed interface AgendaDetailAction {
     data object SaveReminder : AgendaDetailAction
 
     class UpdateAttendeeSelection(val selection: AttendeeSelection) : AgendaDetailAction
+    class RemoveAttendee(val userId: String) : AgendaDetailAction
 }
