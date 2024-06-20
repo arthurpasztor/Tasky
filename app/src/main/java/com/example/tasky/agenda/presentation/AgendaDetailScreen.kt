@@ -184,7 +184,6 @@ private fun AgendaDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(BackgroundBlack)
     ) {
         AgendaItemDetailHeader(
@@ -204,6 +203,7 @@ private fun AgendaDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
+                .verticalScroll(rememberScrollState())
                 .background(BackgroundWhite)
         ) {
             // Label
