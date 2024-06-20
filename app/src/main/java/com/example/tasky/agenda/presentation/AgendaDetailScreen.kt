@@ -3,6 +3,7 @@ package com.example.tasky.agenda.presentation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -121,6 +122,18 @@ fun AgendaDetailRoot(
                 navigator.popBackStack()
             }
 
+            is AgendaDetailVMAction.RemoveAgendaItemSuccess -> {
+                context.showToast(
+                    when (destination.itemType) {
+                        AgendaItemType.EVENT -> TODO()
+                        AgendaItemType.TASK -> R.string.success_task_removed
+                        AgendaItemType.REMINDER -> R.string.success_reminder_removed
+                    }
+                )
+
+                navigator.popBackStack()
+            }
+
             is AgendaDetailVMAction.AgendaItemError -> context.showToast(destination.error, TAG)
         }
     }
@@ -180,6 +193,8 @@ private fun AgendaDetailScreen(
     val timeDialogState = rememberMaterialDialogState()
     val dateEventEndDialogState = rememberMaterialDialogState()
     val timeEventEndDialogState = rememberMaterialDialogState()
+
+    val deleteAlertDialogState = rememberMaterialDialogState()
 
     Column(
         modifier = Modifier
@@ -305,14 +320,14 @@ private fun AgendaDetailScreen(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "plus",
-                            tint = Color.Gray
+                            tint = Color.LightGray
                         )
                         Text(
                             modifier = Modifier.padding(start = 12.dp),
                             text = stringResource(id = R.string.add_photos),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Gray
+                            color = Color.LightGray
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -471,6 +486,37 @@ private fun AgendaDetailScreen(
                     }
                 }
             }
+
+            // Delete Item
+            if (state.isViewMode() || state.isEditMode()) {
+                Spacer(modifier = Modifier.weight(1f))
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = VeryLightGray,
+                    thickness = 1.dp
+                )
+
+                val bottomActionButtonText = stringResource(
+                    id = when (state.agendaItemType) {
+                        AgendaItemType.EVENT -> R.string.delete_event
+                        AgendaItemType.TASK -> R.string.delete_task
+                        AgendaItemType.REMINDER -> R.string.delete_reminder
+                    }
+                ).uppercase()
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable {
+                            deleteAlertDialogState.show()
+                        }
+                        .padding(vertical = 22.dp),
+                    text = bottomActionButtonText,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.LightGray
+                )
+            }
         }
     }
 
@@ -543,6 +589,26 @@ private fun AgendaDetailScreen(
         }
     }
     //endregion
+
+    // region Delete Alert Dialog
+    MaterialDialog(
+        dialogState = deleteAlertDialogState,
+        buttons = {
+            positiveButton(text = stringResource(id = R.string.confirm)) {
+                deleteAlertDialogState.hide()
+                onAction.invoke(AgendaDetailAction.RemoveAgendaItem)
+            }
+            negativeButton(text = stringResource(id = R.string.cancel)) {
+                deleteAlertDialogState.hide()
+            }
+        }
+    ) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(id = R.string.delete_item_confirmation),
+        )
+    }
+    // endregion
 }
 
 sealed interface AgendaDetailAction {
@@ -556,6 +622,7 @@ sealed interface AgendaDetailAction {
     class UpdateEventEndDate(val newDate: LocalDate) : AgendaDetailAction
     class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction
+    data object RemoveAgendaItem : AgendaDetailAction
     data object SaveEvent : AgendaDetailAction
     data object SaveTask : AgendaDetailAction
     data object SaveReminder : AgendaDetailAction
