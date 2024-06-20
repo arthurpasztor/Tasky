@@ -307,7 +307,7 @@ private fun AgendaDetailScreen(
 
             // Photos
             if (state.isEvent()) {
-                if (state.isUserEventCreator() && (state.isCreateMode() || state.isEditMode())) {
+                if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -395,7 +395,7 @@ private fun AgendaDetailScreen(
                     Spacer(Modifier.weight(1f))
                     ClickableText(
                         modifier = Modifier.align(Alignment.CenterVertically),
-                        text = AnnotatedString(state.getEventTime().formatDetailTime()),
+                        text = AnnotatedString(state.eventTime.formatDetailTime()),
                         style = detailDescriptionStyle,
                         maxLines = 1,
                         onClick = {
@@ -405,7 +405,7 @@ private fun AgendaDetailScreen(
                     Spacer(Modifier.weight(1f))
                     ClickableText(
                         modifier = Modifier.align(Alignment.CenterVertically),
-                        text = AnnotatedString(state.getEventDate().formatDetailDate()),
+                        text = AnnotatedString(state.eventDate.formatDetailDate()),
                         style = detailDescriptionStyle,
                         maxLines = 1,
                         onClick = {
@@ -433,58 +433,9 @@ private fun AgendaDetailScreen(
 
             // Attendees
             if (state.isEvent()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 26.dp, bottom = 26.dp)
-                ) {
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        text = stringResource(id = R.string.visitors),
-                        style = detailTitleStyle,
-                        fontSize = 22.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.size(16.dp))
-                    if (state.isCreateMode() || state.isEditMode()) {
-                        AddAttendeeButton(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .size(30.dp)
-                        ) {
-                            // TODO add visitor
-                        }
-                    }
-                }
-
+                AttendeeHeader(state, onAction)
                 AttendeeToggleToolbar(state, onAction)
-
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    if (state.isAllAttendeesSelected() || state.isGoingAttendeesSelected()) {
-                        AttendeeList(
-                            modifier = Modifier,
-                            labelRes = R.string.going,
-                            list = state.getAttendees(),
-                            creatorFullName = state.getCurrentUserFullNameIfEventCreator(),
-                            onRemoveAttendee = {
-                                onAction(AgendaDetailAction.RemoveAttendee(it))
-                            }
-                        )
-                    }
-                    if (state.isAllAttendeesSelected() || state.isNotGoingAttendeesSelected()) {
-                        AttendeeList(
-                            modifier = Modifier.align(Alignment.Start),
-                            labelRes = R.string.not_going,
-                            list = state.getNonAttendees(),
-                            onRemoveAttendee = {
-                                onAction(AgendaDetailAction.RemoveAttendee(it))
-                            }
-                        )
-                    }
-                }
+                AttendeeFullList(state, onAction)
             }
 
             // Delete Item
@@ -564,7 +515,7 @@ private fun AgendaDetailScreen(
         }
     ) {
         datepicker(
-            initialDate = state.getEventDate(),
+            initialDate = state.eventDate,
             title = stringResource(id = R.string.pick_a_date),
             allowedDateValidator = {
                 it.isAfter(state.date) || it.isEqual(state.date)
@@ -582,7 +533,7 @@ private fun AgendaDetailScreen(
         }
     ) {
         timepicker(
-            initialTime = state.getEventTime(),
+            initialTime = state.eventTime,
             title = stringResource(id = R.string.pick_a_time)
         ) {
             onAction(AgendaDetailAction.UpdateEventEndTime(it))
