@@ -79,6 +79,7 @@ class AgendaDetailsViewModel(
             AgendaDetailAction.SaveReminder -> saveReminder()
             is AgendaDetailAction.UpdateAttendeeSelection -> updateAttendeeSelection(action.selection)
             is AgendaDetailAction.RemoveAttendee -> removeAttendee(action.userId)
+            AgendaDetailAction.RemoveAgendaItem -> deleteItem()
         }
     }
 
@@ -174,6 +175,44 @@ class AgendaDetailsViewModel(
                     eventExtras.copy(currentUserFullName = currentUserFullName)
                 }
             )
+        }
+    }
+
+    private fun deleteItem() {
+        state.value.itemId?.let {
+            _state.update { it.copy(isLoading = true) }
+
+            when (state.value.agendaItemType) {
+                AgendaItemType.EVENT -> {
+                    //TODO
+                }
+
+                AgendaItemType.TASK -> {
+                    viewModelScope.launch {
+                        taskRepo.deleteTask(it)
+                            .onSuccess {
+                                _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.TASK))
+                            }
+                            .onError {
+                                _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                            }
+                    }
+                }
+
+                AgendaItemType.REMINDER -> {
+                    viewModelScope.launch {
+                        reminderRepo.deleteReminder(it)
+                            .onSuccess {
+                                _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.REMINDER))
+                            }
+                            .onError {
+                                _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                            }
+                    }
+                }
+            }
+
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
@@ -413,6 +452,7 @@ sealed class AgendaDetailVMAction {
     data object OpenTitleEditor : AgendaDetailVMAction()
     data object OpenDescriptionEditor : AgendaDetailVMAction()
     class CreateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
+    class RemoveAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
 
     class AgendaItemError(val error: DataError) : AgendaDetailVMAction()
 }
