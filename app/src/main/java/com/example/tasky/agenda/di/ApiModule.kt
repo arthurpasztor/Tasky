@@ -19,7 +19,7 @@ import org.koin.dsl.module
 val apiModule = module {
     viewModelOf(::AgendaViewModel)
     viewModel { params ->
-        AgendaDetailsViewModel(get(), get(), params[0], params[1], params[2])
+        AgendaDetailsViewModel(get(), get(), get(), params[0], params[1], params[2])
     }
 
     singleOf(::AuthRepositoryImpl).bind<AuthRepository>()

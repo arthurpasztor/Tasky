@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,6 +45,7 @@ import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.agenda.domain.formatDetailTime
+import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.TextEditorRootDestination
@@ -153,12 +156,17 @@ fun AgendaDetailRoot(
 @Composable
 private fun AgendaDetailScreenPreview() {
     AgendaDetailScreen(
-        state = AgendaDetailsState(),
+        state = AgendaDetailsState(
+            extras = AgendaItemDetails.EventItemDetail(
+                attendeeSelection = AttendeeSelection.ALL,
+                attendees = listOf(Attendee.getSampleAttendeeGoing()),
+                nonAttendees = listOf(Attendee.getSampleAttendeeNotGoing())
+            )
+        ),
         onAction = {},
         onNavigateBack = {}
     )
 }
-
 
 @Composable
 private fun AgendaDetailScreen(
@@ -195,6 +203,7 @@ private fun AgendaDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(cornerRadius, cornerRadius, 0.dp, 0.dp))
+                .verticalScroll(rememberScrollState())
                 .background(BackgroundWhite)
         ) {
             // Label
@@ -281,6 +290,7 @@ private fun AgendaDetailScreen(
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 
+            // Photos
             if (state.isEvent()) {
                 if (state.isUserEventCreator() && (state.isCreateMode() || state.isEditMode())) {
                     Row(
@@ -397,16 +407,74 @@ private fun AgendaDetailScreen(
                 )
             }
 
+            // Reminder
             ReminderSelector(
-                modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp),
+                modifier = Modifier.padding(top = 20.dp, bottom = 20.dp, start = 16.dp, end = 34.dp),
                 state = state,
                 onAction = onAction
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
+
+            // Attendees
+            if (state.isEvent()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 26.dp, bottom = 26.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = stringResource(id = R.string.visitors),
+                        style = detailTitleStyle,
+                        fontSize = 22.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    if (state.isCreateMode() || state.isEditMode()) {
+                        AddAttendeeButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .size(30.dp)
+                        ) {
+                            // TODO add visitor
+                        }
+                    }
+                }
+
+                AttendeeToggleToolbar(state, onAction)
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    if (state.isAllAttendeesSelected() || state.isGoingAttendeesSelected()) {
+                        AttendeeList(
+                            modifier = Modifier,
+                            labelRes = R.string.going,
+                            list = state.getAttendees(),
+                            creatorFullName = state.getCurrentUserFullNameIfEventCreator(),
+                            onRemoveAttendee = {
+                                onAction(AgendaDetailAction.RemoveAttendee(it))
+                            }
+                        )
+                    }
+                    if (state.isAllAttendeesSelected() || state.isNotGoingAttendeesSelected()) {
+                        AttendeeList(
+                            modifier = Modifier.align(Alignment.Start),
+                            labelRes = R.string.not_going,
+                            list = state.getNonAttendees(),
+                            onRemoveAttendee = {
+                                onAction(AgendaDetailAction.RemoveAttendee(it))
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 
+    //region DateTime Picker Dialogs
     val now = LocalDate.now()
 
     MaterialDialog(
@@ -474,6 +542,7 @@ private fun AgendaDetailScreen(
             onAction(AgendaDetailAction.UpdateEventEndTime(it))
         }
     }
+    //endregion
 }
 
 sealed interface AgendaDetailAction {
@@ -490,4 +559,7 @@ sealed interface AgendaDetailAction {
     data object SaveEvent : AgendaDetailAction
     data object SaveTask : AgendaDetailAction
     data object SaveReminder : AgendaDetailAction
+
+    class UpdateAttendeeSelection(val selection: AttendeeSelection) : AgendaDetailAction
+    class RemoveAttendee(val userId: String) : AgendaDetailAction
 }

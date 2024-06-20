@@ -8,6 +8,8 @@ import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
@@ -25,6 +27,7 @@ import java.util.UUID
 class AgendaDetailsViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
+    private val prefs: Preferences,
     type: AgendaItemType,
     itemId: String? = null,
     editable: Boolean = true
@@ -53,6 +56,10 @@ class AgendaDetailsViewModel(
                 AgendaItemType.REMINDER -> loadReminder(id)
             }
         }
+
+        if (type == AgendaItemType.EVENT) {
+            initCurrentUserFullName()
+        }
     }
 
     fun onAction(action: AgendaDetailAction) {
@@ -70,6 +77,8 @@ class AgendaDetailsViewModel(
             AgendaDetailAction.SaveEvent -> saveEvent()
             AgendaDetailAction.SaveTask -> saveTask()
             AgendaDetailAction.SaveReminder -> saveReminder()
+            is AgendaDetailAction.UpdateAttendeeSelection -> updateAttendeeSelection(action.selection)
+            is AgendaDetailAction.RemoveAttendee -> removeAttendee(action.userId)
         }
     }
 
@@ -147,6 +156,29 @@ class AgendaDetailsViewModel(
                 description = description
             )
         }
+    }
+
+    private fun updateAttendeeSelection(selection: AttendeeSelection) {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras -> eventExtras.copy(attendeeSelection = selection) }
+            )
+        }
+    }
+
+    private fun initCurrentUserFullName() {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    val currentUserFullName = prefs.getString(Preferences.KEY_USER_NAME, "")
+                    eventExtras.copy(currentUserFullName = currentUserFullName)
+                }
+            )
+        }
+    }
+
+    private fun removeAttendee(userId: String) {
+        //TODO
     }
 
     private fun updateDetailsIfEvent(update: (AgendaItemDetails.EventItemDetail) -> AgendaItemDetails.EventItemDetail): AgendaItemDetails? {
@@ -315,7 +347,13 @@ sealed interface AgendaItemDetails {
     data class EventItemDetail(
         val toDate: LocalDate = LocalDate.now(),
         val toTime: LocalTime = LocalTime.now(),
-        val isUserEventCreator: Boolean = true
+        val isUserEventCreator: Boolean = true,
+
+        val attendeeSelection: AttendeeSelection = AttendeeSelection.ALL,
+
+        val currentUserFullName: String = "",
+        val attendees: List<Attendee> = listOf(Attendee.getSampleAttendeeGoing()),
+        val nonAttendees: List<Attendee> = listOf(Attendee.getSampleAttendeeNotGoing())
     ) : AgendaItemDetails
 }
 
@@ -353,6 +391,22 @@ data class AgendaDetailsState(
     fun isUserEventCreator(): Boolean {
         return extras?.asEventDetails?.isUserEventCreator ?: true
     }
+
+    fun isAllAttendeesSelected() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.ALL
+    fun isGoingAttendeesSelected() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.GOING
+    fun isNotGoingAttendeesSelected() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.NOT_GOING
+
+    fun getCurrentUserFullNameIfEventCreator(): String? {
+        return if (isUserEventCreator()) extras?.asEventDetails?.currentUserFullName else null
+    }
+    fun getAttendees() = extras?.asEventDetails?.attendees ?: emptyList()
+    fun getNonAttendees() = extras?.asEventDetails?.nonAttendees ?: emptyList()
+}
+
+enum class AttendeeSelection {
+    ALL,
+    GOING,
+    NOT_GOING
 }
 
 sealed class AgendaDetailVMAction {
