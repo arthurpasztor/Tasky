@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,11 +39,16 @@ import com.example.tasky.agenda.presentation.AgendaDetailAction
 import com.example.tasky.agenda.presentation.AgendaDetailsState
 import com.example.tasky.agenda.presentation.AgendaItemDetails
 import com.example.tasky.agenda.presentation.AttendeeSelection
+import com.example.tasky.auth.presentation.UserInfoTextField
+import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundGray
 import com.example.tasky.ui.theme.attendeeLabelStyle
 import com.example.tasky.ui.theme.detailTitleStyle
 import com.example.tasky.ui.theme.toggleSelectedStyle
 import com.example.tasky.ui.theme.toggleUnselectedStyle
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
 @Composable
 fun AttendeeSection(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
@@ -75,22 +83,28 @@ fun AttendeeHeader(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> 
             AddAttendeeButton(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .size(30.dp)
-            ) {
-                // TODO add visitor
-            }
+                    .size(30.dp),
+                state = state,
+                onAction = onAction
+            )
         }
     }
 }
 
 @Preview
 @Composable
-fun AddAttendeeButton(modifier: Modifier = Modifier, onAction: () -> Unit = {}) {
+fun AddAttendeeButton(
+    modifier: Modifier = Modifier,
+    state: AgendaDetailsState = AgendaDetailsState(),
+    onAction: (AgendaDetailAction) -> Unit = {}
+) {
+    val addAttendeeAlertDialogState = rememberMaterialDialogState()
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(25))
             .background(BackgroundGray)
-            .clickable { onAction.invoke() },
+            .clickable { addAttendeeAlertDialogState.show() },
     ) {
         Icon(
             modifier = Modifier.align(Alignment.Center),
@@ -98,6 +112,89 @@ fun AddAttendeeButton(modifier: Modifier = Modifier, onAction: () -> Unit = {}) 
             contentDescription = "add attendee",
             tint = Color.Gray,
         )
+    }
+
+    MaterialDialog(
+        dialogState = addAttendeeAlertDialogState,
+        onCloseRequest = {
+            it.hide()
+            onAction(AgendaDetailAction.ClearNewAttendeeEmail)
+        }
+    ) {
+        AddAttendeeDialogContent(state, addAttendeeAlertDialogState, onAction)
+    }
+}
+
+@Preview
+@Composable
+private fun AddAttendeeDialogContentValidEmailPreview() {
+    AddAttendeeDialogContent(
+        state = AgendaDetailsState(
+            extras = AgendaItemDetails.EventItemDetail(
+                newAttendeeEmail = "john.doe@gmail.com",
+                isNewAttendeeEmailValid = true,
+                newAttendeeShouldShowEmailValidationError = false,
+                isNewAttendeeActionButtonEnabled = true
+            )
+        ),
+        addAttendeeAlertDialogState = MaterialDialogState(),
+    ) {}
+}
+
+@Preview
+@Composable
+private fun AddAttendeeDialogContentInvalidEmailPreview() {
+    AddAttendeeDialogContent(
+        state = AgendaDetailsState(
+            extras = AgendaItemDetails.EventItemDetail(
+                newAttendeeEmail = "john.doe.invalid.email",
+                isNewAttendeeEmailValid = false,
+                newAttendeeShouldShowEmailValidationError = true,
+                isNewAttendeeActionButtonEnabled = false
+            )
+        ),
+        addAttendeeAlertDialogState = MaterialDialogState(),
+    ) {}
+}
+
+@Composable
+private fun AddAttendeeDialogContent(
+    state: AgendaDetailsState,
+    addAttendeeAlertDialogState: MaterialDialogState,
+    onAction: (AgendaDetailAction) -> Unit
+) {
+    Column(Modifier.background(Color.White)) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(id = R.string.add_attendee),
+            textAlign = TextAlign.Center
+        )
+        UserInfoTextField(
+            input = state.newAttendeeEmail,
+            label = stringResource(R.string.email),
+            isValid = state.isNewAttendeeEmailValid,
+            validationErrorText = if (state.newAttendeeShouldShowEmailValidationError) stringResource(R.string.error_email_invalid) else null,
+            updateInputState = { onAction(AgendaDetailAction.UpdateNewAttendeeEmail(it)) }
+        )
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            onClick = {
+                addAttendeeAlertDialogState.hide()
+                onAction(AgendaDetailAction.ClearNewAttendeeEmail)
+                onAction(AgendaDetailAction.AddAttendee)
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = BackgroundBlack),
+            enabled = state.isNewAttendeeActionButtonEnabled
+        ) {
+            Text(
+                text = stringResource(id = R.string.add),
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
@@ -80,6 +81,9 @@ class AgendaDetailsViewModel(
             is AgendaDetailAction.UpdateAttendeeSelection -> updateAttendeeSelection(action.selection)
             is AgendaDetailAction.RemoveAttendee -> removeAttendee(action.userId)
             AgendaDetailAction.RemoveAgendaItem -> deleteItem()
+            is AgendaDetailAction.UpdateNewAttendeeEmail -> updateNewAttendeeEmail(action.email)
+            AgendaDetailAction.ClearNewAttendeeEmail -> updateNewAttendeeEmail("")
+            AgendaDetailAction.AddAttendee -> addAttendee()
         }
     }
 
@@ -218,6 +222,43 @@ class AgendaDetailsViewModel(
 
     private fun removeAttendee(userId: String) {
         //TODO
+    }
+
+    private fun updateNewAttendeeEmail(email: String) {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(
+                        newAttendeeEmail = email,
+                        isNewAttendeeEmailValid = email.isEmailValid(),
+                        newAttendeeShouldShowEmailValidationError = !email.isEmailValid(),
+                        isNewAttendeeActionButtonEnabled = email.isEmailValid()
+                    )
+                }
+            )
+        }
+    }
+
+    private fun addAttendee() {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
+                    val remindAt = it.reminderType.getReminder(time)
+
+                    eventExtras.copy(
+                        attendees = eventExtras.attendees + Attendee(
+                            email = state.value.newAttendeeEmail,
+                            fullName = "Pam Beesley",
+                            userId = UUID.randomUUID().toString(),
+                            eventId = "123",
+                            isGoing = true,
+                            remindAt = remindAt
+                        )
+                    )
+                }
+            )
+        }
     }
 
     private fun updateDetailsIfEvent(update: (AgendaItemDetails.EventItemDetail) -> AgendaItemDetails.EventItemDetail): AgendaItemDetails? {
@@ -392,7 +433,12 @@ sealed interface AgendaItemDetails {
 
         val currentUserFullName: String = "",
         val attendees: List<Attendee> = emptyList(),
-        val nonAttendees: List<Attendee> = emptyList()
+        val nonAttendees: List<Attendee> = emptyList(),
+
+        val newAttendeeEmail: String = "",
+        val isNewAttendeeEmailValid: Boolean = false,
+        val newAttendeeShouldShowEmailValidationError: Boolean = false,
+        val isNewAttendeeActionButtonEnabled: Boolean = false
     ) : AgendaItemDetails
 }
 
@@ -432,6 +478,13 @@ data class AgendaDetailsState(
         get() = if (isUserEventCreator) extras?.asEventDetails?.currentUserFullName else null
     val attendees: List<Attendee> get() = extras?.asEventDetails?.attendees ?: emptyList()
     val nonAttendees: List<Attendee> get() = extras?.asEventDetails?.nonAttendees ?: emptyList()
+
+    val newAttendeeEmail: String get() = extras?.asEventDetails?.newAttendeeEmail ?: ""
+    val isNewAttendeeEmailValid: Boolean get() = extras?.asEventDetails?.isNewAttendeeEmailValid ?: false
+    val newAttendeeShouldShowEmailValidationError: Boolean
+        get() = extras?.asEventDetails?.newAttendeeShouldShowEmailValidationError ?: false
+    val isNewAttendeeActionButtonEnabled: Boolean
+        get() = extras?.asEventDetails?.isNewAttendeeActionButtonEnabled ?: false
 }
 
 enum class AttendeeSelection {
