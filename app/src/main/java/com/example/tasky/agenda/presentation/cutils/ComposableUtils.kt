@@ -1,26 +1,21 @@
-package com.example.tasky.agenda.presentation
+package com.example.tasky.agenda.presentation.cutils
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -36,124 +31,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
-import com.example.tasky.agenda.domain.AgendaItemType
-import com.example.tasky.agenda.domain.ReminderType
-import com.example.tasky.agenda.domain.formatHeaderDate
 import com.example.tasky.agenda.domain.getInitials
+import com.example.tasky.agenda.presentation.AgendaAction
+import com.example.tasky.agenda.presentation.AgendaState
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.Purple40
 import com.example.tasky.ui.theme.PurpleGrey80
 import com.example.tasky.ui.theme.VeryLightGray
-import com.example.tasky.ui.theme.detailDescriptionStyle
-import com.example.tasky.ui.theme.headerStyle
-import java.time.LocalDate
-
-@Preview
-@Composable
-fun ReminderSelector(
-    modifier: Modifier = Modifier,
-    state: AgendaDetailsState = AgendaDetailsState(),
-    onAction: (AgendaDetailAction) -> Unit = {}
-) {
-    val context = LocalContext.current
-
-    var isContextMenuVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
-    val density = LocalDensity.current
-
-    Box(
-        modifier = modifier
-            .onSizeChanged {
-                itemHeight = with(density) { it.height.toDp() }
-            }
-    ) {
-        Row(modifier = Modifier
-            .pointerInput(true) {
-                detectTapGestures(
-                    onPress = {
-                        isContextMenuVisible = true
-                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                    },
-                )
-            }) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10))
-                    .size(22.dp)
-                    .background(VeryLightGray)
-                    .align(Alignment.CenterVertically),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.NotificationsNone,
-                    contentDescription = "checkIcon",
-                    tint = Color.LightGray
-                )
-            }
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(start = 10.dp),
-                text = state.reminderType.getReminderString(context),
-                style = detailDescriptionStyle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "edit",
-                tint = Color.Black,
-            )
-        }
-        DropdownMenu(
-            expanded = isContextMenuVisible,
-            onDismissRequest = {
-                isContextMenuVisible = false
-            },
-            offset = pressOffset.copy(
-                y = pressOffset.y - itemHeight
-            )
-        ) {
-            ReminderType.entries.forEach {
-                DropdownMenuItem(
-                    text = { Text(text = it.getReminderString(context)) },
-                    onClick = {
-                        onAction.invoke(AgendaDetailAction.UpdateReminder(it))
-                        isContextMenuVisible = false
-                    })
-            }
-        }
-    }
-}
-
-private fun ReminderType.getReminderString(context: Context): String {
-    return context.getString(
-        when (this) {
-            ReminderType.MINUTES_10 -> R.string.reminder_10_minutes
-            ReminderType.MINUTES_30 -> R.string.reminder_30_minutes
-            ReminderType.HOUR_1 -> R.string.reminder_1_hour
-            ReminderType.HOUR_6 -> R.string.reminder_6_hours
-            ReminderType.DAY_1 -> R.string.reminder_1_day
-        }
-    )
-}
 
 @Preview
 @Composable
@@ -427,71 +318,7 @@ fun ArrowBackButton(
 
 @Preview
 @Composable
-fun AgendaItemDetailHeader(
-    state: AgendaDetailsState = AgendaDetailsState(
-        agendaItemType = AgendaItemType.REMINDER,
-        itemId = null,
-        date = LocalDate.now()
-    ),
-    onNavigateBack: () -> Unit = {},
-    onSwitchToEditMode: () -> Unit = {},
-    onSave: () -> Unit = {}
-) {
-    val headerPadding = dimensionResource(R.dimen.padding_20)
-
-    val editHeader = stringResource(
-        id = when (state.agendaItemType) {
-            AgendaItemType.EVENT -> R.string.edit_event
-            AgendaItemType.TASK -> R.string.edit_task
-            AgendaItemType.REMINDER -> R.string.edit_reminder
-        }
-    )
-
-    val headerText = when {
-        state.isCreateMode() -> LocalDate.now().formatHeaderDate()
-        state.isEditMode() -> editHeader.uppercase()
-        state.isViewMode() -> state.date.formatHeaderDate()
-        else -> ""
-    }
-
-    Row {
-        CloseButton { onNavigateBack.invoke() }
-        Spacer(Modifier.weight(1f))
-        Text(
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(end = headerPadding),
-            text = headerText,
-            style = headerStyle
-        )
-        Spacer(Modifier.weight(1f))
-        when {
-            state.isViewMode() -> {
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(60.dp)
-                        .padding(8.dp),
-                    onClick = { onSwitchToEditMode.invoke() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "create, edit",
-                        tint = Color.White,
-                    )
-                }
-            }
-
-            else -> {
-                ClickableText(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = headerPadding),
-                    text = AnnotatedString(stringResource(id = R.string.save)),
-                    style = headerStyle,
-                    onClick = { onSave.invoke() }
-                )
-            }
-        }
-    }
+fun HorizontalDividerGray1dp() {
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = VeryLightGray, thickness = 1.dp)
 }
+

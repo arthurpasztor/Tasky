@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation
+package com.example.tasky.agenda.presentation.cutils
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,11 +32,22 @@ import androidx.compose.ui.unit.sp
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.getInitials
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.presentation.AgendaDetailAction
+import com.example.tasky.agenda.presentation.AgendaDetailsState
+import com.example.tasky.agenda.presentation.AgendaItemDetails
+import com.example.tasky.agenda.presentation.AttendeeSelection
 import com.example.tasky.ui.theme.BackgroundGray
 import com.example.tasky.ui.theme.attendeeLabelStyle
 import com.example.tasky.ui.theme.detailTitleStyle
 import com.example.tasky.ui.theme.toggleSelectedStyle
 import com.example.tasky.ui.theme.toggleUnselectedStyle
+
+@Composable
+fun AttendeeSection(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
+    AttendeeHeader(state, onAction)
+    AttendeeToggleToolbar(state, onAction)
+    AttendeeFullList(state, onAction)
+}
 
 @Preview
 @Composable

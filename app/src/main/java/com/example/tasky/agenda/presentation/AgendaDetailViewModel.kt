@@ -391,8 +391,8 @@ sealed interface AgendaItemDetails {
         val attendeeSelection: AttendeeSelection = AttendeeSelection.ALL,
 
         val currentUserFullName: String = "",
-        val attendees: List<Attendee> = listOf(Attendee.getSampleAttendeeGoing()),
-        val nonAttendees: List<Attendee> = listOf(Attendee.getSampleAttendeeNotGoing())
+        val attendees: List<Attendee> = emptyList(),
+        val nonAttendees: List<Attendee> = emptyList()
     ) : AgendaItemDetails
 }
 
