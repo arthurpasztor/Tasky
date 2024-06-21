@@ -143,6 +143,23 @@ private fun AddAttendeeDialogContentValidEmailPreview() {
 
 @Preview
 @Composable
+private fun AddAttendeeDialogContentNonExistentEmailPreview() {
+    AddAttendeeDialogContent(
+        state = AgendaDetailsState(
+            extras = AgendaItemDetails.EventItemDetail(
+                newAttendeeEmail = "john.doe@gmail.com",
+                isNewAttendeeEmailValid = true,
+                newAttendeeShouldShowEmailValidationError = false,
+                newAttendeeShouldShowNotExistentError = true,
+                isNewAttendeeActionButtonEnabled = true
+            )
+        ),
+        addAttendeeAlertDialogState = MaterialDialogState(),
+    ) {}
+}
+
+@Preview
+@Composable
 private fun AddAttendeeDialogContentInvalidEmailPreview() {
     AddAttendeeDialogContent(
         state = AgendaDetailsState(
@@ -163,7 +180,19 @@ private fun AddAttendeeDialogContent(
     addAttendeeAlertDialogState: MaterialDialogState,
     onAction: (AgendaDetailAction) -> Unit
 ) {
+    if (state.newAttendeeJustAdded) {
+        addAttendeeAlertDialogState.hide()
+        onAction(AgendaDetailAction.ClearNewAttendeeEmail)
+    }
+
     Column(Modifier.background(Color.White)) {
+        val errorText =
+            when {
+                state.newAttendeeShouldShowNotExistentError -> stringResource(id = R.string.error_email_not_existent)
+                state.newAttendeeShouldShowEmailValidationError -> stringResource(R.string.error_email_invalid)
+                else -> null
+            }
+
         Text(
             modifier = Modifier.padding(16.dp),
             text = stringResource(id = R.string.add_attendee),
@@ -173,7 +202,7 @@ private fun AddAttendeeDialogContent(
             input = state.newAttendeeEmail,
             label = stringResource(R.string.email),
             isValid = state.isNewAttendeeEmailValid,
-            validationErrorText = if (state.newAttendeeShouldShowEmailValidationError) stringResource(R.string.error_email_invalid) else null,
+            validationErrorText = errorText,
             updateInputState = { onAction(AgendaDetailAction.UpdateNewAttendeeEmail(it)) }
         )
         Button(
@@ -181,8 +210,6 @@ private fun AddAttendeeDialogContent(
                 .fillMaxWidth()
                 .padding(16.dp),
             onClick = {
-                addAttendeeAlertDialogState.hide()
-                onAction(AgendaDetailAction.ClearNewAttendeeEmail)
                 onAction(AgendaDetailAction.AddAttendee)
             },
             colors = ButtonDefaults.buttonColors(containerColor = BackgroundBlack),
