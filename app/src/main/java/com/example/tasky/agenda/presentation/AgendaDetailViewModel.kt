@@ -224,7 +224,15 @@ class AgendaDetailsViewModel(
     }
 
     private fun removeAttendee(userId: String) {
-        //TODO
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(
+                        attendees = eventExtras.attendees.filterNot { attendee -> attendee.userId == userId }
+                    )
+                }
+            )
+        }
     }
 
     private fun updateNewAttendeeEmail(email: String) {
