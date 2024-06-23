@@ -26,16 +26,16 @@ import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.model.Attendee
-import com.example.tasky.agenda.presentation.cutils.AddPhotoEmptySpace
-import com.example.tasky.agenda.presentation.cutils.AgendaItemDetailHeader
-import com.example.tasky.agenda.presentation.cutils.AttendeeSection
-import com.example.tasky.agenda.presentation.cutils.DateTimeSection
-import com.example.tasky.agenda.presentation.cutils.DeleteSection
-import com.example.tasky.agenda.presentation.cutils.DescriptionSection
-import com.example.tasky.agenda.presentation.cutils.HorizontalDividerGray1dp
-import com.example.tasky.agenda.presentation.cutils.LabelSection
-import com.example.tasky.agenda.presentation.cutils.ReminderSelector
-import com.example.tasky.agenda.presentation.cutils.TitleSection
+import com.example.tasky.agenda.presentation.composables.detail.AddPhotoEmptySpaceSection
+import com.example.tasky.agenda.presentation.composables.detail.HeaderSection
+import com.example.tasky.agenda.presentation.composables.detail.AttendeeSection
+import com.example.tasky.agenda.presentation.composables.detail.DateTimeSection
+import com.example.tasky.agenda.presentation.composables.detail.DeleteSection
+import com.example.tasky.agenda.presentation.composables.detail.DescriptionSection
+import com.example.tasky.agenda.presentation.composables.utils.HorizontalDividerGray1dp
+import com.example.tasky.agenda.presentation.composables.detail.LabelSection
+import com.example.tasky.agenda.presentation.composables.detail.ReminderSelectorSection
+import com.example.tasky.agenda.presentation.composables.detail.TitleSection
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.TextEditorRootDestination
@@ -171,7 +171,7 @@ private fun AgendaDetailScreen(
             .fillMaxSize()
             .background(BackgroundBlack)
     ) {
-        AgendaItemDetailHeader(
+        HeaderSection(
             state = state,
             onNavigateBack = { onNavigateBack() },
             onSwitchToEditMode = { onAction(AgendaDetailAction.SwitchToEditMode) },
@@ -203,7 +203,7 @@ private fun AgendaDetailScreen(
 
             if (state.isEvent()) {
                 if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
-                    AddPhotoEmptySpace()
+                    AddPhotoEmptySpaceSection()
                 }
             }
 
@@ -217,7 +217,7 @@ private fun AgendaDetailScreen(
                 HorizontalDividerGray1dp()
             }
 
-            ReminderSelector(
+            ReminderSelectorSection(
                 modifier = Modifier.padding(top = 20.dp, bottom = 20.dp, start = 16.dp, end = 34.dp),
                 state = state,
                 onAction = onAction

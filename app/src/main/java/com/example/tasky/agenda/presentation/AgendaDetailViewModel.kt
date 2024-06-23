@@ -523,8 +523,8 @@ data class AgendaDetailsState(
 
     fun isViewMode() = !itemId.isNullOrBlank() && !editable
 
-    val eventDate: LocalDate get() = extras?.asEventDetails?.toDate ?: LocalDate.now()
-    val eventTime: LocalTime get() = extras?.asEventDetails?.toTime ?: LocalTime.now()
+    val eventEndDate: LocalDate get() = extras?.asEventDetails?.toDate ?: LocalDate.now()
+    val eventEndTime: LocalTime get() = extras?.asEventDetails?.toTime ?: LocalTime.now()
 
     val isUserEventCreator: Boolean get() = extras?.asEventDetails?.isUserEventCreator ?: true
 
