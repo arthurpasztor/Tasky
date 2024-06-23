@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation.cutils
+package com.example.tasky.agenda.presentation.composables.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,7 +39,7 @@ import com.example.tasky.agenda.presentation.AgendaDetailAction
 import com.example.tasky.agenda.presentation.AgendaDetailsState
 import com.example.tasky.agenda.presentation.AgendaItemDetails
 import com.example.tasky.agenda.presentation.AttendeeSelection
-import com.example.tasky.auth.presentation.UserInfoTextField
+import com.example.tasky.auth.presentation.util.UserInfoTextField
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundGray
 import com.example.tasky.ui.theme.attendeeLabelStyle
@@ -64,7 +64,7 @@ private fun AttendeeHeaderPreview() {
 }
 
 @Composable
-fun AttendeeHeader(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
+private fun AttendeeHeader(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,7 +93,7 @@ fun AttendeeHeader(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> 
 
 @Preview
 @Composable
-fun AddAttendeeButton(
+private fun AddAttendeeButton(
     modifier: Modifier = Modifier,
     state: AgendaDetailsState = AgendaDetailsState(),
     onAction: (AgendaDetailAction) -> Unit = {}
@@ -237,7 +237,7 @@ private fun AttendeeToggleToolbarPreview() {
 }
 
 @Composable
-fun AttendeeToggleToolbar(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
+private fun AttendeeToggleToolbar(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -299,7 +299,7 @@ private fun AttendeeFullListPreview() {
 }
 
 @Composable
-fun AttendeeFullList(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
+private fun AttendeeFullList(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
@@ -339,7 +339,7 @@ private fun AttendeeListPreview() {
 }
 
 @Composable
-fun AttendeeList(
+private fun AttendeeList(
     modifier: Modifier = Modifier,
     labelRes: Int,
     list: List<Attendee>,
@@ -401,7 +401,7 @@ private fun AttendeeItemParticipantPreview() {
 }
 
 @Composable
-fun AttendeeItem(
+private fun AttendeeItem(
     modifier: Modifier,
     fullName: String,
     isUserEventCreator: Boolean,

@@ -40,11 +40,11 @@ import com.example.tasky.destinations.AgendaRootDestination
 import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.isToday
-import com.example.tasky.agenda.presentation.cutils.AddButton
-import com.example.tasky.agenda.presentation.cutils.AgendaItem
-import com.example.tasky.agenda.presentation.cutils.Needle
-import com.example.tasky.agenda.presentation.cutils.ProfileIcon
-import com.example.tasky.agenda.presentation.cutils.PullToRefreshLazyColumn
+import com.example.tasky.agenda.presentation.composables.utils.AddButton
+import com.example.tasky.agenda.presentation.composables.list.AgendaItem
+import com.example.tasky.agenda.presentation.composables.list.Needle
+import com.example.tasky.agenda.presentation.composables.utils.ProfileIcon
+import com.example.tasky.agenda.presentation.composables.list.PullToRefreshLazyColumn
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.AgendaDetailRootDestination

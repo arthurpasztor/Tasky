@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation.cutils
+package com.example.tasky.agenda.presentation.composables.detail
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -28,7 +28,7 @@ import com.example.tasky.ui.theme.VeryLightGray
 
 @Preview
 @Composable
-fun AddPhotoEmptySpace() {
+fun AddPhotoEmptySpaceSection() {
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -28,6 +28,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
+import com.example.tasky.auth.presentation.util.ActionButton
+import com.example.tasky.auth.presentation.util.AuthenticationTitle
+import com.example.tasky.auth.presentation.util.PasswordTextField
+import com.example.tasky.auth.presentation.util.UserInfoTextField
 import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.AgendaRootDestination
