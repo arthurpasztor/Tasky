@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -80,10 +83,21 @@ fun <T : AgendaItemUi> PullToRefreshLazyColumn(
                     Today()
                 }
             }
-            items(items) {
+            items(items = items, key = { it.id }) {
                 when (it) {
-                    is AgendaItemUi.NeedleUi -> needleContent()
-                    else -> content(it)
+                    is AgendaItemUi.NeedleUi ->
+                        Card(modifier = Modifier.animateItemPlacement()) {
+                            needleContent()
+                        }
+
+                    else ->
+                        Card(
+                            modifier = Modifier
+                                .animateItemPlacement()
+                                .clip(RoundedCornerShape(15))
+                        ) {
+                            content(it)
+                        }
                 }
             }
         }
