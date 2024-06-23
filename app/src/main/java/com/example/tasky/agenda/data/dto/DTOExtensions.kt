@@ -8,6 +8,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
 
 fun AgendaDTO.toAgenda(): Agenda {
@@ -107,4 +108,11 @@ fun PhotoDTO.toPhoto() = Photo(
 fun Photo.toPhotoDTO() = PhotoDTO(
     key = key,
     url = url
+)
+
+fun NewAttendeeDTO.toAttendee() = NewAttendee(
+    doesUserExist = doesUserExist,
+    email = attendee?.email,
+    fullName = attendee?.fullName,
+    userId = attendee?.userId
 )

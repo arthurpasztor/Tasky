@@ -68,6 +68,9 @@
     <string name="going">Going</string>
     <string name="not_going">Not going</string>
     <string name="creator">creator</string>
+    <string name="add">Add</string>
+    <string name="add_attendee">Add new attendee. Type email</string>
+    <string name="error_email_not_existent">This email does not exist</string>
 
     <string name="today">Today</string>
     <string name="open">Open</string>

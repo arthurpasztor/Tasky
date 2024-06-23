@@ -3,12 +3,15 @@ package com.example.tasky.agenda.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.NewAttendee
+import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.onError
@@ -25,6 +28,7 @@ import java.time.LocalTime
 import java.util.UUID
 
 class AgendaDetailsViewModel(
+    private val eventRepo: EventRepository,
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
@@ -80,6 +84,9 @@ class AgendaDetailsViewModel(
             is AgendaDetailAction.UpdateAttendeeSelection -> updateAttendeeSelection(action.selection)
             is AgendaDetailAction.RemoveAttendee -> removeAttendee(action.userId)
             AgendaDetailAction.RemoveAgendaItem -> deleteItem()
+            is AgendaDetailAction.UpdateNewAttendeeEmail -> updateNewAttendeeEmail(action.email)
+            AgendaDetailAction.ClearNewAttendeeEmail -> clearNewAttendeeEmail()
+            AgendaDetailAction.AddAttendee -> addAttendee()
         }
     }
 
@@ -217,7 +224,97 @@ class AgendaDetailsViewModel(
     }
 
     private fun removeAttendee(userId: String) {
-        //TODO
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(
+                        attendees = eventExtras.attendees.filterNot { attendee -> attendee.userId == userId }
+                    )
+                }
+            )
+        }
+    }
+
+    private fun updateNewAttendeeEmail(email: String) {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(
+                        newAttendeeEmail = email,
+                        isNewAttendeeEmailValid = email.isEmailValid(),
+                        newAttendeeShouldShowEmailValidationError = !email.isEmailValid(),
+                        newAttendeeShouldShowNotExistentError = false,
+                        isNewAttendeeActionButtonEnabled = email.isEmailValid()
+                    )
+                }
+            )
+        }
+    }
+
+    private fun clearNewAttendeeEmail() {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(
+                        newAttendeeEmail = "",
+                        isNewAttendeeEmailValid = false,
+                        newAttendeeShouldShowEmailValidationError = false,
+                        newAttendeeShouldShowNotExistentError = false,
+                        isNewAttendeeActionButtonEnabled = false,
+                        newAttendeeJustAdded = false
+                    )
+                }
+            )
+        }
+    }
+
+    private fun addAttendee() {
+        viewModelScope.launch {
+            eventRepo.getAttendee(_state.value.newAttendeeEmail)
+                .onSuccess { newAttendee ->
+                    if (newAttendee.doesUserExist) {
+                        updateWithNewAttendee(newAttendee)
+                    } else {
+                        showNonExistentUserError()
+                    }
+                }
+                .onError {
+                    _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                }
+        }
+    }
+
+    private fun updateWithNewAttendee(newAttendee: NewAttendee) {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
+                    val remindAt = it.reminderType.getReminder(time)
+
+                    eventExtras.copy(
+                        attendees = eventExtras.attendees + Attendee(
+                            email = newAttendee.email!!, // the usage of non-null assertions is justified, since the user exists
+                            fullName = newAttendee.fullName!!,
+                            userId = newAttendee.userId!!,
+                            eventId = "", // TODO upon saving, replace with event id, if exists
+                            isGoing = true,
+                            remindAt = remindAt
+                        ),
+                        newAttendeeJustAdded = true
+                    )
+                }
+            )
+        }
+    }
+
+    private fun showNonExistentUserError() {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(newAttendeeShouldShowNotExistentError = true)
+                }
+            )
+        }
     }
 
     private fun updateDetailsIfEvent(update: (AgendaItemDetails.EventItemDetail) -> AgendaItemDetails.EventItemDetail): AgendaItemDetails? {
@@ -392,7 +489,14 @@ sealed interface AgendaItemDetails {
 
         val currentUserFullName: String = "",
         val attendees: List<Attendee> = emptyList(),
-        val nonAttendees: List<Attendee> = emptyList()
+        val nonAttendees: List<Attendee> = emptyList(),
+
+        val newAttendeeEmail: String = "",
+        val isNewAttendeeEmailValid: Boolean = false,
+        val newAttendeeShouldShowEmailValidationError: Boolean = false,
+        val newAttendeeShouldShowNotExistentError: Boolean = false,
+        val isNewAttendeeActionButtonEnabled: Boolean = false,
+        val newAttendeeJustAdded: Boolean = false
     ) : AgendaItemDetails
 }
 
@@ -432,6 +536,16 @@ data class AgendaDetailsState(
         get() = if (isUserEventCreator) extras?.asEventDetails?.currentUserFullName else null
     val attendees: List<Attendee> get() = extras?.asEventDetails?.attendees ?: emptyList()
     val nonAttendees: List<Attendee> get() = extras?.asEventDetails?.nonAttendees ?: emptyList()
+
+    val newAttendeeEmail: String get() = extras?.asEventDetails?.newAttendeeEmail ?: ""
+    val isNewAttendeeEmailValid: Boolean get() = extras?.asEventDetails?.isNewAttendeeEmailValid ?: false
+    val newAttendeeShouldShowEmailValidationError: Boolean
+        get() = extras?.asEventDetails?.newAttendeeShouldShowEmailValidationError ?: false
+    val newAttendeeShouldShowNotExistentError : Boolean
+        get() = extras?.asEventDetails?.newAttendeeShouldShowNotExistentError ?: false
+    val isNewAttendeeActionButtonEnabled: Boolean
+        get() = extras?.asEventDetails?.isNewAttendeeActionButtonEnabled ?: false
+    val newAttendeeJustAdded: Boolean get() = extras?.asEventDetails?.newAttendeeJustAdded ?: false
 }
 
 enum class AttendeeSelection {

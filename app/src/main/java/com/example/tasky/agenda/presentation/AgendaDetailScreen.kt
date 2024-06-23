@@ -141,7 +141,7 @@ fun AgendaDetailRoot(
     }
 }
 
-@Preview
+@Preview()
 @Composable
 private fun AgendaDetailScreenPreview() {
     AgendaDetailScreen(
@@ -255,5 +255,8 @@ sealed interface AgendaDetailAction {
     data object SaveReminder : AgendaDetailAction
 
     class UpdateAttendeeSelection(val selection: AttendeeSelection) : AgendaDetailAction
+    class UpdateNewAttendeeEmail(val email: String) : AgendaDetailAction
+    data object ClearNewAttendeeEmail : AgendaDetailAction
+    data object AddAttendee : AgendaDetailAction
     class RemoveAttendee(val userId: String) : AgendaDetailAction
 }
