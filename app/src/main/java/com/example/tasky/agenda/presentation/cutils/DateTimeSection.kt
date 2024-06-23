@@ -68,13 +68,13 @@ fun DateTimeSection(
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
 
-    val initialDate = if (state.isEvent() && isEndDate) {
-        state.eventDate
+    val initialDate = if (isEndDate) {
+        state.eventEndDate
     } else {
         state.date
     }
-    val initialTime = if (state.isEvent() && isEndDate) {
-        state.eventTime
+    val initialTime = if (isEndDate) {
+        state.eventEndTime
     } else {
         state.time
     }
@@ -122,7 +122,7 @@ fun DateTimeSection(
     //region DateTime Picker Dialogs
     val now = LocalDate.now()
 
-    val earliestAvailableDate = if (state.isEvent() && isEndDate) {
+    val earliestAvailableDate = if (isEndDate) {
         state.date
     } else {
         now
@@ -142,7 +142,7 @@ fun DateTimeSection(
                 it.isAfter(earliestAvailableDate) || it.isEqual(earliestAvailableDate)
             }
         ) {
-            if (state.isEvent() && isEndDate) {
+            if (isEndDate) {
                 onAction(AgendaDetailAction.UpdateEventEndDate(it))
             } else {
                 onAction(AgendaDetailAction.UpdateDate(it))
@@ -161,7 +161,7 @@ fun DateTimeSection(
             initialTime = initialTime,
             title = stringResource(id = R.string.pick_a_time)
         ) {
-            if (state.isEvent() && isEndDate) {
+            if (isEndDate) {
                 onAction(AgendaDetailAction.UpdateEventEndTime(it))
             } else {
                 onAction(AgendaDetailAction.UpdateTime(it))
