@@ -115,4 +115,7 @@ dependencies {
 
     // Date Picker
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+
+    // Coil image loader
+    implementation("io.coil-kt:coil-compose:2.1.0")
 }

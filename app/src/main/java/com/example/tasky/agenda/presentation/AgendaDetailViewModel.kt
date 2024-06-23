@@ -1,5 +1,6 @@
 package com.example.tasky.agenda.presentation
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaItemType
@@ -11,6 +12,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.NewAttendee
+import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
@@ -87,6 +89,7 @@ class AgendaDetailsViewModel(
             is AgendaDetailAction.UpdateNewAttendeeEmail -> updateNewAttendeeEmail(action.email)
             AgendaDetailAction.ClearNewAttendeeEmail -> clearNewAttendeeEmail()
             AgendaDetailAction.AddAttendee -> addAttendee()
+            is AgendaDetailAction.AddNewPhoto -> addNewPhoto(action.uri)
         }
     }
 
@@ -317,6 +320,28 @@ class AgendaDetailsViewModel(
         }
     }
 
+    private fun addNewPhoto(uri: Uri?) {
+        if (uri?.toString()?.isEmpty() == true) {
+            viewModelScope.launch {
+                _navChannel.send(AgendaDetailVMAction.PhotoUriEmptyOrNull)
+            }
+        } else {
+            _state.update {
+                it.copy(
+                    extras = updateDetailsIfEvent { eventExtras ->
+
+                        eventExtras.copy(
+                            photos = eventExtras.photos + Photo(
+                                key = UUID.randomUUID().toString(),
+                                url = uri.toString()
+                            )
+                        )
+                    }
+                )
+            }
+        }
+    }
+
     private fun updateDetailsIfEvent(update: (AgendaItemDetails.EventItemDetail) -> AgendaItemDetails.EventItemDetail): AgendaItemDetails? {
         return when (val details = state.value.extras) {
             is AgendaItemDetails.EventItemDetail -> update(details)
@@ -496,7 +521,9 @@ sealed interface AgendaItemDetails {
         val newAttendeeShouldShowEmailValidationError: Boolean = false,
         val newAttendeeShouldShowNotExistentError: Boolean = false,
         val isNewAttendeeActionButtonEnabled: Boolean = false,
-        val newAttendeeJustAdded: Boolean = false
+        val newAttendeeJustAdded: Boolean = false,
+
+        val photos: List<Photo> = emptyList()
     ) : AgendaItemDetails
 }
 
@@ -546,6 +573,8 @@ data class AgendaDetailsState(
     val isNewAttendeeActionButtonEnabled: Boolean
         get() = extras?.asEventDetails?.isNewAttendeeActionButtonEnabled ?: false
     val newAttendeeJustAdded: Boolean get() = extras?.asEventDetails?.newAttendeeJustAdded ?: false
+
+    val photos: List<Photo> get() = extras?.asEventDetails?.photos ?: emptyList()
 }
 
 enum class AttendeeSelection {
@@ -561,4 +590,5 @@ sealed class AgendaDetailVMAction {
     class RemoveAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
 
     class AgendaItemError(val error: DataError) : AgendaDetailVMAction()
+    data object PhotoUriEmptyOrNull : AgendaDetailVMAction()
 }

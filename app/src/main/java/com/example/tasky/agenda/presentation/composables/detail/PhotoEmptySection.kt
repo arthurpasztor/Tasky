@@ -3,6 +3,7 @@ package com.example.tasky.agenda.presentation.composables.detail
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,13 +29,16 @@ import com.example.tasky.ui.theme.VeryLightGray
 
 @Preview
 @Composable
-fun AddPhotoEmptySpaceSection() {
+fun PhotoEmptySection(onAction: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(120.dp)
             .border(BorderStroke(1.dp, BackgroundGray))
-            .background(BackgroundGray),
+            .background(BackgroundGray)
+            .clickable {
+                onAction.invoke()
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.weight(1f))
