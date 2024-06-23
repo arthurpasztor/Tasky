@@ -25,16 +25,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.R
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.AgendaDetailsState
 import com.example.tasky.agenda.presentation.AgendaItemDetails
-import com.example.tasky.agenda.presentation.AttendeeSelection
 import com.example.tasky.ui.theme.BackgroundGray
 
 private const val MAX_NUMBER_OF_PHOTOS = 10
@@ -47,12 +47,18 @@ private fun PhotoSectionPreview() {
             extras = AgendaItemDetails.EventItemDetail(
                 photos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
             )
-        )
-    ) {}
+        ),
+        onOpenGallery = {},
+        onOpenFullScreenImage = {}
+    )
 }
 
 @Composable
-fun PhotoSection(state: AgendaDetailsState, onAction: () -> Unit) {
+fun PhotoSection(
+    state: AgendaDetailsState,
+    onOpenGallery: () -> Unit,
+    onOpenFullScreenImage: (photo: Photo) -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,7 +67,7 @@ fun PhotoSection(state: AgendaDetailsState, onAction: () -> Unit) {
     ) {
         Text(
             modifier = Modifier.padding(start = 16.dp, top = 16.dp),
-            text = "Photos",
+            text = stringResource(R.string.photos),
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
         )
@@ -79,6 +85,7 @@ fun PhotoSection(state: AgendaDetailsState, onAction: () -> Unit) {
                         .padding(end = 10.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .border(BorderStroke(width = 4.dp, color = Color.LightGray))
+                        .clickable { onOpenFullScreenImage.invoke(it) }
                 ) {
                     AsyncImage(
                         model = it.url,
@@ -97,7 +104,7 @@ fun PhotoSection(state: AgendaDetailsState, onAction: () -> Unit) {
                         .size(70.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .border(BorderStroke(width = 4.dp, color = Color.LightGray))
-                        .clickable { onAction.invoke() }
+                        .clickable { onOpenGallery.invoke() }
                     ) {
                         Icon(
                             modifier = Modifier.align(Alignment.Center),

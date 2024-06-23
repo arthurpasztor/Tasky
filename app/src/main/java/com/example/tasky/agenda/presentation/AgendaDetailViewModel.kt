@@ -90,6 +90,7 @@ class AgendaDetailsViewModel(
             AgendaDetailAction.ClearNewAttendeeEmail -> clearNewAttendeeEmail()
             AgendaDetailAction.AddAttendee -> addAttendee()
             is AgendaDetailAction.AddNewPhoto -> addNewPhoto(action.uri)
+            is AgendaDetailAction.RemovePhoto -> removePhoto(action.key)
         }
     }
 
@@ -329,7 +330,6 @@ class AgendaDetailsViewModel(
             _state.update {
                 it.copy(
                     extras = updateDetailsIfEvent { eventExtras ->
-
                         eventExtras.copy(
                             photos = eventExtras.photos + Photo(
                                 key = UUID.randomUUID().toString(),
@@ -339,6 +339,18 @@ class AgendaDetailsViewModel(
                     }
                 )
             }
+        }
+    }
+
+    private fun removePhoto(key: String) {
+        _state.update {
+            it.copy(
+                extras = updateDetailsIfEvent { eventExtras ->
+                    eventExtras.copy(
+                        photos = eventExtras.photos.filterNot { photo -> photo.key == key }
+                    )
+                }
+            )
         }
     }
 

@@ -61,6 +61,7 @@
     <string name="reminder_6_hours">6 hour before</string>
     <string name="reminder_1_day">1 day before</string>
     <string name="add_photos">Add photos</string>
+    <string name="photo">Photo</string>
     <string name="photos">Photos</string>
     <string name="from">From</string>
     <string name="to">To</string>

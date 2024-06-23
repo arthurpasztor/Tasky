@@ -44,6 +44,7 @@ import com.example.tasky.agenda.presentation.composables.detail.ReminderSelector
 import com.example.tasky.agenda.presentation.composables.detail.TitleSection
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
+import com.example.tasky.destinations.ImageScreenRootDestination
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -61,6 +62,7 @@ import java.time.LocalTime
 fun AgendaDetailRoot(
     navigator: DestinationsNavigator,
     resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
+    imageResultRecipient: ResultRecipient<ImageScreenRootDestination, String>,
     type: AgendaItemType,
     itemId: String? = null,
     editable: Boolean = true
@@ -130,10 +132,19 @@ fun AgendaDetailRoot(
         }
     }
 
+    imageResultRecipient.onNavResult { result ->
+        if (result is NavResult.Value) {
+            viewModel.onAction(AgendaDetailAction.RemovePhoto(result.value))
+        }
+    }
+
     AgendaDetailScreen(
         state = state,
         onAction = viewModel::onAction,
-        onNavigateBack = { navigator.popBackStack() }
+        onNavigateBack = { navigator.popBackStack() },
+        onOpenFullScreenImage = {
+            navigator.navigate(ImageScreenRootDestination(it.key, it.url))
+        }
     )
 
     if (state.isLoading) {
@@ -162,7 +173,8 @@ private fun AgendaDetailScreenPreview() {
             )
         ),
         onAction = {},
-        onNavigateBack = {}
+        onNavigateBack = {},
+        onOpenFullScreenImage = {}
     )
 }
 
@@ -170,7 +182,8 @@ private fun AgendaDetailScreenPreview() {
 private fun AgendaDetailScreen(
     state: AgendaDetailsState,
     onAction: (AgendaDetailAction) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onOpenFullScreenImage: (photo: Photo) -> Unit
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
@@ -227,11 +240,17 @@ private fun AgendaDetailScreen(
                             )
                         }
                     } else {
-                        PhotoSection(state) {
-                            singlePhotoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }
+                        PhotoSection(
+                            state = state,
+                            onOpenGallery = {
+                                singlePhotoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            onOpenFullScreenImage = {
+                                onOpenFullScreenImage.invoke(it)
+                            }
+                        )
                     }
                 }
             }
@@ -290,4 +309,5 @@ sealed interface AgendaDetailAction {
     class RemoveAttendee(val userId: String) : AgendaDetailAction
 
     class AddNewPhoto(val uri: Uri?) : AgendaDetailAction
+    class RemovePhoto(val key: String) : AgendaDetailAction
 }
