@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation
+package com.example.tasky.agenda.presentation.cutils
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -44,6 +44,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.AgendaItemUi
+import com.example.tasky.agenda.presentation.AgendaItemUiType
+import com.example.tasky.agenda.presentation.getAgendaSample
+import com.example.tasky.agenda.presentation.getEventSample
+import com.example.tasky.agenda.presentation.getReminderSample
+import com.example.tasky.agenda.presentation.getTaskSample
 import com.example.tasky.ui.theme.EventGreen
 import com.example.tasky.ui.theme.ReminderGray
 import com.example.tasky.ui.theme.TaskyGreen

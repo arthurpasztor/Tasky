@@ -391,8 +391,8 @@ sealed interface AgendaItemDetails {
         val attendeeSelection: AttendeeSelection = AttendeeSelection.ALL,
 
         val currentUserFullName: String = "",
-        val attendees: List<Attendee> = listOf(Attendee.getSampleAttendeeGoing()),
-        val nonAttendees: List<Attendee> = listOf(Attendee.getSampleAttendeeNotGoing())
+        val attendees: List<Attendee> = emptyList(),
+        val nonAttendees: List<Attendee> = emptyList()
     ) : AgendaItemDetails
 }
 
@@ -419,27 +419,19 @@ data class AgendaDetailsState(
 
     fun isViewMode() = !itemId.isNullOrBlank() && !editable
 
-    fun getEventDate(): LocalDate {
-        return extras?.asEventDetails?.toDate ?: LocalDate.now()
-    }
+    val eventDate: LocalDate get() = extras?.asEventDetails?.toDate ?: LocalDate.now()
+    val eventTime: LocalTime get() = extras?.asEventDetails?.toTime ?: LocalTime.now()
 
-    fun getEventTime(): LocalTime {
-        return extras?.asEventDetails?.toTime ?: LocalTime.now()
-    }
+    val isUserEventCreator: Boolean get() = extras?.asEventDetails?.isUserEventCreator ?: true
 
-    fun isUserEventCreator(): Boolean {
-        return extras?.asEventDetails?.isUserEventCreator ?: true
-    }
+    val isAllAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.ALL
+    val isGoingAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.GOING
+    val isNotGoingAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.NOT_GOING
 
-    fun isAllAttendeesSelected() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.ALL
-    fun isGoingAttendeesSelected() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.GOING
-    fun isNotGoingAttendeesSelected() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.NOT_GOING
-
-    fun getCurrentUserFullNameIfEventCreator(): String? {
-        return if (isUserEventCreator()) extras?.asEventDetails?.currentUserFullName else null
-    }
-    fun getAttendees() = extras?.asEventDetails?.attendees ?: emptyList()
-    fun getNonAttendees() = extras?.asEventDetails?.nonAttendees ?: emptyList()
+    val currentUserFullNameIfEventCreator: String?
+        get() = if (isUserEventCreator) extras?.asEventDetails?.currentUserFullName else null
+    val attendees: List<Attendee> get() = extras?.asEventDetails?.attendees ?: emptyList()
+    val nonAttendees: List<Attendee> get() = extras?.asEventDetails?.nonAttendees ?: emptyList()
 }
 
 enum class AttendeeSelection {
