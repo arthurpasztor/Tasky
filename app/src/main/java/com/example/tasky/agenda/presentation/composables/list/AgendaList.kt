@@ -86,14 +86,14 @@ fun <T : AgendaItemUi> PullToRefreshLazyColumn(
             items(items = items, key = { it.id }) {
                 when (it) {
                     is AgendaItemUi.NeedleUi ->
-                        Card(modifier = Modifier.animateItemPlacement()) {
+                        Card(modifier = Modifier.animateItem()) {
                             needleContent()
                         }
 
                     else ->
                         Card(
                             modifier = Modifier
-                                .animateItemPlacement()
+                                .animateItem()
                                 .clip(RoundedCornerShape(15))
                         ) {
                             content(it)
