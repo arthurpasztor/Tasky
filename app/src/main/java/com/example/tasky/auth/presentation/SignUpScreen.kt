@@ -54,7 +54,7 @@ fun SignUpRoot(navigator: DestinationsNavigator) {
 
     ObserveAsEvents(viewModel.navChannel) { destination ->
         when (destination) {
-            SignUpAuthAction.NavigateBack -> navigator.popBackStack()
+            SignUpAuthAction.NavigateBack -> navigator.navigateUp()
 
             SignUpAuthAction.HandleAuthResponseSuccess -> {
                 navigator.navigate(AgendaRootDestination) {
