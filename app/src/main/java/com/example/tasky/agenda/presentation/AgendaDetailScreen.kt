@@ -1,5 +1,9 @@
 package com.example.tasky.agenda.presentation
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +30,8 @@ import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.model.Attendee
-import com.example.tasky.agenda.presentation.composables.detail.AddPhotoEmptySpaceSection
+import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.agenda.presentation.composables.detail.PhotoEmptySection
 import com.example.tasky.agenda.presentation.composables.detail.HeaderSection
 import com.example.tasky.agenda.presentation.composables.detail.AttendeeSection
 import com.example.tasky.agenda.presentation.composables.detail.DateTimeSection
@@ -34,10 +39,12 @@ import com.example.tasky.agenda.presentation.composables.detail.DeleteSection
 import com.example.tasky.agenda.presentation.composables.detail.DescriptionSection
 import com.example.tasky.agenda.presentation.composables.utils.HorizontalDividerGray1dp
 import com.example.tasky.agenda.presentation.composables.detail.LabelSection
+import com.example.tasky.agenda.presentation.composables.detail.PhotoSection
 import com.example.tasky.agenda.presentation.composables.detail.ReminderSelectorSection
 import com.example.tasky.agenda.presentation.composables.detail.TitleSection
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
+import com.example.tasky.destinations.ImageScreenRootDestination
 import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
@@ -55,6 +62,7 @@ import java.time.LocalTime
 fun AgendaDetailRoot(
     navigator: DestinationsNavigator,
     resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
+    imageResultRecipient: ResultRecipient<ImageScreenRootDestination, String>,
     type: AgendaItemType,
     itemId: String? = null,
     editable: Boolean = true
@@ -111,6 +119,7 @@ fun AgendaDetailRoot(
             }
 
             is AgendaDetailVMAction.AgendaItemError -> context.showToast(destination.error, TAG)
+            AgendaDetailVMAction.PhotoUriEmptyOrNull -> context.showToast(R.string.error_empty_photo_uri, TAG)
         }
     }
 
@@ -123,10 +132,19 @@ fun AgendaDetailRoot(
         }
     }
 
+    imageResultRecipient.onNavResult { result ->
+        if (result is NavResult.Value) {
+            viewModel.onAction(AgendaDetailAction.RemovePhoto(result.value))
+        }
+    }
+
     AgendaDetailScreen(
         state = state,
         onAction = viewModel::onAction,
-        onNavigateBack = { navigator.popBackStack() }
+        onNavigateBack = { navigator.popBackStack() },
+        onOpenFullScreenImage = {
+            navigator.navigate(ImageScreenRootDestination(it.key, it.url))
+        }
     )
 
     if (state.isLoading) {
@@ -141,7 +159,7 @@ fun AgendaDetailRoot(
     }
 }
 
-@Preview()
+@Preview
 @Composable
 private fun AgendaDetailScreenPreview() {
     AgendaDetailScreen(
@@ -150,11 +168,13 @@ private fun AgendaDetailScreenPreview() {
             extras = AgendaItemDetails.EventItemDetail(
                 attendeeSelection = AttendeeSelection.ALL,
                 attendees = listOf(Attendee.getSampleAttendeeGoing()),
-                nonAttendees = listOf(Attendee.getSampleAttendeeNotGoing())
+                nonAttendees = listOf(Attendee.getSampleAttendeeNotGoing()),
+                photos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
             )
         ),
         onAction = {},
-        onNavigateBack = {}
+        onNavigateBack = {},
+        onOpenFullScreenImage = {}
     )
 }
 
@@ -162,9 +182,19 @@ private fun AgendaDetailScreenPreview() {
 private fun AgendaDetailScreen(
     state: AgendaDetailsState,
     onAction: (AgendaDetailAction) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onOpenFullScreenImage: (photo: Photo) -> Unit
 ) {
     val cornerRadius = dimensionResource(R.dimen.radius_30)
+
+    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            uri?.let {
+                onAction.invoke(AgendaDetailAction.AddNewPhoto(uri))
+            }
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -203,7 +233,25 @@ private fun AgendaDetailScreen(
 
             if (state.isEvent()) {
                 if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
-                    AddPhotoEmptySpaceSection()
+                    if (state.photos.isEmpty()) {
+                        PhotoEmptySection {
+                            singlePhotoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
+                    } else {
+                        PhotoSection(
+                            state = state,
+                            onOpenGallery = {
+                                singlePhotoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            onOpenFullScreenImage = {
+                                onOpenFullScreenImage.invoke(it)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -259,4 +307,7 @@ sealed interface AgendaDetailAction {
     data object ClearNewAttendeeEmail : AgendaDetailAction
     data object AddAttendee : AgendaDetailAction
     class RemoveAttendee(val userId: String) : AgendaDetailAction
+
+    class AddNewPhoto(val uri: Uri?) : AgendaDetailAction
+    class RemovePhoto(val key: String) : AgendaDetailAction
 }
