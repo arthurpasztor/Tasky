@@ -69,7 +69,7 @@ fun EventDTO.toEvent() = Event(
     photos = photos.map { it.toPhoto() }
 )
 
-fun Event.toEventDTO() = EventDTO(
+fun Event.toEventDTO(withPhotos: Boolean = true) = EventDTO(
     id = id,
     title = title,
     description = description,
@@ -79,7 +79,7 @@ fun Event.toEventDTO() = EventDTO(
     host = host,
     isUserEventCreator = isUserEventCreator,
     attendees = attendees.map { it.toAttendeeDTO() },
-    photos = photos.map { it.toPhotoDTO() }
+    photos = if (withPhotos) photos.map { it.toPhotoDTO() } else emptyList()
 )
 
 fun AttendeeDTO.toAttendee() = Attendee(
