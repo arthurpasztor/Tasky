@@ -20,7 +20,7 @@ fun Bitmap.getByteArray(compress: Boolean = false): ByteArray {
 
 fun ByteArray.isGreaterThan1MB() = size > 1024 * 1024
 
-fun Context.getPhotoByteArrayPair(photo: Photo): Pair<String, ByteArray>? {
+fun Context.getPhotoByteArray(photo: Photo): ByteArray? {
     val imageStream: InputStream? = contentResolver.openInputStream(Uri.parse(photo.url))
     val bitmap = BitmapFactory.decodeStream(imageStream)
 
@@ -34,6 +34,6 @@ fun Context.getPhotoByteArrayPair(photo: Photo): Pair<String, ByteArray>? {
         showToast(R.string.photo_too_large)
         null
     } else {
-        photo.key to byteArray
+        byteArray
     }
 }

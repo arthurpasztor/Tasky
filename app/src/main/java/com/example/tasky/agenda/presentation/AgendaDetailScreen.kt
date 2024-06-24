@@ -211,7 +211,7 @@ private fun AgendaDetailScreen(
                 onAction(
                     when (state.agendaItemType) {
                         AgendaItemType.EVENT -> {
-                            val photoByteArrays = state.photos.map { context.getPhotoByteArrayPair(it) }
+                            val photoByteArrays = state.photos.map { context.getPhotoByteArray(it) }
                             AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull())
                         }
                         AgendaItemType.TASK -> AgendaDetailAction.SaveTask
@@ -303,7 +303,7 @@ sealed interface AgendaDetailAction {
     class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction
     data object RemoveAgendaItem : AgendaDetailAction
-    class SaveEvent(val photoByteArrays: List<Pair<String, ByteArray>>) : AgendaDetailAction
+    class SaveEvent(val photoByteArrays: List<ByteArray>) : AgendaDetailAction
     data object SaveTask : AgendaDetailAction
     data object SaveReminder : AgendaDetailAction
 

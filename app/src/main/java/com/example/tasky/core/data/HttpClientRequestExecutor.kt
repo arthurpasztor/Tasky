@@ -56,7 +56,7 @@ suspend inline fun <reified P, R> HttpClient.executeMultipartRequest(
     url: String,
     key: String,
     payload: P,
-    imageBytes: List<Pair<String, ByteArray>>,
+    imageBytes: List<ByteArray>,
     tag: String,
     handleResponse: (response: HttpResponse) -> Result<R, DataError>
 ): Result<R, DataError> {
@@ -70,10 +70,11 @@ suspend inline fun <reified P, R> HttpClient.executeMultipartRequest(
                     append(HttpHeaders.ContentType, "text/plain")
                     append(HttpHeaders.ContentDisposition, "form-data; name=\"$key\"")
                 })
-                imageBytes.forEach { (imageKey, byteArray) ->
-                    append(imageKey, byteArray, Headers.build {
+                imageBytes.forEachIndexed { index, byteArray ->
+                    val fileName = "photo${index}"
+                    append(fileName, byteArray, Headers.build {
                         append(HttpHeaders.ContentType, "image/jpeg")
-                        append(HttpHeaders.ContentDisposition, "key=${imageKey}")
+                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
                     })
                 }
             }

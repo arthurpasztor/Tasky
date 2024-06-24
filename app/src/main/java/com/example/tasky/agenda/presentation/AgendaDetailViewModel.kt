@@ -362,7 +362,7 @@ class AgendaDetailsViewModel(
         }
     }
 
-    private fun saveEvent(photoByteArrays: List<Pair<String, ByteArray>>) {
+    private fun saveEvent(photoByteArrays: List<ByteArray>) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
