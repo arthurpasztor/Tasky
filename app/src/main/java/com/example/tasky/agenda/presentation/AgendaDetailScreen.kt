@@ -103,7 +103,7 @@ fun AgendaDetailRoot(
                     }
                 )
 
-                navigator.popBackStack()
+                navigator.navigateUp()
             }
 
             is AgendaDetailVMAction.RemoveAgendaItemSuccess -> {
@@ -115,7 +115,7 @@ fun AgendaDetailRoot(
                     }
                 )
 
-                navigator.popBackStack()
+                navigator.navigateUp()
             }
 
             is AgendaDetailVMAction.AgendaItemError -> context.showToast(destination.error, TAG)
@@ -141,7 +141,7 @@ fun AgendaDetailRoot(
     AgendaDetailScreen(
         state = state,
         onAction = viewModel::onAction,
-        onNavigateBack = { navigator.popBackStack() },
+        onNavigateBack = { navigator.navigateUp() },
         onOpenFullScreenImage = {
             navigator.navigate(ImageScreenRootDestination(it.key, it.url))
         }
