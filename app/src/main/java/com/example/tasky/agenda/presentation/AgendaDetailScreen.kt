@@ -99,7 +99,7 @@ fun AgendaDetailRoot(
             is AgendaDetailVMAction.CreateAgendaItemSuccess -> {
                 context.showToast(
                     when (destination.itemType) {
-                        AgendaItemType.EVENT -> TODO()
+                        AgendaItemType.EVENT -> R.string.success_event_created
                         AgendaItemType.TASK -> R.string.success_task_created
                         AgendaItemType.REMINDER -> R.string.success_reminder_created
                     }

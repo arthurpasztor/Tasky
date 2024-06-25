@@ -74,7 +74,7 @@ suspend inline fun <reified P, R> HttpClient.executeMultipartRequest(
                     val fileName = "photo${index}"
                     append(fileName, byteArray, Headers.build {
                         append(HttpHeaders.ContentType, "image/jpeg")
-                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                        append(HttpHeaders.ContentDisposition, "filename=$fileName.jpg")
                     })
                 }
             }
