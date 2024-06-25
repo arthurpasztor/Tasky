@@ -13,6 +13,7 @@ import com.example.tasky.agenda.domain.model.Photo
 
 fun AgendaDTO.toAgenda(): Agenda {
     val items = mutableListOf<AgendaListItem>().apply {
+        addAll(events.map { it.toEvent() })
         addAll(tasks.map { it.toTask() })
         addAll(reminders.map { it.toReminder() })
 
