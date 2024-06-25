@@ -182,20 +182,20 @@ private fun AgendaScreen(
 
                     PullToRefreshLazyColumn(
                         items = state.dailyAgenda.toAgendaItemUiList(),
-                        content = {
+                        content = { item ->
                             AgendaItem(
-                                item = it,
+                                item = item,
                                 onDoneRadioButtonClicked = { taskUi ->
                                     onAction.invoke(AgendaAction.SetTaskDone(taskUi))
                                 },
-                                onOpen = { itemId, itemType ->
-                                    onAction.invoke(AgendaAction.Open(itemId, itemType.toAgendaItemType()))
+                                onOpen = { id, type ->
+                                    type.toAgendaItemType()?.let { onAction.invoke(AgendaAction.Open(id, it)) }
                                 },
-                                onEdit = { itemId, itemType ->
-                                    onAction.invoke(AgendaAction.Edit(itemId, itemType.toAgendaItemType()))
+                                onEdit = { id, type ->
+                                    type.toAgendaItemType()?.let { onAction.invoke(AgendaAction.Edit(id, it)) }
                                 },
-                                onDelete = { itemId, itemType ->
-                                    onAction.invoke(AgendaAction.Delete(itemId, itemType.toAgendaItemType()))
+                                onDelete = { id, type ->
+                                    type.toAgendaItemType()?.let { onAction.invoke(AgendaAction.Delete(id, it)) }
                                 }
                             )
                         },
@@ -260,9 +260,9 @@ sealed interface AgendaAction {
     data object CreateNewReminder : AgendaAction
 
     class SetTaskDone(val task: AgendaItemUi.TaskUi) : AgendaAction
-    class Open(val itemId: String, val itemType: AgendaItemType?) : AgendaAction
-    class Edit(val itemId: String, val itemType: AgendaItemType?) : AgendaAction
-    class Delete(val itemId: String, val itemType: AgendaItemType?) : AgendaAction
+    class Open(val itemId: String, val itemType: AgendaItemType) : AgendaAction
+    class Edit(val itemId: String, val itemType: AgendaItemType) : AgendaAction
+    class Delete(val itemId: String, val itemType: AgendaItemType) : AgendaAction
 }
 
 @Preview
