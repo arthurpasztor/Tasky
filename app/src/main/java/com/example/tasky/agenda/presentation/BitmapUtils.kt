@@ -7,6 +7,8 @@ import android.net.Uri
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.auth.presentation.showToast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
@@ -20,20 +22,22 @@ fun Bitmap.getByteArray(compress: Boolean = false): ByteArray {
 
 fun ByteArray.isGreaterThan1MB() = size > 1024 * 1024
 
-fun Context.getPhotoByteArrayPair(photo: Photo): Pair<String, ByteArray>? {
-    val imageStream: InputStream? = contentResolver.openInputStream(Uri.parse(photo.url))
-    val bitmap = BitmapFactory.decodeStream(imageStream)
+suspend fun Context.getPhotoByteArray(photo: Photo): ByteArray? {
+    return withContext(Dispatchers.IO) {
+        val imageStream: InputStream? = contentResolver.openInputStream(Uri.parse(photo.url))
+        val bitmap = BitmapFactory.decodeStream(imageStream)
 
-    var byteArray = bitmap.getByteArray()
-    if (byteArray.isGreaterThan1MB()) {
-        byteArray = bitmap.getByteArray(compress = true)
-    }
+        var byteArray = bitmap.getByteArray()
+        if (byteArray.isGreaterThan1MB()) {
+            byteArray = bitmap.getByteArray(compress = true)
+        }
 
-    return if (byteArray.isGreaterThan1MB()) {
-        // return null for byte arrays greater than 1MB even after compression
-        showToast(R.string.photo_too_large)
-        null
-    } else {
-        photo.key to byteArray
+        if (byteArray.isGreaterThan1MB()) {
+            // return null for byte arrays greater than 1MB even after compression
+            showToast(R.string.photo_too_large)
+            null
+        } else {
+            byteArray
+        }
     }
 }

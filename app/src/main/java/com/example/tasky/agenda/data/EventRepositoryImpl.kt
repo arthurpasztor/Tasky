@@ -42,7 +42,7 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
 
     override suspend fun createEvent(
         event: Event,
-        imageBytes: List<Pair<String, ByteArray>>
+        imageBytes: List<ByteArray>
     ): Result<Event, DataError> {
         val result: Result<EventDTO, DataError> = client.executeMultipartRequest<EventDTO, EventDTO>(
             httpMethod = HttpMethod.Post,

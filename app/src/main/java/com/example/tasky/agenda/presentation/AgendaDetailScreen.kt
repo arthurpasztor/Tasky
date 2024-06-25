@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +53,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
 import java.time.LocalDate
@@ -186,6 +188,7 @@ private fun AgendaDetailScreen(
     onOpenFullScreenImage: (photo: Photo) -> Unit
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
@@ -208,16 +211,16 @@ private fun AgendaDetailScreen(
             onNavigateBack = { onNavigateBack() },
             onSwitchToEditMode = { onAction(AgendaDetailAction.SwitchToEditMode) },
             onSave = {
-                onAction(
                     when (state.agendaItemType) {
                         AgendaItemType.EVENT -> {
-                            val photoByteArrays = state.photos.map { context.getPhotoByteArrayPair(it) }
-                            AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull())
+                            coroutineScope.launch {
+                                val photoByteArrays = state.photos.map { context.getPhotoByteArray(it) }
+                                onAction(AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull()))
+                            }
                         }
-                        AgendaItemType.TASK -> AgendaDetailAction.SaveTask
-                        AgendaItemType.REMINDER -> AgendaDetailAction.SaveReminder
+                        AgendaItemType.TASK -> onAction(AgendaDetailAction.SaveTask)
+                        AgendaItemType.REMINDER -> onAction(AgendaDetailAction.SaveReminder)
                     }
-                )
             })
         Column(
             modifier = Modifier
@@ -303,7 +306,7 @@ sealed interface AgendaDetailAction {
     class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction
     data object RemoveAgendaItem : AgendaDetailAction
-    class SaveEvent(val photoByteArrays: List<Pair<String, ByteArray>>) : AgendaDetailAction
+    class SaveEvent(val photoByteArrays: List<ByteArray>) : AgendaDetailAction
     data object SaveTask : AgendaDetailAction
     data object SaveReminder : AgendaDetailAction
 
