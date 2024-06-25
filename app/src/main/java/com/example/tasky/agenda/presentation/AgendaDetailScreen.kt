@@ -185,6 +185,8 @@ private fun AgendaDetailScreen(
     onNavigateBack: () -> Unit,
     onOpenFullScreenImage: (photo: Photo) -> Unit
 ) {
+    val context = LocalContext.current
+
     val cornerRadius = dimensionResource(R.dimen.radius_30)
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
@@ -208,7 +210,10 @@ private fun AgendaDetailScreen(
             onSave = {
                 onAction(
                     when (state.agendaItemType) {
-                        AgendaItemType.EVENT -> AgendaDetailAction.SaveEvent
+                        AgendaItemType.EVENT -> {
+                            val photoByteArrays = state.photos.map { context.getPhotoByteArrayPair(it) }
+                            AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull())
+                        }
                         AgendaItemType.TASK -> AgendaDetailAction.SaveTask
                         AgendaItemType.REMINDER -> AgendaDetailAction.SaveReminder
                     }
@@ -298,7 +303,7 @@ sealed interface AgendaDetailAction {
     class UpdateEventEndTime(val newTime: LocalTime) : AgendaDetailAction
     class UpdateReminder(val newReminder: ReminderType) : AgendaDetailAction
     data object RemoveAgendaItem : AgendaDetailAction
-    data object SaveEvent : AgendaDetailAction
+    class SaveEvent(val photoByteArrays: List<Pair<String, ByteArray>>) : AgendaDetailAction
     data object SaveTask : AgendaDetailAction
     data object SaveReminder : AgendaDetailAction
 

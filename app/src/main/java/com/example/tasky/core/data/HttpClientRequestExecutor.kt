@@ -6,12 +6,18 @@ import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.DataError.HttpError
 import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.parameter
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.concurrent.CancellationException
 
 suspend inline fun <reified P, R> HttpClient.executeRequest(
@@ -33,18 +39,7 @@ suspend inline fun <reified P, R> HttpClient.executeRequest(
         if (httpResponse.isSuccess()) {
             handleResponse.invoke(httpResponse)
         } else {
-            Result.Error(
-                when (httpResponse.status.value) {
-                    in 300..399 -> HttpError.REDIRECT
-                    401 -> HttpError.UNAUTHORIZED
-                    408 -> HttpError.REQUEST_TIMEOUT
-                    409 -> getDefault409HttpError(url)
-                    413 -> HttpError.PAYLOAD_TOO_LARGE
-                    in 400..499 -> HttpError.CLIENT_REQUEST
-                    in 500..599 -> HttpError.SERVER_RESPONSE
-                    else -> HttpError.UNKNOWN
-                }
-            )
+            Result.Error(getHttpError(httpResponse, url))
         }
     } catch (e: Exception) {
         if (e is CancellationException) {
@@ -56,7 +51,67 @@ suspend inline fun <reified P, R> HttpClient.executeRequest(
     }
 }
 
-fun getDefault409HttpError(url: String): HttpError {
+suspend inline fun <reified P, R> HttpClient.executeMultipartRequest(
+    httpMethod: HttpMethod,
+    url: String,
+    key: String,
+    payload: P,
+    imageBytes: List<Pair<String, ByteArray>>,
+    tag: String,
+    handleResponse: (response: HttpResponse) -> Result<R, DataError>
+): Result<R, DataError> {
+    return try {
+        val payloadJson = Json.encodeToString(payload)
+
+        val httpResponse = submitFormWithBinaryData(
+            url = url,
+            formData {
+                append(key, payloadJson, Headers.build {
+                    append(HttpHeaders.ContentType, "text/plain")
+                    append(HttpHeaders.ContentDisposition, "form-data; name=\"$key\"")
+                })
+                imageBytes.forEach { (imageKey, byteArray) ->
+                    append(imageKey, byteArray, Headers.build {
+                        append(HttpHeaders.ContentType, "image/jpeg")
+                        append(HttpHeaders.ContentDisposition, "key=${imageKey}")
+                    })
+                }
+            }
+
+        ) {
+            method = httpMethod
+        }
+
+        if (httpResponse.isSuccess()) {
+            handleResponse.invoke(httpResponse)
+        } else {
+            Result.Error(getHttpError(httpResponse, url))
+        }
+    } catch (e: Exception) {
+        if (e is CancellationException) {
+            throw e
+        } else {
+            Log.e(tag, "Error: ${e.message} / ${e.cause}")
+            Result.Error(HttpError.UNKNOWN)
+        }
+    }
+}
+
+fun getHttpError(
+    httpResponse: HttpResponse,
+    url: String
+) = when (httpResponse.status.value) {
+    in 300..399 -> HttpError.REDIRECT
+    401 -> HttpError.UNAUTHORIZED
+    408 -> HttpError.REQUEST_TIMEOUT
+    409 -> getDefault409HttpError(url)
+    413 -> HttpError.PAYLOAD_TOO_LARGE
+    in 400..499 -> HttpError.CLIENT_REQUEST
+    in 500..599 -> HttpError.SERVER_RESPONSE
+    else -> HttpError.UNKNOWN
+}
+
+private fun getDefault409HttpError(url: String): HttpError {
     return when {
         url.contains("login") -> HttpError.CONFLICT_LOGIN
         url.contains("register") -> HttpError.CONFLICT_SIGN_UP

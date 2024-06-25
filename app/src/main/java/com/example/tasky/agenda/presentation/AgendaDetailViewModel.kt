@@ -8,6 +8,7 @@ import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
+import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
@@ -80,7 +81,7 @@ class AgendaDetailsViewModel(
             is AgendaDetailAction.UpdateEventEndDate -> updateEventEndDate(action.newDate)
             is AgendaDetailAction.UpdateEventEndTime -> updateEventEndTime(action.newTime)
             is AgendaDetailAction.UpdateReminder -> updateReminder(action.newReminder)
-            AgendaDetailAction.SaveEvent -> saveEvent()
+            is AgendaDetailAction.SaveEvent -> saveEvent(action.photoByteArrays)
             AgendaDetailAction.SaveTask -> saveTask()
             AgendaDetailAction.SaveReminder -> saveReminder()
             is AgendaDetailAction.UpdateAttendeeSelection -> updateAttendeeSelection(action.selection)
@@ -361,8 +362,29 @@ class AgendaDetailsViewModel(
         }
     }
 
-    private fun saveEvent() {
-        //TODO
+    private fun saveEvent(photoByteArrays: List<Pair<String, ByteArray>>) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            when {
+                _state.value.isCreateMode() -> {
+                    val event = getEventPayloadForCreation()
+                    eventRepo.createEvent(event, photoByteArrays)
+                        .onSuccess {
+                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
+                        }
+                        .onError {
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                        }
+                }
+
+                _state.value.isEditMode() -> {
+                    // TODO
+                }
+            }
+
+            _state.update { it.copy(isLoading = false) }
+        }
     }
 
     private fun saveTask() {
@@ -473,6 +495,27 @@ class AgendaDetailsViewModel(
                     _state.update { it.copy(isLoading = false) }
                     _navChannel.send(AgendaDetailVMAction.AgendaItemError(error))
                 }
+        }
+    }
+
+    private fun getEventPayloadForCreation(): Event {
+        _state.value.let {
+            val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
+            val endTime: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
+            val remindAt = it.reminderType.getReminder(time)
+
+            return Event(
+                id = UUID.randomUUID().toString(),
+                title = it.title,
+                description = it.description,
+                time = time,
+                to = endTime,
+                remindAt = remindAt,
+                host = prefs.getEncryptedString(Preferences.KEY_USER_ID, ""),
+                isUserEventCreator = true,
+                attendees = it.attendees,
+                photos = emptyList() // irrelevant in this context. Photos will be added in multipart form
+            )
         }
     }
 

@@ -63,6 +63,7 @@
     <string name="add_photos">Add photos</string>
     <string name="photo">Photo</string>
     <string name="photos">Photos</string>
+    <string name="photo_too_large">Photo is larger than 1MB, cannot be uploaded</string>
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="visitors">Visitors</string>
