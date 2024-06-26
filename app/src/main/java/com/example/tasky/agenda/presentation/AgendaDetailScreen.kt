@@ -297,7 +297,7 @@ private fun AgendaDetailScreen(
                 AttendeeSection(state, onAction)
             }
 
-            if (state.isViewMode() || state.isEditMode()) {
+            if (state.isEditMode()) {
                 Spacer(Modifier.weight(1f))
 
                 DeleteSection(state, onAction)
