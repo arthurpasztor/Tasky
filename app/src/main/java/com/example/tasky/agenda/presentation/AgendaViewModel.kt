@@ -199,7 +199,7 @@ class AgendaViewModel(
         viewModelScope.launch {
             itemType?.let {
                 _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, false))
-            } ?: _navChannel.send(AgendaResponseAction.UnknownAgendaItemType)
+            }
         }
     }
 
@@ -207,7 +207,7 @@ class AgendaViewModel(
         viewModelScope.launch {
             itemType?.let {
                 _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, true))
-            } ?: _navChannel.send(AgendaResponseAction.UnknownAgendaItemType)
+            }
         }
     }
 
@@ -267,6 +267,5 @@ sealed interface AgendaResponseAction {
     class OpenAgendaItemDetail(val itemId: String, val itemType: AgendaItemType, val isEditable: Boolean) :
         AgendaResponseAction
 
-    data object UnknownAgendaItemType : AgendaResponseAction
     class AgendaError(val error: DataError) : AgendaResponseAction
 }

@@ -104,8 +104,6 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                     )
                 )
             }
-
-            AgendaResponseAction.UnknownAgendaItemType -> context.showToast(R.string.agenda_item_type_unknown)
         }
     }
 
