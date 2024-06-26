@@ -8,6 +8,8 @@ import com.example.tasky.agenda.data.ReminderRepositoryImpl
 import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.agenda.data.db.TaskDataSourceImpl
 import com.example.tasky.agenda.data.TaskRepositoryImpl
+import com.example.tasky.agenda.data.db.ReminderDataSource
+import com.example.tasky.agenda.data.db.ReminderDataSourceImpl
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
@@ -34,4 +36,5 @@ val apiModule = module {
     singleOf(::ReminderRepositoryImpl).bind<ReminderRepository>()
 
     single<TaskDataSource> { TaskDataSourceImpl(TaskyDatabase(get())) }
+    single<ReminderDataSource> { ReminderDataSourceImpl(TaskyDatabase(get())) }
 }

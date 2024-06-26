@@ -1,0 +1,25 @@
+CREATE TABLE reminderEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    time INTEGER NOT NULL,
+    remindAt INTEGER NOT NULL
+);
+
+getReminderById:
+SELECT *
+FROM reminderEntity
+WHERE id = :id;
+
+getAllReminders:
+SELECT *
+FROM reminderEntity;
+
+insertOrReplaceReminder:
+INSERT OR REPLACE
+INTO reminderEntity
+VALUES (?, ?, ?, ?, ?);
+
+deleteReminderById:
+DELETE FROM reminderEntity
+WHERE id = :id;
