@@ -83,6 +83,9 @@
     <string name="success_event_created">Event successfully created</string>
     <string name="success_task_created">Task successfully created</string>
     <string name="success_reminder_created">Reminder successfully created</string>
+    <string name="success_event_updated">Event successfully updated</string>
+    <string name="success_task_updated">Task successfully updated</string>
+    <string name="success_reminder_updated">Reminder successfully updated</string>
     <string name="success_event_removed">Event successfully removed</string>
     <string name="success_task_removed">Task successfully removed</string>
     <string name="success_reminder_removed">Reminder successfully removed</string>

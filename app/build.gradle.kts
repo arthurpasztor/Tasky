@@ -6,6 +6,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("kotlin-parcelize")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("app.cash.sqldelight")
 }
 
 android {
@@ -116,6 +117,19 @@ dependencies {
     // Date Picker
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
-    // Coil image loader
+    // Coil
     implementation("io.coil-kt:coil-compose:2.1.0")
+
+    // SQL delight
+    implementation("app.cash.sqldelight:android-driver:2.0.0")
+    implementation("app.cash.sqldelight:coroutines-extensions-jvm:2.0.0")
+    implementation("app.cash.sqldelight:primitive-adapters:2.0.0-alpha05")
+}
+
+sqldelight {
+    databases {
+        create("TaskyDatabase") {
+            packageName.set("com.example.tasky.db")
+        }
+    }
 }

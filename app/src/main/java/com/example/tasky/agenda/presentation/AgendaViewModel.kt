@@ -1,5 +1,6 @@
 package com.example.tasky.agenda.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaItemType
@@ -197,17 +198,13 @@ class AgendaViewModel(
 
     private fun openAgendaItem(itemId: String, itemType: AgendaItemType) {
         viewModelScope.launch {
-            itemType?.let {
-                _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, false))
-            }
+            _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, false))
         }
     }
 
     private fun editAgendaItem(itemId: String, itemType: AgendaItemType) {
         viewModelScope.launch {
-            itemType?.let {
-                _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, true))
-            }
+            _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, true))
         }
     }
 

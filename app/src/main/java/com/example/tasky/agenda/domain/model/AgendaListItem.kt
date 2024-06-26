@@ -57,7 +57,7 @@ sealed class AgendaListItem {
         val title: String,
         val description: String,
         override val time: LocalDateTime,
-        val remindAt: LocalDateTime = LocalDateTime.now(),
+        val remindAt: LocalDateTime,
         val isDone: Boolean
     ): AgendaListItem() {
 
@@ -78,7 +78,7 @@ sealed class AgendaListItem {
         val title: String,
         val description: String,
         override val time: LocalDateTime,
-        val remindAt: LocalDateTime = LocalDateTime.now()
+        val remindAt: LocalDateTime
     ): AgendaListItem() {
 
         companion object {
