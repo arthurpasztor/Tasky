@@ -13,6 +13,7 @@ import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.core.data.executeMultipartRequest
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -43,6 +44,17 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
         }
     }
 
+    override suspend fun deleteEvent(eventId: String): EmptyResult<DataError> {
+        return client.executeRequest<Unit, Unit>(
+            httpMethod = HttpMethod.Delete,
+            url = eventUrl,
+            queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
+            tag = TAG
+        ) {
+            Result.Success(Unit)
+        }
+    }
+
     override suspend fun getAttendee(email: String): Result<NewAttendee, DataError> {
         val result: Result<NewAttendeeDTO, DataError> = client.executeRequest<Unit, NewAttendeeDTO>(
             httpMethod = HttpMethod.Get,
@@ -63,5 +75,6 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
         private const val TAG = "EventRepository"
 
         private const val QUERY_PARAM_KEY_EMAIL = "email"
+        private const val QUERY_PARAM_KEY_ID = "eventId"
     }
 }
