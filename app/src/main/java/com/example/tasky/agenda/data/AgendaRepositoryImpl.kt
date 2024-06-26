@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.Result
 import com.example.tasky.agenda.data.dto.AgendaDTO
@@ -12,7 +13,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
 
-class AgendaRepositoryImpl(private val client: HttpClient) : AgendaRepository {
+class AgendaRepositoryImpl(private val client: HttpClient, private val localDataSource: TaskDataSource) : AgendaRepository {
 
     private val agendaUrl = "${BuildConfig.BASE_URL}/agenda"
 
@@ -27,7 +28,13 @@ class AgendaRepositoryImpl(private val client: HttpClient) : AgendaRepository {
         }
 
         return when (result) {
-            is Result.Success ->  Result.Success(result.data.toAgenda())
+            is Result.Success -> {
+                val agendaDTO = result.data
+
+                localDataSource.insertOrReplaceTasks(agendaDTO.tasks)
+
+                Result.Success(agendaDTO.toAgenda())
+            }
             is Result.Error -> result
         }
     }

@@ -405,10 +405,10 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     taskRepo.updateTask(getTaskPayload())
                         .onSuccess {
-                            //TODO
+                            _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.TASK))
                         }
                         .onError {
-                            //TODO
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
                         }
                 }
             }
@@ -464,6 +464,7 @@ class AgendaDetailsViewModel(
                             description = task.description,
                             date = task.time.toLocalDate(),
                             time = task.time.toLocalTime(),
+                            reminderType = ReminderType.getReminderType(task.time, task.remindAt),
                             extras = AgendaItemDetails.TaskItemDetail(task.isDone),
                         )
                     }
@@ -525,7 +526,7 @@ class AgendaDetailsViewModel(
             val remindAt = it.reminderType.getReminder(time)
 
             return Task(
-                id = UUID.randomUUID().toString(),
+                id = it.itemId ?: UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,
                 time = time,
@@ -541,7 +542,7 @@ class AgendaDetailsViewModel(
             val remindAt = it.reminderType.getReminder(time)
 
             return Reminder(
-                id = UUID.randomUUID().toString(),
+                id = it.itemId ?: UUID.randomUUID().toString(),
                 title = it.title,
                 description = it.description,
                 time = time,
@@ -642,6 +643,7 @@ sealed class AgendaDetailVMAction {
     data object OpenTitleEditor : AgendaDetailVMAction()
     data object OpenDescriptionEditor : AgendaDetailVMAction()
     class CreateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
+    class UpdateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
     class RemoveAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
 
     class AgendaItemError(val error: DataError) : AgendaDetailVMAction()

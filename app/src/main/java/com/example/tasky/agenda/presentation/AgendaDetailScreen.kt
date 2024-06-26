@@ -108,6 +108,18 @@ fun AgendaDetailRoot(
                 navigator.navigateUp()
             }
 
+            is AgendaDetailVMAction.UpdateAgendaItemSuccess -> {
+                context.showToast(
+                    when (destination.itemType) {
+                        AgendaItemType.EVENT -> R.string.success_event_updated
+                        AgendaItemType.TASK -> R.string.success_task_updated
+                        AgendaItemType.REMINDER -> R.string.success_reminder_updated
+                    }
+                )
+
+                navigator.navigateUp()
+            }
+
             is AgendaDetailVMAction.RemoveAgendaItemSuccess -> {
                 context.showToast(
                     when (destination.itemType) {

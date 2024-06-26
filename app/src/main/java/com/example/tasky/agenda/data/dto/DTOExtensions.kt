@@ -10,6 +10,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.db.TaskEntity
 
 fun AgendaDTO.toAgenda(): Agenda {
     val items = mutableListOf<AgendaListItem>().apply {
@@ -38,6 +39,15 @@ fun Task.toTaskDTO() = TaskDTO(
     description = description,
     time = time.getMillis(),
     remindAt = remindAt.getMillis(),
+    isDone = isDone
+)
+
+fun TaskEntity.toTask() = Task(
+    id = id,
+    title = title,
+    description = description,
+    time = time.getLocalDateTimeFromMillis(),
+    remindAt = remindAt.getLocalDateTimeFromMillis(),
     isDone = isDone
 )
 
