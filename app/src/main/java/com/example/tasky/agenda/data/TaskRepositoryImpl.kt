@@ -60,28 +60,22 @@ class TaskRepositoryImpl(private val client: HttpClient, private val localDataSo
     }
 
     override suspend fun getTaskDetails(taskId: String): Result<Task, DataError> {
-        val task = localDataSource.getTaskById(taskId)
+        val result = client.executeRequest<Unit, TaskDTO>(
+            httpMethod = HttpMethod.Get,
+            url = taskUrl,
+            queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
+            tag = TAG
+        ) {
+            Result.Success(it.body())
+        }
 
-        return if (task != null) {
-            Result.Success(task.toTask())
-        } else {
-            val result = client.executeRequest<Unit, TaskDTO>(
-                httpMethod = HttpMethod.Get,
-                url = taskUrl,
-                queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
-                tag = TAG
-            ) {
-                Result.Success(it.body())
+        return when (result) {
+            is Result.Success -> {
+                localDataSource.insertOrReplaceTask(result.data)
+                Result.Success(result.data.toTask())
             }
 
-            return when (result) {
-                is Result.Success -> {
-                    localDataSource.insertOrReplaceTask(result.data)
-                    Result.Success(result.data.toTask())
-                }
-
-                is Result.Error -> Result.Error(result.error)
-            }
+            is Result.Error -> Result.Error(result.error)
         }
     }
 
