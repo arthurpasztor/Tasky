@@ -55,6 +55,22 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
         }
     }
 
+    override suspend fun getEventDetails(eventId: String): Result<Event, DataError> {
+        val result = client.executeRequest<Unit, EventDTO>(
+            httpMethod = HttpMethod.Get,
+            url = eventUrl,
+            queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
+            tag = TAG
+        ) {
+            Result.Success(it.body())
+        }
+
+        return when (result) {
+            is Result.Success -> Result.Success(result.data.toEvent())
+            is Result.Error -> result
+        }
+    }
+
     override suspend fun getAttendee(email: String): Result<NewAttendee, DataError> {
         val result: Result<NewAttendeeDTO, DataError> = client.executeRequest<Unit, NewAttendeeDTO>(
             httpMethod = HttpMethod.Get,

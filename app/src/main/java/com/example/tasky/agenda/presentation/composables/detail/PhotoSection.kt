@@ -45,7 +45,7 @@ private fun PhotoSectionPreview() {
     PhotoSection(
         state = AgendaDetailsState(
             extras = AgendaItemDetails.EventItemDetail(
-                photos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
+                newPhotos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
             )
         ),
         onOpenGallery = {},
@@ -77,7 +77,7 @@ fun PhotoSection(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            items(state.photos) {
+            items(state.allPhotos) {
                 Box(
                     modifier = Modifier
                         .width(80.dp)
@@ -98,7 +98,7 @@ fun PhotoSection(
                 }
             }
 
-            if (state.photos.size < MAX_NUMBER_OF_PHOTOS) {
+            if (state.allPhotos.size < MAX_NUMBER_OF_PHOTOS) {
                 item {
                     Box(modifier = Modifier
                         .size(70.dp)
