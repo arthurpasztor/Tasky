@@ -301,7 +301,7 @@ class AgendaDetailsViewModel(
                             email = newAttendee.email!!, // the usage of non-null assertions is justified, since the user exists
                             fullName = newAttendee.fullName!!,
                             userId = newAttendee.userId!!,
-                            eventId = "", // TODO upon saving, replace with event id, if exists
+                            eventId = "", // upon saving, replace with existing or generated event id
                             isGoing = true,
                             remindAt = remindAt
                         ),
@@ -501,12 +501,18 @@ class AgendaDetailsViewModel(
 
     private fun getEventPayloadForCreation(): Event {
         _state.value.let {
+            val eventId = UUID.randomUUID().toString()
+
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val endTime: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
             val remindAt = it.reminderType.getReminder(time)
 
+            it.attendees.forEach { attendee ->
+                attendee.eventId = eventId
+            }
+
             return Event(
-                id = UUID.randomUUID().toString(),
+                id = eventId,
                 title = it.title,
                 description = it.description,
                 time = time,

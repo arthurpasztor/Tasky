@@ -97,7 +97,7 @@ data class Attendee(
     val email: String,
     val fullName: String,
     val userId: String,
-    val eventId: String,
+    var eventId: String,
     val isGoing: Boolean,
     val remindAt: LocalDateTime
 ) {
