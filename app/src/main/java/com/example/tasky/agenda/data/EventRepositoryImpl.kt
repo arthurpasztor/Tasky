@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.EventDataSource
 import com.example.tasky.agenda.data.dto.EventCreateDTO
 import com.example.tasky.agenda.data.dto.EventDTO
 import com.example.tasky.agenda.data.dto.EventUpdateDTO
@@ -25,7 +26,10 @@ import io.ktor.http.HttpMethod
 private const val CREATE_EVENT_MULTIPART_JSON_KEY = "create_event_request"
 private const val UPDATE_EVENT_MULTIPART_JSON_KEY = "update_event_request"
 
-class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
+class EventRepositoryImpl(
+    private val client: HttpClient,
+    private val localDataSource: EventDataSource
+) : EventRepository {
 
     private val eventUrl = "${BuildConfig.BASE_URL}/event"
     private val attendeeUrl = "${BuildConfig.BASE_URL}/attendee"
@@ -43,7 +47,10 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
         }
 
         return when (result) {
-            is Result.Success -> Result.Success(result.data.toEvent())
+            is Result.Success -> {
+                localDataSource.insertOrReplaceEvent(result.data)
+                Result.Success(result.data.toEvent())
+            }
             is Result.Error -> result
         }
     }
@@ -61,7 +68,10 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
         }
 
         return when (result) {
-            is Result.Success -> Result.Success(result.data.toEvent())
+            is Result.Success -> {
+                localDataSource.insertOrReplaceEvent(result.data)
+                Result.Success(result.data.toEvent())
+            }
             is Result.Error -> result
         }
     }
@@ -73,6 +83,7 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
             queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
             tag = TAG
         ) {
+            localDataSource.deleteEvent(eventId)
             Result.Success(Unit)
         }
     }
@@ -88,7 +99,10 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
         }
 
         return when (result) {
-            is Result.Success -> Result.Success(result.data.toEvent())
+            is Result.Success -> {
+                localDataSource.insertOrReplaceEvent(result.data)
+                Result.Success(result.data.toEvent())
+            }
             is Result.Error -> result
         }
     }
