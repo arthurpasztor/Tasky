@@ -309,6 +309,7 @@ private fun AttendeeFullList(state: AgendaDetailsState, onAction: (AgendaDetailA
                 labelRes = R.string.going,
                 list = state.attendees,
                 creatorFullName = state.currentUserFullNameIfEventCreator,
+                creatorId = state.hostId,
                 onRemoveAttendee = {
                     onAction(AgendaDetailAction.RemoveAttendee(it))
                 }
@@ -344,6 +345,7 @@ private fun AttendeeList(
     labelRes: Int,
     list: List<Attendee>,
     creatorFullName: String? = null,
+    creatorId: String? = null,
     onRemoveAttendee: (userId: String) -> Unit,
 ) {
     if (list.isNotEmpty() || creatorFullName != null) {
@@ -356,23 +358,25 @@ private fun AttendeeList(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            creatorFullName?.let {
+            if (!creatorFullName.isNullOrEmpty()) {
                 AttendeeItem(
                     modifier = Modifier,
-                    fullName = it,
+                    fullName = creatorFullName,
                     isUserEventCreator = true,
                     onRemoveAttendee = {}
                 )
             }
             list.forEach {
-                AttendeeItem(
-                    modifier = Modifier,
-                    fullName = it.fullName,
-                    isUserEventCreator = false,
-                    onRemoveAttendee = {
-                        onRemoveAttendee.invoke(it.userId)
-                    }
-                )
+                if (it.userId != creatorId) { // the creator user is displayed in the header above
+                    AttendeeItem(
+                        modifier = Modifier,
+                        fullName = it.fullName,
+                        isUserEventCreator = false,
+                        onRemoveAttendee = {
+                            onRemoveAttendee.invoke(it.userId)
+                        }
+                    )
+                }
             }
         }
     }

@@ -478,6 +478,9 @@ class AgendaDetailsViewModel(
                                 toDate = event.to.toLocalDate(),
                                 toTime = event.to.toLocalTime(),
                                 isUserEventCreator = event.isUserEventCreator,
+                                hostId = event.host,
+
+                                currentUserFullName = it.currentUserFullNameIfEventCreator ?: "",
 
                                 attendees = event.attendees.filter { attendee -> attendee.eventId == event.id },
                                 nonAttendees = event.attendees.filterNot { attendee -> attendee.eventId == event.id },
@@ -616,6 +619,7 @@ sealed interface AgendaItemDetails {
         val toDate: LocalDate = LocalDate.now(),
         val toTime: LocalTime = LocalTime.now(),
         val isUserEventCreator: Boolean = true,
+        val hostId: String? = null,
 
         val attendeeSelection: AttendeeSelection = AttendeeSelection.ALL,
 
@@ -663,6 +667,7 @@ data class AgendaDetailsState(
     val eventEndTime: LocalTime get() = extras?.asEventDetails?.toTime ?: LocalTime.now()
 
     val isUserEventCreator: Boolean get() = extras?.asEventDetails?.isUserEventCreator ?: true
+    val hostId: String? get() = extras?.asEventDetails?.hostId
 
     val isAllAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.ALL
     val isGoingAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.GOING
