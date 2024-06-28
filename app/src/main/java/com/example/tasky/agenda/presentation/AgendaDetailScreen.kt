@@ -123,7 +123,7 @@ fun AgendaDetailRoot(
             is AgendaDetailVMAction.RemoveAgendaItemSuccess -> {
                 context.showToast(
                     when (destination.itemType) {
-                        AgendaItemType.EVENT -> TODO()
+                        AgendaItemType.EVENT -> R.string.success_event_removed
                         AgendaItemType.TASK -> R.string.success_task_removed
                         AgendaItemType.REMINDER -> R.string.success_reminder_removed
                     }

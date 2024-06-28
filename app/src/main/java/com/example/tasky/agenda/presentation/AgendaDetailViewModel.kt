@@ -197,7 +197,15 @@ class AgendaDetailsViewModel(
 
             when (state.value.agendaItemType) {
                 AgendaItemType.EVENT -> {
-                    //TODO
+                    viewModelScope.launch {
+                        eventRepo.deleteEvent(it)
+                            .onSuccess {
+                                _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.EVENT))
+                            }
+                            .onError {
+                                _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                            }
+                    }
                 }
 
                 AgendaItemType.TASK -> {
