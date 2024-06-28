@@ -9,5 +9,5 @@ interface ReminderRepository {
     suspend fun createReminder(reminder: Reminder): EmptyResult<DataError>
     suspend fun updateReminder(reminder: Reminder): EmptyResult<DataError>
     suspend fun deleteReminder(reminderId: String): EmptyResult<DataError>
-    suspend fun getReminderDetails(taskId: String): Result<Reminder, DataError>
+    suspend fun getReminderDetails(reminderId: String): Result<Reminder, DataError>
 }

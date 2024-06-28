@@ -435,10 +435,10 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     reminderRepo.updateReminder(getReminderPayload())
                         .onSuccess {
-                            //TODO
+                            _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.REMINDER))
                         }
                         .onError {
-                            //TODO
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
                         }
                 }
             }

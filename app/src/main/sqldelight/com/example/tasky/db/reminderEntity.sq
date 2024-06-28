@@ -1,0 +1,17 @@
+getReminderById:
+SELECT *
+FROM reminderEntity
+WHERE id = :id;
+
+getAllReminders:
+SELECT *
+FROM reminderEntity;
+
+insertOrReplaceReminder:
+INSERT OR REPLACE
+INTO reminderEntity
+VALUES (?, ?, ?, ?, ?);
+
+deleteReminderById:
+DELETE FROM reminderEntity
+WHERE id = :id;
