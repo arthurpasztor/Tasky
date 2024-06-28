@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS reminderEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    time INTEGER NOT NULL,
+    remindAt INTEGER NOT NULL
+);

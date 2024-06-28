@@ -130,6 +130,10 @@ sqldelight {
     databases {
         create("TaskyDatabase") {
             packageName.set("com.example.tasky.db")
+            deriveSchemaFromMigrations.set(true)
+            verifyMigrations = true
+            schemaOutputDirectory = file("src/main/sqldelight/com.example.tasky.db")
+            migrationOutputDirectory = file("src/main/sqldelight/com.example.tasky.migrations")
         }
     }
 }
