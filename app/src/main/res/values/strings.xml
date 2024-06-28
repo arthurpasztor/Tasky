@@ -89,4 +89,7 @@
     <string name="success_event_removed">Event successfully removed</string>
     <string name="success_task_removed">Task successfully removed</string>
     <string name="success_reminder_removed">Reminder successfully removed</string>
+
+    <string name="warning_start_date_is_later_than_end_date">Start date is later than end date. End date was reset to start date</string>
+    <string name="warning_start_time_is_later_than_end_time">Start time is later than end time. End date was reset to start time</string>
 </resources>
