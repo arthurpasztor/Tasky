@@ -12,6 +12,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.auth.domain.isEmailValid
@@ -349,6 +350,7 @@ class AgendaDetailsViewModel(
                 it.copy(
                     extras = updateDetailsIfEvent { eventExtras ->
                         eventExtras.copy(
+                            existingPhotos = eventExtras.existingPhotos.filterNot { photo -> photo.key == key },
                             deletedPhotoKeys = eventExtras.deletedPhotoKeys + key
                         )
                     }
@@ -380,8 +382,7 @@ class AgendaDetailsViewModel(
 
             when {
                 _state.value.isCreateMode() -> {
-                    val event = getEventPayloadForCreation()
-                    eventRepo.createEvent(event, photoByteArrays)
+                    eventRepo.createEvent(getEventPayloadForCreation(), photoByteArrays)
                         .onSuccess {
                             _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
                         }
@@ -391,7 +392,13 @@ class AgendaDetailsViewModel(
                 }
 
                 _state.value.isEditMode() -> {
-                    // TODO
+                    eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
+                        .onSuccess {
+                            _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
+                        }
+                        .onError {
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                        }
                 }
             }
 
@@ -574,6 +581,29 @@ class AgendaDetailsViewModel(
         }
     }
 
+    private fun getEventPayloadForUpdate(): EventUpdate {
+        _state.value.let {
+            val from: LocalDateTime = LocalDateTime.of(it.date, it.time)
+            val to: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
+            val remindAt = it.reminderType.getReminder(from)
+
+            val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+            val isGoing = it.attendees.find { attendee -> attendee.userId == currentUserId }?.isGoing ?: false
+
+            return EventUpdate(
+                id = it.itemId ?: UUID.randomUUID().toString(),
+                title = it.title,
+                description = it.description,
+                from = from,
+                to = to,
+                remindAt = remindAt,
+                attendees = it.attendees,
+                deletedPhotoKeys = it.deletedPhotoKeys,
+                isGoing = isGoing
+            )
+        }
+    }
+
     private fun getTaskPayload(): Task {
         _state.value.let {
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
@@ -696,6 +726,7 @@ data class AgendaDetailsState(
     }
     val existingPhotos: List<Photo> get() = extras?.asEventDetails?.existingPhotos ?: emptyList()
     val newPhotos: List<Photo> get() = extras?.asEventDetails?.newPhotos ?: emptyList()
+    val deletedPhotoKeys: List<String> get() = extras?.asEventDetails?.deletedPhotoKeys ?: emptyList()
 }
 
 enum class AttendeeSelection {

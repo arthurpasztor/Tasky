@@ -28,6 +28,19 @@ data class EventCreateDTO(
 )
 
 @Serializable
+data class EventUpdateDTO(
+    val id: String,
+    val title: String,
+    val description: String,
+    val from: Long,
+    val to: Long,
+    val remindAt: Long,
+    val attendeeIds: List<String>,
+    val deletedPhotoKeys: List<String>,
+    val isGoing: Boolean
+)
+
+@Serializable
 data class AttendeeDTO(
     val email: String,
     val fullName: String,

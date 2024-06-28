@@ -3,12 +3,15 @@ package com.example.tasky.agenda.data
 import com.example.tasky.BuildConfig
 import com.example.tasky.agenda.data.dto.EventCreateDTO
 import com.example.tasky.agenda.data.dto.EventDTO
+import com.example.tasky.agenda.data.dto.EventUpdateDTO
 import com.example.tasky.agenda.data.dto.NewAttendeeDTO
 import com.example.tasky.agenda.data.dto.toAttendee
 import com.example.tasky.agenda.data.dto.toEvent
 import com.example.tasky.agenda.data.dto.toEventCreateDTO
+import com.example.tasky.agenda.data.dto.toEventUpdateDTO
 import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem.Event
+import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.core.data.executeMultipartRequest
 import com.example.tasky.core.data.executeRequest
@@ -20,6 +23,7 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
 
 private const val CREATE_EVENT_MULTIPART_JSON_KEY = "create_event_request"
+private const val UPDATE_EVENT_MULTIPART_JSON_KEY = "update_event_request"
 
 class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
 
@@ -32,6 +36,24 @@ class EventRepositoryImpl(private val client: HttpClient) : EventRepository {
             url = eventUrl,
             key = CREATE_EVENT_MULTIPART_JSON_KEY,
             payload = event.toEventCreateDTO(),
+            imageBytes = imageBytes,
+            tag = TAG
+        ) {
+            Result.Success(it.body())
+        }
+
+        return when (result) {
+            is Result.Success -> Result.Success(result.data.toEvent())
+            is Result.Error -> result
+        }
+    }
+
+    override suspend fun updateEvent(event: EventUpdate, imageBytes: List<ByteArray>): Result<Event, DataError> {
+        val result: Result<EventDTO, DataError> = client.executeMultipartRequest<EventUpdateDTO, EventDTO>(
+            httpMethod = HttpMethod.Put,
+            url = eventUrl,
+            key = UPDATE_EVENT_MULTIPART_JSON_KEY,
+            payload = event.toEventUpdateDTO(),
             imageBytes = imageBytes,
             tag = TAG
         ) {

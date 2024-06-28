@@ -133,3 +133,15 @@ data class Photo(
         )
     }
 }
+
+data class EventUpdate(
+    val id: String,
+    val title: String,
+    val description: String,
+    val from: LocalDateTime,
+    val to: LocalDateTime,
+    val remindAt: LocalDateTime,
+    val attendees: List<Attendee>,
+    val deletedPhotoKeys: List<String>,
+    val isGoing: Boolean
+)
