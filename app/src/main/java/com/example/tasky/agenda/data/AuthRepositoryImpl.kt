@@ -9,17 +9,22 @@ import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
+import com.example.tasky.db.TaskyDatabase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.plugin
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class AuthRepositoryImpl(
     private val client: HttpClient,
     private val localEventDataSource: EventDataSource,
     private val localTaskDataSource: TaskDataSource,
-    private val localReminderDataSource: ReminderDataSource
+    private val localReminderDataSource: ReminderDataSource,
+    private val database: TaskyDatabase,
+    private val applicationScope: CoroutineScope
 ) : AuthRepository {
 
     private val tokenCheckUrl = "${BuildConfig.BASE_URL}/authenticate"
@@ -43,9 +48,15 @@ class AuthRepositoryImpl(
             url = logoutUrl,
             tag = TAG
         ) {
-            localEventDataSource.deleteAllEvents()
-            localTaskDataSource.deleteAllTasks()
-            localReminderDataSource.deleteAllReminders()
+            database.transaction {
+                applicationScope.launch {
+                    applicationScope.launch {
+                        localEventDataSource.deleteAllEvents()
+                        localTaskDataSource.deleteAllTasks()
+                        localReminderDataSource.deleteAllReminders()
+                    }.join()
+                }
+            }
 
             Result.Success(Unit)
         }

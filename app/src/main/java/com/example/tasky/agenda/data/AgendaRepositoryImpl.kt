@@ -11,15 +11,20 @@ import com.example.tasky.agenda.data.dto.toAgenda
 import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.db.TaskyDatabase
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class AgendaRepositoryImpl(
     private val client: HttpClient,
     private val localEventDataSource: EventDataSource,
     private val localTaskDataSource: TaskDataSource,
-    private val localReminderDataSource: ReminderDataSource
+    private val localReminderDataSource: ReminderDataSource,
+    private val database: TaskyDatabase,
+    private val applicationScope: CoroutineScope
 ) : AgendaRepository {
 
     private val agendaUrl = "${BuildConfig.BASE_URL}/agenda"
@@ -38,9 +43,15 @@ class AgendaRepositoryImpl(
             is Result.Success -> {
                 val agendaDTO = result.data
 
-                localEventDataSource.insertOrReplaceEvents(agendaDTO.events)
-                localTaskDataSource.insertOrReplaceTasks(agendaDTO.tasks)
-                localReminderDataSource.insertOrReplaceReminders(agendaDTO.reminders)
+                database.transaction {
+                    applicationScope.launch {
+                        applicationScope.launch {
+                            localEventDataSource.insertOrReplaceEvents(agendaDTO.events)
+                            localTaskDataSource.insertOrReplaceTasks(agendaDTO.tasks)
+                            localReminderDataSource.insertOrReplaceReminders(agendaDTO.reminders)
+                        }.join()
+                    }
+                }
 
                 Result.Success(agendaDTO.toAgenda())
             }
