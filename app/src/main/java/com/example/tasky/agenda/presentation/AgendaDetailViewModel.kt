@@ -376,7 +376,10 @@ class AgendaDetailsViewModel(
     }
 
     private fun removePhoto(key: String) {
-        if (_state.value.existingPhotos.any { photo -> photo.key == key }) {
+        val isInExistingPhotos = _state.value.existingPhotos.any { photo -> photo.key == key }
+        val isInNewPhotos = _state.value.newPhotos.any { photo -> photo.key == key }
+
+        if (isInExistingPhotos) {
             _state.update {
                 it.copy(
                     extras = updateDetailsIfEvent { eventExtras ->
@@ -387,15 +390,17 @@ class AgendaDetailsViewModel(
                     }
                 )
             }
-        } else if (_state.value.newPhotos.any { photo -> photo.key == key }) {
-            _state.update {
-                it.copy(
-                    extras = updateDetailsIfEvent { eventExtras ->
-                        eventExtras.copy(
-                            newPhotos = eventExtras.newPhotos.filterNot { photo -> photo.key == key }
-                        )
-                    }
-                )
+        } else {
+            if (isInNewPhotos) {
+                _state.update {
+                    it.copy(
+                        extras = updateDetailsIfEvent { eventExtras ->
+                            eventExtras.copy(
+                                newPhotos = eventExtras.newPhotos.filterNot { photo -> photo.key == key }
+                            )
+                        }
+                    )
+                }
             }
         }
     }
@@ -753,7 +758,7 @@ data class AgendaDetailsState(
         return mutableListOf<Photo>().apply {
             addAll(extras?.asEventDetails?.existingPhotos ?: emptyList())
             addAll(extras?.asEventDetails?.newPhotos ?: emptyList())
-        }
+        }.toList()
     }
     val existingPhotos: List<Photo> get() = extras?.asEventDetails?.existingPhotos ?: emptyList()
     val newPhotos: List<Photo> get() = extras?.asEventDetails?.newPhotos ?: emptyList()
