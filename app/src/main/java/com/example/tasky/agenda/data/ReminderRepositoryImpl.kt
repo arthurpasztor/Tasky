@@ -16,10 +16,13 @@ import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class ReminderRepositoryImpl(
     private val client: HttpClient,
-    private val localDataSource: ReminderDataSource
+    private val localDataSource: ReminderDataSource,
+    private val applicationScope: CoroutineScope
 ) : ReminderRepository {
 
     private val reminderUrl = "${BuildConfig.BASE_URL}/reminder"
@@ -33,7 +36,9 @@ class ReminderRepositoryImpl(
             payload = reminderDTO,
             tag = TAG
         ) {
-            localDataSource.insertOrReplaceReminder(reminderDTO)
+            applicationScope.launch {
+                localDataSource.insertOrReplaceReminder(reminderDTO)
+            }.join()
             Result.Success(Unit)
         }
     }
@@ -47,7 +52,9 @@ class ReminderRepositoryImpl(
             payload = reminderDTO,
             tag = TAG
         ) {
-            localDataSource.insertOrReplaceReminder(reminderDTO)
+            applicationScope.launch {
+                localDataSource.insertOrReplaceReminder(reminderDTO)
+            }.join()
             Result.Success(Unit)
         }
     }
@@ -59,7 +66,9 @@ class ReminderRepositoryImpl(
             queryParams = Pair(QUERY_PARAM_KEY_ID, reminderId),
             tag = TAG
         ) {
-            localDataSource.deleteReminder(reminderId)
+            applicationScope.launch {
+                localDataSource.deleteReminder(reminderId)
+            }
             Result.Success(Unit)
         }
     }
@@ -76,7 +85,9 @@ class ReminderRepositoryImpl(
 
         return when (result) {
             is Result.Success -> {
-                localDataSource.insertOrReplaceReminder(result.data)
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceReminder(result.data)
+                }.join()
                 Result.Success(result.data.toReminder())
             }
 

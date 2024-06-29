@@ -2,12 +2,14 @@ package com.example.tasky.core.di
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import com.example.tasky.MyApplication
 import com.example.tasky.agenda.data.db.getListOfItemAdapter
 import com.example.tasky.core.data.HttpClientFactory
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.presentation.RootViewModel
 import com.example.tasky.db.TaskyDatabase
 import com.example.tasky.migrations.EventEntity
+import kotlinx.coroutines.CoroutineScope
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
@@ -33,4 +35,6 @@ val coreModule = module {
             photosAdapter = getListOfItemAdapter()
         )
     }
+
+    single<CoroutineScope> { (androidApplication() as MyApplication).applicationScope }
 }
