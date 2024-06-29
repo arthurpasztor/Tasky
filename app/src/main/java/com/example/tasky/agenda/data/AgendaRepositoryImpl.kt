@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.EventDataSource
 import com.example.tasky.agenda.data.db.ReminderDataSource
 import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.core.data.executeRequest
@@ -16,6 +17,7 @@ import io.ktor.http.HttpMethod
 
 class AgendaRepositoryImpl(
     private val client: HttpClient,
+    private val localEventDataSource: EventDataSource,
     private val localTaskDataSource: TaskDataSource,
     private val localReminderDataSource: ReminderDataSource
 ) : AgendaRepository {
@@ -36,6 +38,7 @@ class AgendaRepositoryImpl(
             is Result.Success -> {
                 val agendaDTO = result.data
 
+                localEventDataSource.insertOrReplaceEvents(agendaDTO.events)
                 localTaskDataSource.insertOrReplaceTasks(agendaDTO.tasks)
                 localReminderDataSource.insertOrReplaceReminders(agendaDTO.reminders)
 

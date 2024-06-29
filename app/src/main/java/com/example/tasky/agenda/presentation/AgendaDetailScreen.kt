@@ -134,6 +134,8 @@ fun AgendaDetailRoot(
 
             is AgendaDetailVMAction.AgendaItemError -> context.showToast(destination.error, TAG)
             AgendaDetailVMAction.PhotoUriEmptyOrNull -> context.showToast(R.string.error_empty_photo_uri, TAG)
+            AgendaDetailVMAction.EventStartDateIsAfterEndDate -> context.showToast(R.string.warning_start_date_is_later_than_end_date, TAG)
+            AgendaDetailVMAction.EventStartTimeIsAfterEndTime -> context.showToast(R.string.warning_start_time_is_later_than_end_time, TAG)
         }
     }
 

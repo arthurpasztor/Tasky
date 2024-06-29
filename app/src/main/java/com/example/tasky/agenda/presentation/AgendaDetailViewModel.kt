@@ -117,18 +117,41 @@ class AgendaDetailsViewModel(
     }
 
     private fun updateDate(date: LocalDate) {
-        _state.update {
-            it.copy(
-                date = date
-            )
+        viewModelScope.launch {
+            _state.update {
+                if (it.eventEndDate.isBefore(date)) {
+                    _navChannel.send(AgendaDetailVMAction.EventStartDateIsAfterEndDate)
+                    it.copy(
+                        date = date,
+                        extras = updateDetailsIfEvent { eventExtras -> eventExtras.copy(toDate = date) }
+                    )
+                } else {
+                    it.copy(
+                        date = date
+                    )
+                }
+            }
         }
     }
 
     private fun updateTime(time: LocalTime) {
-        _state.update {
-            it.copy(
-                time = time
-            )
+        viewModelScope.launch {
+            _state.update {
+                val startDate: LocalDateTime = LocalDateTime.of(it.date, time)
+                val endDate: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
+
+                if (endDate.isBefore(startDate)) {
+                    _navChannel.send(AgendaDetailVMAction.EventStartTimeIsAfterEndTime)
+                    it.copy(
+                        time = time,
+                        extras = updateDetailsIfEvent { eventExtras -> eventExtras.copy(toTime = time) }
+                    )
+                } else {
+                    it.copy(
+                        time = time
+                    )
+                }
+            }
         }
     }
 
@@ -752,4 +775,7 @@ sealed class AgendaDetailVMAction {
 
     class AgendaItemError(val error: DataError) : AgendaDetailVMAction()
     data object PhotoUriEmptyOrNull : AgendaDetailVMAction()
+
+    data object EventStartDateIsAfterEndDate : AgendaDetailVMAction()
+    data object EventStartTimeIsAfterEndTime : AgendaDetailVMAction()
 }

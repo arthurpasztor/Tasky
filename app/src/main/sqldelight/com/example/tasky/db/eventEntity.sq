@@ -1,0 +1,17 @@
+getEventById:
+SELECT *
+FROM eventEntity
+WHERE id = :id;
+
+getAllEvents:
+SELECT *
+FROM eventEntity;
+
+insertOrReplaceEvent:
+INSERT OR REPLACE
+INTO eventEntity
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteEventById:
+DELETE FROM eventEntity
+WHERE id = :id;

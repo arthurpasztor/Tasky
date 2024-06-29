@@ -1,0 +1,17 @@
+import com.example.tasky.agenda.data.dto.AttendeeDTO;
+import com.example.tasky.agenda.data.dto.PhotoDTO;
+import kotlin.Boolean;
+import kotlin.collections.List;
+
+CREATE TABLE IF NOT EXISTS eventEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    startDate INTEGER NOT NULL,
+    endDate INTEGER NOT NULL,
+    remindAt INTEGER NOT NULL,
+    host TEXT NOT NULL,
+    isUserEventCreator INTEGER AS Boolean NOT NULL,
+    attendees TEXT AS List<AttendeeDTO> NOT NULL,
+    photos TEXT AS List<PhotoDTO> NOT NULL
+);
