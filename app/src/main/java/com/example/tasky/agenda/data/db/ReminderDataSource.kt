@@ -15,4 +15,6 @@ interface ReminderDataSource {
     suspend fun insertOrReplaceReminder(reminder: ReminderDTO)
 
     suspend fun deleteReminder(id: String)
+
+    suspend fun deleteAllReminders()
 }

@@ -81,4 +81,10 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
             queries.deleteEventById(id)
         }
     }
+
+    override suspend fun deleteAllEvents() {
+        withContext(Dispatchers.IO) {
+            queries.deleteAll()
+        }
+    }
 }

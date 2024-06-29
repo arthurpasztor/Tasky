@@ -15,4 +15,6 @@ interface EventDataSource {
     suspend fun insertOrReplaceEvent(event: EventDTO)
 
     suspend fun deleteEvent(id: String)
+
+    suspend fun deleteAllEvents()
 }

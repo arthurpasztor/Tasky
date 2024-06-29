@@ -1,6 +1,9 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.EventDataSource
+import com.example.tasky.agenda.data.db.ReminderDataSource
+import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
@@ -12,7 +15,12 @@ import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.plugin
 import io.ktor.http.HttpMethod
 
-class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
+class AuthRepositoryImpl(
+    private val client: HttpClient,
+    private val localEventDataSource: EventDataSource,
+    private val localTaskDataSource: TaskDataSource,
+    private val localReminderDataSource: ReminderDataSource
+) : AuthRepository {
 
     private val tokenCheckUrl = "${BuildConfig.BASE_URL}/authenticate"
     private val logoutUrl = "${BuildConfig.BASE_URL}/logout"
@@ -35,6 +43,10 @@ class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
             url = logoutUrl,
             tag = TAG
         ) {
+            localEventDataSource.deleteAllEvents()
+            localTaskDataSource.deleteAllTasks()
+            localReminderDataSource.deleteAllReminders()
+
             Result.Success(Unit)
         }
     }
