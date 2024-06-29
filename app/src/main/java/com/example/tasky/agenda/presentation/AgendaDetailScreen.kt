@@ -123,7 +123,7 @@ fun AgendaDetailRoot(
             is AgendaDetailVMAction.RemoveAgendaItemSuccess -> {
                 context.showToast(
                     when (destination.itemType) {
-                        AgendaItemType.EVENT -> TODO()
+                        AgendaItemType.EVENT -> R.string.success_event_removed
                         AgendaItemType.TASK -> R.string.success_task_removed
                         AgendaItemType.REMINDER -> R.string.success_reminder_removed
                     }
@@ -183,7 +183,7 @@ private fun AgendaDetailScreenPreview() {
                 attendeeSelection = AttendeeSelection.ALL,
                 attendees = listOf(Attendee.getSampleAttendeeGoing()),
                 nonAttendees = listOf(Attendee.getSampleAttendeeNotGoing()),
-                photos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
+                newPhotos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
             )
         ),
         onAction = {},
@@ -226,7 +226,7 @@ private fun AgendaDetailScreen(
                     when (state.agendaItemType) {
                         AgendaItemType.EVENT -> {
                             coroutineScope.launch {
-                                val photoByteArrays = state.photos.map { context.getPhotoByteArray(it) }
+                                val photoByteArrays = state.newPhotos.map { context.getPhotoByteArray(it) }
                                 onAction(AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull()))
                             }
                         }
@@ -253,7 +253,7 @@ private fun AgendaDetailScreen(
 
             if (state.isEvent()) {
                 if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
-                    if (state.photos.isEmpty()) {
+                    if (state.allPhotos.isEmpty()) {
                         PhotoEmptySection {
                             singlePhotoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)

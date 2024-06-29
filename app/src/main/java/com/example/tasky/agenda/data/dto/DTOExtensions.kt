@@ -8,6 +8,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.db.TaskEntity
@@ -101,6 +102,18 @@ fun Event.toEventCreateDTO() = EventCreateDTO(
     to = to.getMillis(),
     remindAt = remindAt.getMillis(),
     attendeeIds = attendees.map { it.userId }
+)
+
+fun EventUpdate.toEventUpdateDTO() = EventUpdateDTO(
+    id = id,
+    title = title,
+    description = description,
+    from = from.getMillis(),
+    to = to.getMillis(),
+    remindAt = remindAt.getMillis(),
+    attendeeIds = attendees.map { it.userId },
+    deletedPhotoKeys = deletedPhotoKeys,
+    isGoing = isGoing,
 )
 
 fun AttendeeDTO.toAttendee() = Attendee(

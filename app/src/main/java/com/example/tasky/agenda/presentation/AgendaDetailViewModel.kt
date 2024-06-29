@@ -12,6 +12,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
 import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.auth.domain.isEmailValid
@@ -196,7 +197,15 @@ class AgendaDetailsViewModel(
 
             when (state.value.agendaItemType) {
                 AgendaItemType.EVENT -> {
-                    //TODO
+                    viewModelScope.launch {
+                        eventRepo.deleteEvent(it)
+                            .onSuccess {
+                                _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.EVENT))
+                            }
+                            .onError {
+                                _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                            }
+                    }
                 }
 
                 AgendaItemType.TASK -> {
@@ -301,7 +310,7 @@ class AgendaDetailsViewModel(
                             email = newAttendee.email!!, // the usage of non-null assertions is justified, since the user exists
                             fullName = newAttendee.fullName!!,
                             userId = newAttendee.userId!!,
-                            eventId = "", // TODO upon saving, replace with event id, if exists
+                            eventId = "", // upon saving, replace with existing or generated event id
                             isGoing = true,
                             remindAt = remindAt
                         ),
@@ -332,7 +341,7 @@ class AgendaDetailsViewModel(
                 it.copy(
                     extras = updateDetailsIfEvent { eventExtras ->
                         eventExtras.copy(
-                            photos = eventExtras.photos + Photo(
+                            newPhotos = eventExtras.newPhotos + Photo(
                                 key = UUID.randomUUID().toString(),
                                 url = uri.toString()
                             )
@@ -344,14 +353,27 @@ class AgendaDetailsViewModel(
     }
 
     private fun removePhoto(key: String) {
-        _state.update {
-            it.copy(
-                extras = updateDetailsIfEvent { eventExtras ->
-                    eventExtras.copy(
-                        photos = eventExtras.photos.filterNot { photo -> photo.key == key }
-                    )
-                }
-            )
+        if (_state.value.existingPhotos.any { photo -> photo.key == key }) {
+            _state.update {
+                it.copy(
+                    extras = updateDetailsIfEvent { eventExtras ->
+                        eventExtras.copy(
+                            existingPhotos = eventExtras.existingPhotos.filterNot { photo -> photo.key == key },
+                            deletedPhotoKeys = eventExtras.deletedPhotoKeys + key
+                        )
+                    }
+                )
+            }
+        } else if (_state.value.newPhotos.any { photo -> photo.key == key }) {
+            _state.update {
+                it.copy(
+                    extras = updateDetailsIfEvent { eventExtras ->
+                        eventExtras.copy(
+                            newPhotos = eventExtras.newPhotos.filterNot { photo -> photo.key == key }
+                        )
+                    }
+                )
+            }
         }
     }
 
@@ -368,8 +390,7 @@ class AgendaDetailsViewModel(
 
             when {
                 _state.value.isCreateMode() -> {
-                    val event = getEventPayloadForCreation()
-                    eventRepo.createEvent(event, photoByteArrays)
+                    eventRepo.createEvent(getEventPayloadForCreation(), photoByteArrays)
                         .onSuccess {
                             _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
                         }
@@ -379,7 +400,13 @@ class AgendaDetailsViewModel(
                 }
 
                 _state.value.isEditMode() -> {
-                    // TODO
+                    eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
+                        .onSuccess {
+                            _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
+                        }
+                        .onError {
+                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                        }
                 }
             }
 
@@ -448,7 +475,41 @@ class AgendaDetailsViewModel(
     }
 
     private fun loadEvent(id: String) {
-        //TODO
+        _state.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            eventRepo.getEventDetails(id)
+                .onSuccess { event ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            itemId = event.id,
+                            title = event.title,
+                            description = event.description,
+                            date = event.time.toLocalDate(),
+                            time = event.time.toLocalTime(),
+                            reminderType = ReminderType.getReminderType(event.time, event.remindAt),
+                            extras = AgendaItemDetails.EventItemDetail(
+                                toDate = event.to.toLocalDate(),
+                                toTime = event.to.toLocalTime(),
+                                isUserEventCreator = event.isUserEventCreator,
+                                hostId = event.host,
+
+                                currentUserFullName = it.currentUserFullNameIfEventCreator ?: "",
+
+                                attendees = event.attendees.filter { attendee -> attendee.eventId == event.id },
+                                nonAttendees = event.attendees.filterNot { attendee -> attendee.eventId == event.id },
+
+                                existingPhotos = event.photos,
+                            ),
+                        )
+                    }
+                }
+                .onError { error ->
+                    _state.update { it.copy(isLoading = false) }
+                    _navChannel.send(AgendaDetailVMAction.AgendaItemError(error))
+                }
+        }
     }
 
     private fun loadTask(id: String) {
@@ -460,6 +521,7 @@ class AgendaDetailsViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            itemId = task.id,
                             title = task.title,
                             description = task.description,
                             date = task.time.toLocalDate(),
@@ -485,6 +547,7 @@ class AgendaDetailsViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            itemId = reminder.id,
                             title = reminder.title,
                             description = reminder.description,
                             date = reminder.time.toLocalDate(),
@@ -501,12 +564,18 @@ class AgendaDetailsViewModel(
 
     private fun getEventPayloadForCreation(): Event {
         _state.value.let {
+            val eventId = UUID.randomUUID().toString()
+
             val time: LocalDateTime = LocalDateTime.of(it.date, it.time)
             val endTime: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
             val remindAt = it.reminderType.getReminder(time)
 
+            it.attendees.forEach { attendee ->
+                attendee.eventId = eventId
+            }
+
             return Event(
-                id = UUID.randomUUID().toString(),
+                id = eventId,
                 title = it.title,
                 description = it.description,
                 time = time,
@@ -516,6 +585,29 @@ class AgendaDetailsViewModel(
                 isUserEventCreator = true,
                 attendees = it.attendees,
                 photos = emptyList() // irrelevant in this context. Photos will be added in multipart form
+            )
+        }
+    }
+
+    private fun getEventPayloadForUpdate(): EventUpdate {
+        _state.value.let {
+            val from: LocalDateTime = LocalDateTime.of(it.date, it.time)
+            val to: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
+            val remindAt = it.reminderType.getReminder(from)
+
+            val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+            val isGoing = it.attendees.find { attendee -> attendee.userId == currentUserId }?.isGoing ?: false
+
+            return EventUpdate(
+                id = it.itemId ?: UUID.randomUUID().toString(),
+                title = it.title,
+                description = it.description,
+                from = from,
+                to = to,
+                remindAt = remindAt,
+                attendees = it.attendees,
+                deletedPhotoKeys = it.deletedPhotoKeys,
+                isGoing = isGoing
             )
         }
     }
@@ -565,6 +657,7 @@ sealed interface AgendaItemDetails {
         val toDate: LocalDate = LocalDate.now(),
         val toTime: LocalTime = LocalTime.now(),
         val isUserEventCreator: Boolean = true,
+        val hostId: String? = null,
 
         val attendeeSelection: AttendeeSelection = AttendeeSelection.ALL,
 
@@ -579,7 +672,9 @@ sealed interface AgendaItemDetails {
         val isNewAttendeeActionButtonEnabled: Boolean = false,
         val newAttendeeJustAdded: Boolean = false,
 
-        val photos: List<Photo> = emptyList()
+        val existingPhotos: List<Photo> = emptyList(),
+        val newPhotos: List<Photo> = emptyList(),
+        val deletedPhotoKeys: List<String> = emptyList()
     ) : AgendaItemDetails
 }
 
@@ -610,6 +705,7 @@ data class AgendaDetailsState(
     val eventEndTime: LocalTime get() = extras?.asEventDetails?.toTime ?: LocalTime.now()
 
     val isUserEventCreator: Boolean get() = extras?.asEventDetails?.isUserEventCreator ?: true
+    val hostId: String? get() = extras?.asEventDetails?.hostId
 
     val isAllAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.ALL
     val isGoingAttendeesSelected get() = extras?.asEventDetails?.attendeeSelection == AttendeeSelection.GOING
@@ -624,13 +720,21 @@ data class AgendaDetailsState(
     val isNewAttendeeEmailValid: Boolean get() = extras?.asEventDetails?.isNewAttendeeEmailValid ?: false
     val newAttendeeShouldShowEmailValidationError: Boolean
         get() = extras?.asEventDetails?.newAttendeeShouldShowEmailValidationError ?: false
-    val newAttendeeShouldShowNotExistentError : Boolean
+    val newAttendeeShouldShowNotExistentError: Boolean
         get() = extras?.asEventDetails?.newAttendeeShouldShowNotExistentError ?: false
     val isNewAttendeeActionButtonEnabled: Boolean
         get() = extras?.asEventDetails?.isNewAttendeeActionButtonEnabled ?: false
     val newAttendeeJustAdded: Boolean get() = extras?.asEventDetails?.newAttendeeJustAdded ?: false
 
-    val photos: List<Photo> get() = extras?.asEventDetails?.photos ?: emptyList()
+    val allPhotos: List<Photo> get() {
+        return mutableListOf<Photo>().apply {
+            addAll(extras?.asEventDetails?.existingPhotos ?: emptyList())
+            addAll(extras?.asEventDetails?.newPhotos ?: emptyList())
+        }
+    }
+    val existingPhotos: List<Photo> get() = extras?.asEventDetails?.existingPhotos ?: emptyList()
+    val newPhotos: List<Photo> get() = extras?.asEventDetails?.newPhotos ?: emptyList()
+    val deletedPhotoKeys: List<String> get() = extras?.asEventDetails?.deletedPhotoKeys ?: emptyList()
 }
 
 enum class AttendeeSelection {

@@ -97,7 +97,7 @@ data class Attendee(
     val email: String,
     val fullName: String,
     val userId: String,
-    val eventId: String,
+    var eventId: String,
     val isGoing: Boolean,
     val remindAt: LocalDateTime
 ) {
@@ -133,3 +133,15 @@ data class Photo(
         )
     }
 }
+
+data class EventUpdate(
+    val id: String,
+    val title: String,
+    val description: String,
+    val from: LocalDateTime,
+    val to: LocalDateTime,
+    val remindAt: LocalDateTime,
+    val attendees: List<Attendee>,
+    val deletedPhotoKeys: List<String>,
+    val isGoing: Boolean
+)
