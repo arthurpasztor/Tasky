@@ -119,7 +119,7 @@ class AgendaDetailsViewModel(
     private fun updateDate(date: LocalDate) {
         viewModelScope.launch {
             _state.update {
-                if (it.eventEndDate.isBefore(date)) {
+                if (it.isEvent() && it.eventEndDate.isBefore(date)) {
                     _navChannel.send(AgendaDetailVMAction.EventStartDateIsAfterEndDate)
                     it.copy(
                         date = date,
@@ -140,7 +140,7 @@ class AgendaDetailsViewModel(
                 val startDate: LocalDateTime = LocalDateTime.of(it.date, time)
                 val endDate: LocalDateTime = LocalDateTime.of(it.eventEndDate, it.eventEndTime)
 
-                if (endDate.isBefore(startDate)) {
+                if (it.isEvent() && endDate.isBefore(startDate)) {
                     _navChannel.send(AgendaDetailVMAction.EventStartTimeIsAfterEndTime)
                     it.copy(
                         time = time,
