@@ -1,15 +1,12 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
-import com.example.tasky.agenda.data.db.EventDataSource
-import com.example.tasky.agenda.data.db.ReminderDataSource
-import com.example.tasky.agenda.data.db.TaskDataSource
+import com.example.tasky.agenda.data.db.AgendaDataSource
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
-import com.example.tasky.db.TaskyDatabase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -20,10 +17,7 @@ import kotlinx.coroutines.launch
 
 class AuthRepositoryImpl(
     private val client: HttpClient,
-    private val localEventDataSource: EventDataSource,
-    private val localTaskDataSource: TaskDataSource,
-    private val localReminderDataSource: ReminderDataSource,
-    private val database: TaskyDatabase,
+    private val localDataSource: AgendaDataSource,
     private val applicationScope: CoroutineScope
 ) : AuthRepository {
 
@@ -48,15 +42,9 @@ class AuthRepositoryImpl(
             url = logoutUrl,
             tag = TAG
         ) {
-            database.transaction {
-                applicationScope.launch {
-                    applicationScope.launch {
-                        localEventDataSource.deleteAllEvents()
-                        localTaskDataSource.deleteAllTasks()
-                        localReminderDataSource.deleteAllReminders()
-                    }.join()
-                }
-            }
+            applicationScope.launch {
+                localDataSource.clearDatabase()
+            }.join()
 
             Result.Success(Unit)
         }
