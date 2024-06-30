@@ -14,8 +14,14 @@ import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-class TaskRepositoryImpl(private val client: HttpClient, private val localDataSource: TaskDataSource) : TaskRepository {
+class TaskRepositoryImpl(
+    private val client: HttpClient,
+    private val localDataSource: TaskDataSource,
+    private val applicationScope: CoroutineScope
+) : TaskRepository {
 
     private val taskUrl = "${BuildConfig.BASE_URL}/task"
 
@@ -28,7 +34,9 @@ class TaskRepositoryImpl(private val client: HttpClient, private val localDataSo
             payload = taskDTO,
             tag = TAG
         ) {
-            localDataSource.insertOrReplaceTask(taskDTO)
+            applicationScope.launch {
+                localDataSource.insertOrReplaceTask(taskDTO)
+            }
             Result.Success(Unit)
         }
     }
@@ -42,7 +50,9 @@ class TaskRepositoryImpl(private val client: HttpClient, private val localDataSo
             payload = taskDTO,
             tag = TAG
         ) {
-            localDataSource.insertOrReplaceTask(taskDTO)
+            applicationScope.launch {
+                localDataSource.insertOrReplaceTask(taskDTO)
+            }.join()
             Result.Success(Unit)
         }
     }
@@ -54,7 +64,9 @@ class TaskRepositoryImpl(private val client: HttpClient, private val localDataSo
             queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
             tag = TAG
         ) {
-            localDataSource.deleteTask(taskId)
+            applicationScope.launch {
+                localDataSource.deleteTask(taskId)
+            }.join()
             Result.Success(Unit)
         }
     }
@@ -71,7 +83,9 @@ class TaskRepositoryImpl(private val client: HttpClient, private val localDataSo
 
         return when (result) {
             is Result.Success -> {
-                localDataSource.insertOrReplaceTask(result.data)
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceTask(result.data)
+                }.join()
                 Result.Success(result.data.toTask())
             }
 

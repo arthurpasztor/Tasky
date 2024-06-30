@@ -22,13 +22,16 @@ import com.example.tasky.core.domain.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 private const val CREATE_EVENT_MULTIPART_JSON_KEY = "create_event_request"
 private const val UPDATE_EVENT_MULTIPART_JSON_KEY = "update_event_request"
 
 class EventRepositoryImpl(
     private val client: HttpClient,
-    private val localDataSource: EventDataSource
+    private val localDataSource: EventDataSource,
+    private val applicationScope: CoroutineScope
 ) : EventRepository {
 
     private val eventUrl = "${BuildConfig.BASE_URL}/event"
@@ -48,7 +51,9 @@ class EventRepositoryImpl(
 
         return when (result) {
             is Result.Success -> {
-                localDataSource.insertOrReplaceEvent(result.data)
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceEvent(result.data)
+                }.join()
                 Result.Success(result.data.toEvent())
             }
             is Result.Error -> result
@@ -69,7 +74,9 @@ class EventRepositoryImpl(
 
         return when (result) {
             is Result.Success -> {
-                localDataSource.insertOrReplaceEvent(result.data)
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceEvent(result.data)
+                }.join()
                 Result.Success(result.data.toEvent())
             }
             is Result.Error -> result
@@ -83,7 +90,9 @@ class EventRepositoryImpl(
             queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
             tag = TAG
         ) {
-            localDataSource.deleteEvent(eventId)
+            applicationScope.launch {
+                localDataSource.deleteEvent(eventId)
+            }.join()
             Result.Success(Unit)
         }
     }
@@ -100,7 +109,9 @@ class EventRepositoryImpl(
 
         return when (result) {
             is Result.Success -> {
-                localDataSource.insertOrReplaceEvent(result.data)
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceEvent(result.data)
+                }.join()
                 Result.Success(result.data.toEvent())
             }
             is Result.Error -> result

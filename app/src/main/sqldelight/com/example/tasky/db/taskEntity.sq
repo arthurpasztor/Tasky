@@ -26,3 +26,6 @@ VALUES (?, ?, ?, ?, ?, ?);
 deleteTaskById:
 DELETE FROM taskEntity
 WHERE id = :id;
+
+deleteAll:
+DELETE FROM taskEntity;

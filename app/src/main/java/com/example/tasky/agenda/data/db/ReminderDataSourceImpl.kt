@@ -52,4 +52,10 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
             queries.deleteReminderById(id)
         }
     }
+
+    override suspend fun deleteAllReminders() {
+        withContext(Dispatchers.IO) {
+            queries.deleteAll()
+        }
+    }
 }

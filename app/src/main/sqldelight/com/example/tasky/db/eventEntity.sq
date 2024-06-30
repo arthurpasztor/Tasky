@@ -15,3 +15,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 deleteEventById:
 DELETE FROM eventEntity
 WHERE id = :id;
+
+deleteAll:
+DELETE FROM eventEntity;

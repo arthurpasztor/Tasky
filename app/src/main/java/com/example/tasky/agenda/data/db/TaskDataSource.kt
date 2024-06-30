@@ -15,4 +15,6 @@ interface TaskDataSource {
     suspend fun insertOrReplaceTask(task: TaskDTO)
 
     suspend fun deleteTask(id: String)
+
+    suspend fun deleteAllTasks()
 }
