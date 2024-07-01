@@ -132,6 +132,8 @@ fun AgendaDetailRoot(
                     }
                 )
 
+                workManager.updateNotification(destination.agendaItem)
+
                 navigator.navigateUp()
             }
 
@@ -143,6 +145,8 @@ fun AgendaDetailRoot(
                         AgendaItemType.REMINDER -> R.string.success_reminder_removed
                     }
                 )
+
+                workManager.cancelNotification(destination.agendaItemId)
 
                 navigator.navigateUp()
             }
@@ -328,26 +332,6 @@ private fun AgendaDetailScreen(
                 DeleteSection(state, onAction)
             }
         }
-    }
-}
-
-private fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
-    val now = LocalDateTime.now()
-    if (agendaItem.remindAt.isAfter(now)) {
-        val delayInMinutes = Duration.between(now, agendaItem.remindAt).abs().toMinutes()
-
-        val request = OneTimeWorkRequestBuilder<NotificationSchedulerWorker>()
-            .setInputData(
-                workDataOf(
-                    NOTIFICATION_TITLE to agendaItem.title,
-                    NOTIFICATION_DESCRIPTION to agendaItem.description
-                )
-            )
-            .setInitialDelay(delayInMinutes, TimeUnit.MINUTES)
-            .addTag(agendaItem.id)
-            .build()
-        Log.i(TAG, "Notification enqueued with unique name ${agendaItem.id}")
-        enqueueUniqueWork(agendaItem.id, ExistingWorkPolicy.REPLACE, request)
     }
 }
 
