@@ -1,9 +1,7 @@
 package com.example.tasky.agenda.presentation
 
-import android.app.NotificationManager
-import android.content.Context
 import android.net.Uri
-import android.os.SystemClock
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,9 +26,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.tasky.MyApplication
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
@@ -38,17 +38,19 @@ import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Photo
-import com.example.tasky.agenda.presentation.composables.detail.PhotoEmptySection
-import com.example.tasky.agenda.presentation.composables.detail.HeaderSection
+import com.example.tasky.agenda.presentation.NotificationSchedulerWorker.Companion.NOTIFICATION_DESCRIPTION
+import com.example.tasky.agenda.presentation.NotificationSchedulerWorker.Companion.NOTIFICATION_TITLE
 import com.example.tasky.agenda.presentation.composables.detail.AttendeeSection
 import com.example.tasky.agenda.presentation.composables.detail.DateTimeSection
 import com.example.tasky.agenda.presentation.composables.detail.DeleteSection
 import com.example.tasky.agenda.presentation.composables.detail.DescriptionSection
-import com.example.tasky.agenda.presentation.composables.utils.HorizontalDividerGray1dp
+import com.example.tasky.agenda.presentation.composables.detail.HeaderSection
 import com.example.tasky.agenda.presentation.composables.detail.LabelSection
+import com.example.tasky.agenda.presentation.composables.detail.PhotoEmptySection
 import com.example.tasky.agenda.presentation.composables.detail.PhotoSection
 import com.example.tasky.agenda.presentation.composables.detail.ReminderSelectorSection
 import com.example.tasky.agenda.presentation.composables.detail.TitleSection
+import com.example.tasky.agenda.presentation.composables.utils.HorizontalDividerGray1dp
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.ImageScreenRootDestination
@@ -62,8 +64,13 @@ import com.ramcosta.composedestinations.result.ResultRecipient
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.concurrent.TimeUnit
+
+private const val TAG = "TaskDetailScreen"
 
 @Destination
 @Composable
@@ -76,11 +83,11 @@ fun AgendaDetailRoot(
     editable: Boolean = true
 ) {
 
-    val TAG = "TaskDetailScreen"
-
     val context = LocalContext.current
     val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, itemId, editable) })
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val workManager = WorkManager.getInstance(context)
 
     ObserveAsEvents(viewModel.navChannel) { destination ->
         when (destination) {
@@ -111,7 +118,7 @@ fun AgendaDetailRoot(
                     }
                 )
 
-                showNotification(context, destination.agendaItem)
+                workManager.scheduleNotification(destination.agendaItem)
 
                 navigator.navigateUp()
             }
@@ -142,8 +149,15 @@ fun AgendaDetailRoot(
 
             is AgendaDetailVMAction.AgendaItemError -> context.showToast(destination.error, TAG)
             AgendaDetailVMAction.PhotoUriEmptyOrNull -> context.showToast(R.string.error_empty_photo_uri, TAG)
-            AgendaDetailVMAction.EventStartDateIsAfterEndDate -> context.showToast(R.string.warning_start_date_is_later_than_end_date, TAG)
-            AgendaDetailVMAction.EventStartTimeIsAfterEndTime -> context.showToast(R.string.warning_start_time_is_later_than_end_time, TAG)
+            AgendaDetailVMAction.EventStartDateIsAfterEndDate -> context.showToast(
+                R.string.warning_start_date_is_later_than_end_date,
+                TAG
+            )
+
+            AgendaDetailVMAction.EventStartTimeIsAfterEndTime -> context.showToast(
+                R.string.warning_start_time_is_later_than_end_time,
+                TAG
+            )
         }
     }
 
@@ -233,16 +247,17 @@ private fun AgendaDetailScreen(
             onNavigateBack = { onNavigateBack() },
             onSwitchToEditMode = { onAction(AgendaDetailAction.SwitchToEditMode) },
             onSave = {
-                    when (state.agendaItemType) {
-                        AgendaItemType.EVENT -> {
-                            coroutineScope.launch {
-                                val photoByteArrays = state.newPhotos.map { context.getPhotoByteArray(it) }
-                                onAction(AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull()))
-                            }
+                when (state.agendaItemType) {
+                    AgendaItemType.EVENT -> {
+                        coroutineScope.launch {
+                            val photoByteArrays = state.newPhotos.map { context.getPhotoByteArray(it) }
+                            onAction(AgendaDetailAction.SaveEvent(photoByteArrays.filterNotNull()))
                         }
-                        AgendaItemType.TASK -> onAction(AgendaDetailAction.SaveTask)
-                        AgendaItemType.REMINDER -> onAction(AgendaDetailAction.SaveReminder)
                     }
+
+                    AgendaItemType.TASK -> onAction(AgendaDetailAction.SaveTask)
+                    AgendaItemType.REMINDER -> onAction(AgendaDetailAction.SaveReminder)
+                }
             })
         Column(
             modifier = Modifier
@@ -316,16 +331,24 @@ private fun AgendaDetailScreen(
     }
 }
 
-private fun showNotification(context: Context, agendaItem: AgendaListItem) {
-    val notification = NotificationCompat.Builder(context, MyApplication.CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_launcher_foreground)
-        .setContentTitle(agendaItem.title)
-        .setContentText(agendaItem.description)
-        .build()
+private fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
+    val now = LocalDateTime.now()
+    if (agendaItem.remindAt.isAfter(now)) {
+        val delayInMinutes = Duration.between(now, agendaItem.remindAt).abs().toMinutes()
 
-    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val notificationId = SystemClock.uptimeMillis().toInt()
-    notificationManager.notify(notificationId, notification)
+        val request = OneTimeWorkRequestBuilder<NotificationSchedulerWorker>()
+            .setInputData(
+                workDataOf(
+                    NOTIFICATION_TITLE to agendaItem.title,
+                    NOTIFICATION_DESCRIPTION to agendaItem.description
+                )
+            )
+            .setInitialDelay(delayInMinutes, TimeUnit.MINUTES)
+            .addTag(agendaItem.id)
+            .build()
+        Log.i(TAG, "Notification enqueued with unique name ${agendaItem.id}")
+        enqueueUniqueWork(agendaItem.id, ExistingWorkPolicy.REPLACE, request)
+    }
 }
 
 sealed interface AgendaDetailAction {
