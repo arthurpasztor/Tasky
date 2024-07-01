@@ -1,6 +1,9 @@
 package com.example.tasky.agenda.presentation
 
+import android.app.NotificationManager
+import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,11 +28,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.tasky.MyApplication
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
+import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.composables.detail.PhotoEmptySection
@@ -104,6 +110,8 @@ fun AgendaDetailRoot(
                         AgendaItemType.REMINDER -> R.string.success_reminder_created
                     }
                 )
+
+                showNotification(context, destination.agendaItem)
 
                 navigator.navigateUp()
             }
@@ -306,6 +314,18 @@ private fun AgendaDetailScreen(
             }
         }
     }
+}
+
+private fun showNotification(context: Context, agendaItem: AgendaListItem) {
+    val notification = NotificationCompat.Builder(context, MyApplication.CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
+        .setContentTitle(agendaItem.title)
+        .setContentText(agendaItem.description)
+        .build()
+
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notificationId = SystemClock.uptimeMillis().toInt()
+    notificationManager.notify(notificationId, notification)
 }
 
 sealed interface AgendaDetailAction {

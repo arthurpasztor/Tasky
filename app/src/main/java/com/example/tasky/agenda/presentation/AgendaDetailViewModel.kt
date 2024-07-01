@@ -8,6 +8,7 @@ import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
+import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.AgendaListItem.Reminder
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
@@ -420,7 +421,7 @@ class AgendaDetailsViewModel(
                 _state.value.isCreateMode() -> {
                     eventRepo.createEvent(getEventPayloadForCreation(), photoByteArrays)
                         .onSuccess {
-                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
+                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT, it))
                         }
                         .onError {
                             _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
@@ -448,9 +449,10 @@ class AgendaDetailsViewModel(
 
             when {
                 _state.value.isCreateMode() -> {
-                    taskRepo.createTask(getTaskPayload())
+                    val payload = getTaskPayload()
+                    taskRepo.createTask(payload)
                         .onSuccess {
-                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.TASK))
+                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.TASK, payload))
                         }
                         .onError {
                             _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
@@ -478,9 +480,15 @@ class AgendaDetailsViewModel(
 
             when {
                 _state.value.isCreateMode() -> {
-                    reminderRepo.createReminder(getReminderPayload())
+                    val payload = getReminderPayload()
+                    reminderRepo.createReminder(payload)
                         .onSuccess {
-                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.REMINDER))
+                            _navChannel.send(
+                                AgendaDetailVMAction.CreateAgendaItemSuccess(
+                                    AgendaItemType.REMINDER,
+                                    payload
+                                )
+                            )
                         }
                         .onError {
                             _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
@@ -754,12 +762,13 @@ data class AgendaDetailsState(
         get() = extras?.asEventDetails?.isNewAttendeeActionButtonEnabled ?: false
     val newAttendeeJustAdded: Boolean get() = extras?.asEventDetails?.newAttendeeJustAdded ?: false
 
-    val allPhotos: List<Photo> get() {
-        return mutableListOf<Photo>().apply {
-            addAll(extras?.asEventDetails?.existingPhotos ?: emptyList())
-            addAll(extras?.asEventDetails?.newPhotos ?: emptyList())
-        }.toList()
-    }
+    val allPhotos: List<Photo>
+        get() {
+            return mutableListOf<Photo>().apply {
+                addAll(extras?.asEventDetails?.existingPhotos ?: emptyList())
+                addAll(extras?.asEventDetails?.newPhotos ?: emptyList())
+            }.toList()
+        }
     val existingPhotos: List<Photo> get() = extras?.asEventDetails?.existingPhotos ?: emptyList()
     val newPhotos: List<Photo> get() = extras?.asEventDetails?.newPhotos ?: emptyList()
     val deletedPhotoKeys: List<String> get() = extras?.asEventDetails?.deletedPhotoKeys ?: emptyList()
@@ -774,7 +783,9 @@ enum class AttendeeSelection {
 sealed class AgendaDetailVMAction {
     data object OpenTitleEditor : AgendaDetailVMAction()
     data object OpenDescriptionEditor : AgendaDetailVMAction()
-    class CreateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
+    class CreateAgendaItemSuccess(val itemType: AgendaItemType, val agendaItem: AgendaListItem) :
+        AgendaDetailVMAction()
+
     class UpdateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
     class RemoveAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
 

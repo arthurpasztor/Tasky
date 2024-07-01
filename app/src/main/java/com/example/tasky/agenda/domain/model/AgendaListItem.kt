@@ -7,7 +7,10 @@ import java.util.UUID
 sealed class AgendaListItem {
 
     open val id: String = UUID.randomUUID().toString()
+    open val title: String = ""
+    open val description: String = ""
     open val time: LocalDateTime = LocalDateTime.now()
+    open val remindAt: LocalDateTime = LocalDateTime.now()
 
     open fun getFormattedTime() : String = time.formatAgendaDateTime()
 
@@ -17,11 +20,11 @@ sealed class AgendaListItem {
 
     data class Event(
         override val id: String,
-        val title: String,
-        val description: String,
+        override val title: String,
+        override val description: String,
         override val time: LocalDateTime,
         val to: LocalDateTime,
-        val remindAt: LocalDateTime,
+        override val remindAt: LocalDateTime,
         val host: String,
         val isUserEventCreator: Boolean,
         val attendees: List<Attendee>,
@@ -54,10 +57,10 @@ sealed class AgendaListItem {
 
     data class Task(
         override val id: String,
-        val title: String,
-        val description: String,
+        override val title: String,
+        override val description: String,
         override val time: LocalDateTime,
-        val remindAt: LocalDateTime,
+        override val remindAt: LocalDateTime,
         val isDone: Boolean
     ): AgendaListItem() {
 
@@ -75,10 +78,10 @@ sealed class AgendaListItem {
 
     data class Reminder(
         override val id: String,
-        val title: String,
-        val description: String,
+        override val title: String,
+        override val description: String,
         override val time: LocalDateTime,
-        val remindAt: LocalDateTime
+        override val remindAt: LocalDateTime
     ): AgendaListItem() {
 
         companion object {

@@ -1,6 +1,10 @@
 package com.example.tasky
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import com.example.tasky.auth.di.authModule
 import com.example.tasky.core.di.coreModule
 import com.example.tasky.agenda.di.apiModule
@@ -21,5 +25,14 @@ class MyApplication : Application() {
             androidLogger()
             modules(coreModule, authModule, apiModule)
         }
+
+        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
+    }
+
+    companion object {
+        const val CHANNEL_ID = "tasky_notification_channel_id"
+        private const val CHANNEL_NAME = "Tasky Agenda Item notifications"
     }
 }
