@@ -10,8 +10,6 @@ interface EventDataSource {
 
     suspend fun getAllEvents(): Flow<List<EventEntity>>
 
-    suspend fun insertOrReplaceEvents(events: List<EventDTO>)
-
     suspend fun insertOrReplaceEvent(event: EventDTO)
 
     suspend fun deleteEvent(id: String)

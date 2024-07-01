@@ -5,6 +5,8 @@ import com.example.tasky.agenda.data.AuthRepositoryImpl
 import com.example.tasky.agenda.data.EventRepositoryImpl
 import com.example.tasky.agenda.data.ReminderRepositoryImpl
 import com.example.tasky.agenda.data.TaskRepositoryImpl
+import com.example.tasky.agenda.data.db.AgendaDataSource
+import com.example.tasky.agenda.data.db.AgendaDataSourceImpl
 import com.example.tasky.agenda.data.db.EventDataSource
 import com.example.tasky.agenda.data.db.EventDataSourceImpl
 import com.example.tasky.agenda.data.db.ReminderDataSource
@@ -41,4 +43,5 @@ val apiModule = module {
     single<EventDataSource> { EventDataSourceImpl(get()) }
     single<TaskDataSource> { TaskDataSourceImpl(get()) }
     single<ReminderDataSource> { ReminderDataSourceImpl(get()) }
+    single<AgendaDataSource> { AgendaDataSourceImpl(get()) }
 }

@@ -25,26 +25,9 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceTasks(tasks: List<TaskDTO>) {
-        tasks.forEach {
-            insertOrReplaceTask(it)
-        }
-    }
-
     override suspend fun insertOrReplaceTask(task: TaskDTO) {
-        insertOrReplaceTask(task.id, task.title, task.description, task.time, task.remindAt, task.isDone)
-    }
-
-    private suspend fun insertOrReplaceTask(
-        id: String,
-        title: String,
-        description: String,
-        time: Long,
-        remindAt: Long,
-        isDone: Boolean
-    ) {
         withContext(Dispatchers.IO) {
-            queries.insertOrReplaceTask(id, title, description, time, remindAt, isDone)
+            queries.insertOrReplaceTask(task.id, task.title, task.description, task.time, task.remindAt, task.isDone)
         }
     }
 

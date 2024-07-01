@@ -10,8 +10,6 @@ interface TaskDataSource {
 
     suspend fun getAllTasks(): Flow<List<TaskEntity>>
 
-    suspend fun insertOrReplaceTasks(tasks: List<TaskDTO>)
-
     suspend fun insertOrReplaceTask(task: TaskDTO)
 
     suspend fun deleteTask(id: String)

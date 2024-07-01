@@ -25,25 +25,15 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceReminders(reminders: List<ReminderDTO>) {
-        reminders.forEach {
-            insertOrReplaceReminder(it.id, it.title, it.description, it.time, it.remindAt)
-        }
-    }
-
     override suspend fun insertOrReplaceReminder(reminder: ReminderDTO) {
-        insertOrReplaceReminder(reminder.id, reminder.title, reminder.description, reminder.time, reminder.remindAt)
-    }
-
-    private suspend fun insertOrReplaceReminder(
-        id: String,
-        title: String,
-        description: String,
-        time: Long,
-        remindAt: Long
-    ) {
         withContext(Dispatchers.IO) {
-            queries.insertOrReplaceReminder(id, title, description, time, remindAt)
+            queries.insertOrReplaceReminder(
+                reminder.id,
+                reminder.title,
+                reminder.description,
+                reminder.time,
+                reminder.remindAt
+            )
         }
     }
 

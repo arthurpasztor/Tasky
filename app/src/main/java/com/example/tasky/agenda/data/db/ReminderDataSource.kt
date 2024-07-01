@@ -10,8 +10,6 @@ interface ReminderDataSource {
 
     suspend fun getAllReminders(): Flow<List<ReminderEntity>>
 
-    suspend fun insertOrReplaceReminders(reminders: List<ReminderDTO>)
-
     suspend fun insertOrReplaceReminder(reminder: ReminderDTO)
 
     suspend fun deleteReminder(id: String)
