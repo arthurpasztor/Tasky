@@ -10,15 +10,19 @@ class NotificationSchedulerWorker(
 ) : CoroutineWorker(context, params), NotificationHandler by NotificationHandlerImpl() {
 
     override suspend fun doWork(): Result {
+        val id = params.inputData.getString(NOTIFICATION_AGENDA_ITEM_ID) ?: ""
+        val type = params.inputData.getString(NOTIFICATION_AGENDA_ITEM_TYPE) ?: ""
         val title = params.inputData.getString(NOTIFICATION_TITLE) ?: ""
         val description = params.inputData.getString(NOTIFICATION_DESCRIPTION) ?: ""
 
-        showNotification(context, title, description)
+        showNotification(context, id, type, title, description)
 
         return Result.success()
     }
 
     companion object {
+        const val NOTIFICATION_AGENDA_ITEM_ID = "NotificationAgendaItemId"
+        const val NOTIFICATION_AGENDA_ITEM_TYPE = "NotificationAgendaItemType"
         const val NOTIFICATION_TITLE = "NotificationTitle"
         const val NOTIFICATION_DESCRIPTION = "NotificationDescription"
     }
