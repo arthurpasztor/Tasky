@@ -3,6 +3,7 @@ package com.example.tasky.agenda.presentation
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
@@ -15,6 +16,9 @@ import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.agenda.presentation.workmanager.cancelNotificationScheduler
+import com.example.tasky.agenda.presentation.workmanager.scheduleNotification
+import com.example.tasky.agenda.presentation.workmanager.updateNotificationScheduler
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
@@ -36,6 +40,7 @@ class AgendaDetailsViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
+    private val workManager: WorkManager,
     type: AgendaItemType,
     itemId: String? = null,
     editable: Boolean = true
@@ -215,14 +220,15 @@ class AgendaDetailsViewModel(
     }
 
     private fun deleteItem() {
-        state.value.itemId?.let {
+        state.value.itemId?.let { itemId ->
             _state.update { it.copy(isLoading = true) }
 
             when (state.value.agendaItemType) {
                 AgendaItemType.EVENT -> {
                     viewModelScope.launch {
-                        eventRepo.deleteEvent(it)
+                        eventRepo.deleteEvent(itemId)
                             .onSuccess {
+                                workManager.cancelNotificationScheduler(itemId)
                                 _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.EVENT))
                             }
                             .onError {
@@ -233,8 +239,9 @@ class AgendaDetailsViewModel(
 
                 AgendaItemType.TASK -> {
                     viewModelScope.launch {
-                        taskRepo.deleteTask(it)
+                        taskRepo.deleteTask(itemId)
                             .onSuccess {
+                                workManager.cancelNotificationScheduler(itemId)
                                 _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.TASK))
                             }
                             .onError {
@@ -245,8 +252,9 @@ class AgendaDetailsViewModel(
 
                 AgendaItemType.REMINDER -> {
                     viewModelScope.launch {
-                        reminderRepo.deleteReminder(it)
+                        reminderRepo.deleteReminder(itemId)
                             .onSuccess {
+                                workManager.cancelNotificationScheduler(itemId)
                                 _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.REMINDER))
                             }
                             .onError {
@@ -420,6 +428,7 @@ class AgendaDetailsViewModel(
                 _state.value.isCreateMode() -> {
                     eventRepo.createEvent(getEventPayloadForCreation(), photoByteArrays)
                         .onSuccess {
+                            workManager.scheduleNotification(it)
                             _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
                         }
                         .onError {
@@ -430,6 +439,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
                         .onSuccess {
+                            workManager.updateNotificationScheduler(it)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
                         }
                         .onError {
@@ -446,10 +456,12 @@ class AgendaDetailsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
+            val payload = getTaskPayload()
             when {
                 _state.value.isCreateMode() -> {
-                    taskRepo.createTask(getTaskPayload())
+                    taskRepo.createTask(payload)
                         .onSuccess {
+                            workManager.scheduleNotification(payload)
                             _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.TASK))
                         }
                         .onError {
@@ -460,6 +472,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     taskRepo.updateTask(getTaskPayload())
                         .onSuccess {
+                            workManager.updateNotificationScheduler(payload)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.TASK))
                         }
                         .onError {
@@ -476,10 +489,12 @@ class AgendaDetailsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
+            val payload = getReminderPayload()
             when {
                 _state.value.isCreateMode() -> {
-                    reminderRepo.createReminder(getReminderPayload())
+                    reminderRepo.createReminder(payload)
                         .onSuccess {
+                            workManager.scheduleNotification(payload)
                             _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.REMINDER))
                         }
                         .onError {
@@ -490,6 +505,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     reminderRepo.updateReminder(getReminderPayload())
                         .onSuccess {
+                            workManager.updateNotificationScheduler(payload)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.REMINDER))
                         }
                         .onError {
@@ -754,12 +770,13 @@ data class AgendaDetailsState(
         get() = extras?.asEventDetails?.isNewAttendeeActionButtonEnabled ?: false
     val newAttendeeJustAdded: Boolean get() = extras?.asEventDetails?.newAttendeeJustAdded ?: false
 
-    val allPhotos: List<Photo> get() {
-        return mutableListOf<Photo>().apply {
-            addAll(extras?.asEventDetails?.existingPhotos ?: emptyList())
-            addAll(extras?.asEventDetails?.newPhotos ?: emptyList())
-        }.toList()
-    }
+    val allPhotos: List<Photo>
+        get() {
+            return mutableListOf<Photo>().apply {
+                addAll(extras?.asEventDetails?.existingPhotos ?: emptyList())
+                addAll(extras?.asEventDetails?.newPhotos ?: emptyList())
+            }.toList()
+        }
     val existingPhotos: List<Photo> get() = extras?.asEventDetails?.existingPhotos ?: emptyList()
     val newPhotos: List<Photo> get() = extras?.asEventDetails?.newPhotos ?: emptyList()
     val deletedPhotoKeys: List<String> get() = extras?.asEventDetails?.deletedPhotoKeys ?: emptyList()
@@ -774,6 +791,7 @@ enum class AttendeeSelection {
 sealed class AgendaDetailVMAction {
     data object OpenTitleEditor : AgendaDetailVMAction()
     data object OpenDescriptionEditor : AgendaDetailVMAction()
+
     class CreateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
     class UpdateAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()
     class RemoveAgendaItemSuccess(val itemType: AgendaItemType) : AgendaDetailVMAction()

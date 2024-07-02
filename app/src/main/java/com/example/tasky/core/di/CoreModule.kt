@@ -1,5 +1,6 @@
 package com.example.tasky.core.di
 
+import androidx.work.WorkManager
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.example.tasky.MyApplication
@@ -37,4 +38,6 @@ val coreModule = module {
     }
 
     single<CoroutineScope> { (androidApplication() as MyApplication).applicationScope }
+
+    single<WorkManager> { WorkManager.getInstance(androidApplication()) }
 }

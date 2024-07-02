@@ -124,6 +124,9 @@ dependencies {
     implementation("app.cash.sqldelight:android-driver:2.0.0")
     implementation("app.cash.sqldelight:coroutines-extensions-jvm:2.0.0")
     implementation("app.cash.sqldelight:primitive-adapters:2.0.0-alpha05")
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }
 
 sqldelight {
