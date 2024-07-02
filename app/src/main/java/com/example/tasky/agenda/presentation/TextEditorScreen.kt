@@ -36,10 +36,11 @@ import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.VeryLightGray
 import com.example.tasky.ui.theme.greenSaveButtonStyle
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.result.ResultBackNavigator
 import kotlinx.parcelize.Parcelize
 
-@Destination
+@Destination<RootGraph>
 @Composable
 fun TextEditorRoot(
     resultNavigator: ResultBackNavigator<TextEditorResponse>,

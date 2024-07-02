@@ -29,9 +29,10 @@ import com.example.tasky.R
 import com.example.tasky.agenda.presentation.composables.utils.CloseButton
 import com.example.tasky.ui.theme.headerStyle
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.result.ResultBackNavigator
 
-@Destination
+@Destination<RootGraph>
 @Composable
 fun ImageScreenRoot(
     resultNavigator: ResultBackNavigator<String>,

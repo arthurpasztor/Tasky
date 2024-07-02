@@ -29,11 +29,12 @@ import com.example.tasky.agenda.presentation.workmanager.AGENDA_ITEM_ID
 import com.example.tasky.agenda.presentation.workmanager.AGENDA_ITEM_TYPE
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.presentation.RootViewModel
-import com.example.tasky.destinations.AgendaRootDestination
-import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.TaskyTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.AgendaRootDestination
+import com.ramcosta.composedestinations.generated.destinations.LoginRootDestination
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
