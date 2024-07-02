@@ -24,18 +24,13 @@ fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
     }
 }
 
-fun WorkManager.updateNotification(agendaItem: AgendaListItem) {
-    val now = LocalDateTime.now()
-    if (agendaItem.remindAt.isAfter(now)) {
-        val delayInMinutes = Duration.between(now, agendaItem.remindAt).abs().toMinutes()
-        val request = getOneTimeNotificationSchedulerRequest(agendaItem, delayInMinutes)
-
-        updateWork(request)
-        Log.i(TAG, "Notification with unique name ${agendaItem.id} updated")
-    }
+fun WorkManager.updateNotificationScheduler(agendaItem: AgendaListItem) {
+    cancelNotificationScheduler(agendaItem.id)
+    scheduleNotification(agendaItem)
+    Log.i(TAG, "Notification with unique name ${agendaItem.id} updated")
 }
 
-fun WorkManager.cancelNotification(itemId: String) {
+fun WorkManager.cancelNotificationScheduler(itemId: String) {
     cancelUniqueWork(itemId)
     Log.i(TAG, "Notification with unique name $itemId canceled")
 }

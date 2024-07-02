@@ -16,9 +16,9 @@ import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
-import com.example.tasky.agenda.presentation.workmanager.cancelNotification
+import com.example.tasky.agenda.presentation.workmanager.cancelNotificationScheduler
 import com.example.tasky.agenda.presentation.workmanager.scheduleNotification
-import com.example.tasky.agenda.presentation.workmanager.updateNotification
+import com.example.tasky.agenda.presentation.workmanager.updateNotificationScheduler
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
@@ -228,7 +228,7 @@ class AgendaDetailsViewModel(
                     viewModelScope.launch {
                         eventRepo.deleteEvent(itemId)
                             .onSuccess {
-                                workManager.cancelNotification(itemId)
+                                workManager.cancelNotificationScheduler(itemId)
                                 _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.EVENT))
                             }
                             .onError {
@@ -241,7 +241,7 @@ class AgendaDetailsViewModel(
                     viewModelScope.launch {
                         taskRepo.deleteTask(itemId)
                             .onSuccess {
-                                workManager.cancelNotification(itemId)
+                                workManager.cancelNotificationScheduler(itemId)
                                 _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.TASK))
                             }
                             .onError {
@@ -254,7 +254,7 @@ class AgendaDetailsViewModel(
                     viewModelScope.launch {
                         reminderRepo.deleteReminder(itemId)
                             .onSuccess {
-                                workManager.cancelNotification(itemId)
+                                workManager.cancelNotificationScheduler(itemId)
                                 _navChannel.send(AgendaDetailVMAction.RemoveAgendaItemSuccess(AgendaItemType.REMINDER))
                             }
                             .onError {
@@ -439,7 +439,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
                         .onSuccess {
-                            workManager.updateNotification(it)
+                            workManager.updateNotificationScheduler(it)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
                         }
                         .onError {
@@ -472,7 +472,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     taskRepo.updateTask(getTaskPayload())
                         .onSuccess {
-                            workManager.updateNotification(payload)
+                            workManager.updateNotificationScheduler(payload)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.TASK))
                         }
                         .onError {
@@ -505,7 +505,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     reminderRepo.updateReminder(getReminderPayload())
                         .onSuccess {
-                            workManager.updateNotification(payload)
+                            workManager.updateNotificationScheduler(payload)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.REMINDER))
                         }
                         .onError {

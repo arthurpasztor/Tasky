@@ -13,7 +13,7 @@ import com.example.tasky.agenda.domain.getUTCMillis
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.model.AgendaListItem
-import com.example.tasky.agenda.presentation.workmanager.cancelNotification
+import com.example.tasky.agenda.presentation.workmanager.cancelNotificationScheduler
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.RootError
@@ -191,7 +191,7 @@ class AgendaViewModel(
     }
 
     private fun deleteItem(itemId: String) {
-        workManager.cancelNotification(itemId)
+        workManager.cancelNotificationScheduler(itemId)
 
         _state.update {
             it.copy(
