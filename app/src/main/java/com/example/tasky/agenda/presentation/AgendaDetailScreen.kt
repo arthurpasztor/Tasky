@@ -1,7 +1,6 @@
 package com.example.tasky.agenda.presentation
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,19 +26,12 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
 import com.example.tasky.agenda.domain.ReminderType
-import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Photo
-import com.example.tasky.agenda.presentation.NotificationSchedulerWorker.Companion.NOTIFICATION_DESCRIPTION
-import com.example.tasky.agenda.presentation.NotificationSchedulerWorker.Companion.NOTIFICATION_TITLE
 import com.example.tasky.agenda.presentation.composables.detail.AttendeeSection
 import com.example.tasky.agenda.presentation.composables.detail.DateTimeSection
 import com.example.tasky.agenda.presentation.composables.detail.DeleteSection
@@ -64,11 +56,8 @@ import com.ramcosta.composedestinations.result.ResultRecipient
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.concurrent.TimeUnit
 
 private const val TAG = "TaskDetailScreen"
 
@@ -86,8 +75,6 @@ fun AgendaDetailRoot(
     val context = LocalContext.current
     val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, itemId, editable) })
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    val workManager = WorkManager.getInstance(context)
 
     ObserveAsEvents(viewModel.navChannel) { destination ->
         when (destination) {
@@ -118,8 +105,6 @@ fun AgendaDetailRoot(
                     }
                 )
 
-                workManager.scheduleNotification(destination.agendaItem)
-
                 navigator.navigateUp()
             }
 
@@ -132,8 +117,6 @@ fun AgendaDetailRoot(
                     }
                 )
 
-                workManager.updateNotification(destination.agendaItem)
-
                 navigator.navigateUp()
             }
 
@@ -145,8 +128,6 @@ fun AgendaDetailRoot(
                         AgendaItemType.REMINDER -> R.string.success_reminder_removed
                     }
                 )
-
-                workManager.cancelNotification(destination.agendaItemId)
 
                 navigator.navigateUp()
             }

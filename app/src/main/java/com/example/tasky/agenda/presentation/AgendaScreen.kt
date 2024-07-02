@@ -35,20 +35,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.work.WorkManager
 import com.example.tasky.R
-import com.example.tasky.destinations.AgendaRootDestination
-import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.isToday
-import com.example.tasky.agenda.presentation.composables.utils.AddButton
 import com.example.tasky.agenda.presentation.composables.list.AgendaItem
 import com.example.tasky.agenda.presentation.composables.list.Needle
-import com.example.tasky.agenda.presentation.composables.utils.ProfileIcon
 import com.example.tasky.agenda.presentation.composables.list.PullToRefreshLazyColumn
+import com.example.tasky.agenda.presentation.composables.utils.AddButton
+import com.example.tasky.agenda.presentation.composables.utils.ProfileIcon
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
 import com.example.tasky.destinations.AgendaDetailRootDestination
+import com.example.tasky.destinations.AgendaRootDestination
+import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
@@ -120,8 +119,6 @@ private fun AgendaScreen(
     state: AgendaState = AgendaState(userName = "Arthur"),
     onAction: (AgendaAction) -> Unit = {}
 ) {
-    val workManager = WorkManager.getInstance(LocalContext.current)
-
     val cornerRadius = dimensionResource(R.dimen.radius_30)
     val monthPadding = dimensionResource(R.dimen.padding_20)
 
@@ -196,7 +193,6 @@ private fun AgendaScreen(
                                     type.toAgendaItemType()?.let { onAction.invoke(AgendaAction.Edit(id, it)) }
                                 },
                                 onDelete = { id, type ->
-                                    workManager.cancelNotification(id)
                                     type.toAgendaItemType()?.let { onAction.invoke(AgendaAction.Delete(id, it)) }
                                 }
                             )
