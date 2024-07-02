@@ -18,7 +18,6 @@ import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.workmanager.cancelNotificationScheduler
 import com.example.tasky.agenda.presentation.workmanager.scheduleNotification
-import com.example.tasky.agenda.presentation.workmanager.updateNotificationScheduler
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
@@ -439,7 +438,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
                         .onSuccess {
-                            workManager.updateNotificationScheduler(it)
+                            workManager.scheduleNotification(it)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
                         }
                         .onError {
@@ -472,7 +471,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     taskRepo.updateTask(getTaskPayload())
                         .onSuccess {
-                            workManager.updateNotificationScheduler(payload)
+                            workManager.scheduleNotification(payload)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.TASK))
                         }
                         .onError {
@@ -505,7 +504,7 @@ class AgendaDetailsViewModel(
                 _state.value.isEditMode() -> {
                     reminderRepo.updateReminder(getReminderPayload())
                         .onSuccess {
-                            workManager.updateNotificationScheduler(payload)
+                            workManager.scheduleNotification(payload)
                             _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.REMINDER))
                         }
                         .onError {

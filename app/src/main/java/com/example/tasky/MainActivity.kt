@@ -27,7 +27,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.tasky.agenda.presentation.workmanager.AGENDA_ITEM_ID
 import com.example.tasky.agenda.presentation.workmanager.AGENDA_ITEM_TYPE
-import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.presentation.RootViewModel
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.TaskyTheme
@@ -35,12 +34,9 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.AgendaRootDestination
 import com.ramcosta.composedestinations.generated.destinations.LoginRootDestination
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-
-    private val prefs: Preferences by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,31 +98,25 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun NotificationPermissionsHandler() {
         val context = LocalContext.current
-        val containsNotificationInfoPermissionInfo = prefs.containsNotificationInfoPermissionInfo()
 
-        if (!containsNotificationInfoPermissionInfo) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val status = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                if (status != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val status = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            if (status != PackageManager.PERMISSION_GRANTED) {
 
-                    val launcher = rememberLauncherForActivityResult(
-                        contract = ActivityResultContracts.RequestPermission(),
-                        onResult = { isGranted ->
-                            prefs.setNotificationsPermission(isGranted)
-                            if (isGranted) {
-                                Log.i(TAG, "Manifest.permission.POST_NOTIFICATIONS permission granted")
-                            } else {
-                                Log.i(TAG, "Manifest.permission.POST_NOTIFICATIONS permission denied")
-                            }
+                val launcher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission(),
+                    onResult = { isGranted ->
+                        if (isGranted) {
+                            Log.i(TAG, "Manifest.permission.POST_NOTIFICATIONS permission granted")
+                        } else {
+                            Log.i(TAG, "Manifest.permission.POST_NOTIFICATIONS permission denied")
                         }
-                    )
-
-                    SideEffect {
-                        launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
+                )
+
+                SideEffect {
+                    launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
-            } else {
-                prefs.setNotificationsPermission(true)
             }
         }
     }

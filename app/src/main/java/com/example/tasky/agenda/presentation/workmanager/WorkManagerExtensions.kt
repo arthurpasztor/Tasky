@@ -36,12 +36,6 @@ fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
     }
 }
 
-fun WorkManager.updateNotificationScheduler(agendaItem: AgendaListItem) {
-    cancelNotificationScheduler(agendaItem.id)
-    scheduleNotification(agendaItem)
-    Log.i(TAG, "Notification with unique name ${agendaItem.id} updated")
-}
-
 fun WorkManager.cancelNotificationScheduler(itemId: String) {
     cancelUniqueWork(itemId)
     Log.i(TAG, "Notification with unique name $itemId canceled")
