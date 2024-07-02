@@ -13,6 +13,7 @@ import com.example.tasky.agenda.data.db.ReminderDataSource
 import com.example.tasky.agenda.data.db.ReminderDataSourceImpl
 import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.agenda.data.db.TaskDataSourceImpl
+import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.EventRepository
@@ -20,6 +21,7 @@ import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.presentation.AgendaDetailsViewModel
 import com.example.tasky.agenda.presentation.AgendaViewModel
+import com.example.tasky.agenda.presentation.workmanager.AgendaAlarmSchedulerImpl
 import com.example.tasky.db.TaskyDatabase
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -44,4 +46,6 @@ val apiModule = module {
     single<TaskDataSource> { TaskDataSourceImpl(get()) }
     single<ReminderDataSource> { ReminderDataSourceImpl(get()) }
     single<AgendaDataSource> { AgendaDataSourceImpl(get()) }
+
+    singleOf(::AgendaAlarmSchedulerImpl).bind<AgendaAlarmScheduler>()
 }

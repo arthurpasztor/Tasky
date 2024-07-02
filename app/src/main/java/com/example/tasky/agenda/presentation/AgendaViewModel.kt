@@ -2,7 +2,7 @@ package com.example.tasky.agenda.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkManager
+import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AuthRepository
@@ -13,7 +13,6 @@ import com.example.tasky.agenda.domain.getUTCMillis
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.model.AgendaListItem
-import com.example.tasky.agenda.presentation.workmanager.cancelNotificationScheduler
 import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.RootError
@@ -34,7 +33,7 @@ class AgendaViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
-    private val workManager: WorkManager
+    private val scheduler: AgendaAlarmScheduler
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
@@ -191,7 +190,7 @@ class AgendaViewModel(
     }
 
     private fun deleteItem(itemId: String) {
-        workManager.cancelNotificationScheduler(itemId)
+        scheduler.cancelNotificationScheduler(itemId)
 
         _state.update {
             it.copy(
@@ -216,7 +215,7 @@ class AgendaViewModel(
         viewModelScope.launch {
             authRepo.logout()
                 .onSuccess {
-                    workManager.cancelAllWork()
+                    scheduler.cancelAllNotificationSchedulers()
                     _navChannel.send(AgendaResponseAction.HandleLogoutResponseSuccess)
                 }
                 .onError {
