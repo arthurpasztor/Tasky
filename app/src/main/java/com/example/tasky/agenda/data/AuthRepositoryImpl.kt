@@ -3,6 +3,8 @@ package com.example.tasky.agenda.data
 import com.example.tasky.BuildConfig
 import com.example.tasky.agenda.data.db.AgendaDataSource
 import com.example.tasky.agenda.domain.AuthRepository
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
+import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.EmptyResult
@@ -18,19 +20,29 @@ import kotlinx.coroutines.launch
 class AuthRepositoryImpl(
     private val client: HttpClient,
     private val localDataSource: AgendaDataSource,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val networkMonitor: NetworkConnectivityMonitor,
+    private val prefs: Preferences
 ) : AuthRepository {
 
     private val tokenCheckUrl = "${BuildConfig.BASE_URL}/authenticate"
     private val logoutUrl = "${BuildConfig.BASE_URL}/logout"
 
     override suspend fun authenticate(): EmptyResult<DataError> {
-        return client.executeRequest<Unit, Unit>(
-            httpMethod = HttpMethod.Get,
-            url = tokenCheckUrl,
-            tag = TAG
-        ) {
-            Result.Success(Unit)
+        if (networkMonitor.isNetworkAvailable()) {
+            return client.executeRequest<Unit, Unit>(
+                httpMethod = HttpMethod.Get,
+                url = tokenCheckUrl,
+                tag = TAG
+            ) {
+                Result.Success(Unit)
+            }
+        } else {
+            return if (prefs.contains(Preferences.KEY_ACCESS_TOKEN)) {
+                Result.Success(Unit)
+            } else {
+                Result.Error(DataError.LocalError.USER_LOGGED_OUT)
+            }
         }
     }
 
