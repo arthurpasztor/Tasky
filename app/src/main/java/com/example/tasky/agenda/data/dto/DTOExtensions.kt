@@ -11,6 +11,8 @@ import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.migrations.EventEntity
+import com.example.tasky.migrations.ReminderEntity
 import com.example.tasky.migrations.TaskEntity
 
 fun AgendaDTO.toAgenda(): Agenda {
@@ -68,6 +70,14 @@ fun Reminder.toReminderDTO() = ReminderDTO(
     remindAt = remindAt.getMillis()
 )
 
+fun ReminderEntity.toReminder() = Reminder(
+    id = id,
+    title = title,
+    description = description,
+    time = time.getLocalDateTimeFromMillis(),
+    remindAt = remindAt.getLocalDateTimeFromMillis()
+)
+
 fun EventDTO.toEvent() = Event(
     id = id,
     title = title,
@@ -114,6 +124,19 @@ fun EventUpdate.toEventUpdateDTO() = EventUpdateDTO(
     attendeeIds = attendees.map { it.userId },
     deletedPhotoKeys = deletedPhotoKeys,
     isGoing = isGoing,
+)
+
+fun EventEntity.toEvent() = Event(
+    id = id,
+    title = title,
+    description = description,
+    time = startDate.getLocalDateTimeFromMillis(),
+    to = endDate.getLocalDateTimeFromMillis(),
+    remindAt = remindAt.getLocalDateTimeFromMillis(),
+    host = host,
+    isUserEventCreator = isUserEventCreator,
+    attendees = attendees.map { it.toAttendee() },
+    photos = photos.map { it.toPhoto() }
 )
 
 fun AttendeeDTO.toAttendee() = Attendee(

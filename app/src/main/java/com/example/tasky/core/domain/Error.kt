@@ -16,7 +16,7 @@ sealed interface DataError : Error {
     }
 
     enum class LocalError : DataError {
-        USER_LOGGED_OUT,
+        USER_IS_LOGGED_OUT,
         DISK_FULL,
         NOT_FOUND
     }

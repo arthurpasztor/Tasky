@@ -3,6 +3,11 @@ SELECT *
 FROM eventEntity
 WHERE id = :id;
 
+getAllEventsForToday:
+SELECT *
+FROM eventEntity
+WHERE startDateDayFormatted = :dayFormatted;
+
 getAllEvents:
 SELECT *
 FROM eventEntity;
@@ -10,7 +15,7 @@ FROM eventEntity;
 insertOrReplaceEvent:
 INSERT OR REPLACE
 INTO eventEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteEventById:
 DELETE FROM eventEntity

@@ -3,10 +3,8 @@ package com.example.tasky.agenda.data
 import com.example.tasky.BuildConfig
 import com.example.tasky.agenda.data.db.ReminderDataSource
 import com.example.tasky.agenda.data.dto.ReminderDTO
-import com.example.tasky.agenda.data.dto.TaskDTO
 import com.example.tasky.agenda.data.dto.toReminder
 import com.example.tasky.agenda.data.dto.toReminderDTO
-import com.example.tasky.agenda.data.dto.toTask
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.core.data.executeRequest

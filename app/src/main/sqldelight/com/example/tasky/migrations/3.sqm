@@ -6,6 +6,7 @@ CREATE TABLE taskEntity (
     description TEXT NOT NULL,
     time INTEGER NOT NULL,
     remindAt INTEGER NOT NULL,
-    isDone INTEGER AS Boolean NOT NULL
+    isDone INTEGER AS Boolean NOT NULL,
+    timeDayFormatted TEXT NOT NULL
 );
 

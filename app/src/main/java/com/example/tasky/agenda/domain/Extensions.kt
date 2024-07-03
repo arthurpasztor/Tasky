@@ -45,6 +45,8 @@ fun LocalDate.getUTCMillis(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().to
 
 fun Long.getLocalDateTimeFromMillis(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
 
+fun Long.getFormattedLocalDateFromMillis(): String = getLocalDateTimeFromMillis().toLocalDate().formatDetailDate()
+
 fun LocalDateTime.formatAgendaDateTime(): String = format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
 
 fun LocalDate.isToday() = this == LocalDate.now()

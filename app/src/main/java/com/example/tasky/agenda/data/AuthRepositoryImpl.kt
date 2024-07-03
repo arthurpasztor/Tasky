@@ -29,8 +29,8 @@ class AuthRepositoryImpl(
     private val logoutUrl = "${BuildConfig.BASE_URL}/logout"
 
     override suspend fun authenticate(): EmptyResult<DataError> {
-        if (networkMonitor.isNetworkAvailable()) {
-            return client.executeRequest<Unit, Unit>(
+        return if (networkMonitor.isNetworkAvailable()) {
+            client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Get,
                 url = tokenCheckUrl,
                 tag = TAG
@@ -38,10 +38,10 @@ class AuthRepositoryImpl(
                 Result.Success(Unit)
             }
         } else {
-            return if (prefs.contains(Preferences.KEY_ACCESS_TOKEN)) {
+            if (prefs.containsEncrypted(Preferences.KEY_ACCESS_TOKEN)) {
                 Result.Success(Unit)
             } else {
-                Result.Error(DataError.LocalError.USER_LOGGED_OUT)
+                Result.Error(DataError.LocalError.USER_IS_LOGGED_OUT)
             }
         }
     }

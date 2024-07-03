@@ -1,11 +1,46 @@
 package com.example.tasky.agenda.data.db
 
 import com.example.tasky.agenda.data.dto.AgendaDTO
+import com.example.tasky.agenda.data.dto.toEvent
+import com.example.tasky.agenda.data.dto.toReminder
+import com.example.tasky.agenda.data.dto.toTask
+import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
+import com.example.tasky.agenda.domain.model.Agenda
+import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.db.TaskyDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
+
+    override suspend fun getAllAgendaItemsByDay(dayFormatted: String): Agenda {
+        return withContext(Dispatchers.IO) {
+            val agendaList = mutableListOf<AgendaListItem>()
+
+            db.transaction {
+                val events = db.eventEntityQueries.getAllEventsForToday(dayFormatted).executeAsList().map {
+                    it.toEvent()
+                }
+                val reminders = db.reminderEntityQueries.getAllRemindersForToday(dayFormatted).executeAsList().map {
+                    it.toReminder()
+                }
+                val tasks = db.taskEntityQueries.getAllTasksForToday(dayFormatted).executeAsList().map {
+                    it.toTask()
+                }
+
+                agendaList.apply {
+                    addAll(events)
+                    addAll(tasks)
+                    addAll(reminders)
+
+                    sortBy { it.time }
+                }
+
+            }
+
+            Agenda(agendaList)
+        }
+    }
 
     override suspend fun insertOrReplaceAgendaItems(agenda: AgendaDTO) {
         withContext(Dispatchers.IO) {
@@ -21,7 +56,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.host,
                         it.isUserEventCreator,
                         it.attendees,
-                        it.photos
+                        it.photos,
+                        it.from.getFormattedLocalDateFromMillis()
                     )
                 }
                 agenda.tasks.forEach {
@@ -32,6 +68,7 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.time,
                         it.remindAt,
                         it.isDone,
+                        it.time.getFormattedLocalDateFromMillis()
                     )
                 }
                 agenda.reminders.forEach {
@@ -40,7 +77,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.title,
                         it.description,
                         it.time,
-                        it.remindAt
+                        it.remindAt,
+                        it.time.getFormattedLocalDateFromMillis()
                     )
                 }
             }

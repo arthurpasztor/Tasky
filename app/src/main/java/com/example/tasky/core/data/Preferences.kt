@@ -23,8 +23,8 @@ class Preferences(context: Context) {
             )
         }
 
-    fun contains(key: String): Boolean {
-        return preferences.contains(key)
+    fun containsEncrypted(key: String): Boolean {
+        return encryptedPreferences.contains(key)
     }
 
     fun getString(key: String, default: String): String {

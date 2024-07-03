@@ -3,6 +3,7 @@ package com.example.tasky.agenda.data.db
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.ReminderDTO
+import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.migrations.ReminderEntity
 import com.example.tasky.db.TaskyDatabase
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +33,8 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
                 reminder.title,
                 reminder.description,
                 reminder.time,
-                reminder.remindAt
+                reminder.remindAt,
+                reminder.time.getFormattedLocalDateFromMillis()
             )
         }
     }

@@ -3,6 +3,7 @@ package com.example.tasky.agenda.data.db
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.EventDTO
+import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.db.TaskyDatabase
 import com.example.tasky.migrations.EventEntity
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +38,8 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
                 event.host,
                 event.isUserEventCreator,
                 event.attendees,
-                event.photos
+                event.photos,
+                event.from.getFormattedLocalDateFromMillis()
             )
         }
     }
