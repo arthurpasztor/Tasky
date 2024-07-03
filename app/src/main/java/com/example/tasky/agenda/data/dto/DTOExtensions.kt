@@ -11,7 +11,7 @@ import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.Photo
-import com.example.tasky.db.TaskEntity
+import com.example.tasky.migrations.TaskEntity
 
 fun AgendaDTO.toAgenda(): Agenda {
     val items = mutableListOf<AgendaListItem>().apply {

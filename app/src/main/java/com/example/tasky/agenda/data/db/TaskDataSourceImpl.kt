@@ -3,7 +3,7 @@ package com.example.tasky.agenda.data.db
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.TaskDTO
-import com.example.tasky.db.TaskEntity
+import com.example.tasky.migrations.TaskEntity
 import com.example.tasky.db.TaskyDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
