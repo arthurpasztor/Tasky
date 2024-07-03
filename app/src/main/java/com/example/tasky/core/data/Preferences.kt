@@ -32,11 +32,6 @@ class Preferences(context: Context) {
         editor.apply()
     }
 
-    fun remove(key: String) {
-        editor.remove(key)
-        editor.apply()
-    }
-
     fun removeAll() {
         editor.clear()
         editor.apply()
@@ -53,17 +48,6 @@ class Preferences(context: Context) {
         encryptedPreferences.edit().remove(key).apply()
     }
 
-    fun containsNotificationInfoPermissionInfo(): Boolean = preferences.contains(KEY_NOTIFICATIONS_PERMISSION)
-
-    fun hasNotificationsPermission(): Boolean {
-        return preferences.getBoolean(KEY_NOTIFICATIONS_PERMISSION, false)
-    }
-
-    fun setNotificationsPermission(enabled: Boolean) {
-        editor.putBoolean(KEY_NOTIFICATIONS_PERMISSION, enabled)
-        editor.apply()
-    }
-
     companion object {
         private const val PREFERENCES_NAME = "TaskyStore"
         private const val ENCRYPTED_PREFERENCES_NAME = "EncryptedTaskyStore"
@@ -72,7 +56,5 @@ class Preferences(context: Context) {
         const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_USER_NAME = "full_name"
         const val KEY_USER_ID = "user_id"
-
-        private const val KEY_NOTIFICATIONS_PERMISSION = "notifications_permission"
     }
 }
