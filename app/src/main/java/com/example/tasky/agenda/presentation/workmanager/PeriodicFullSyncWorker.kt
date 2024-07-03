@@ -2,6 +2,7 @@ package com.example.tasky.agenda.presentation.workmanager
 
 import android.content.Context
 import androidx.work.CoroutineWorker
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.example.tasky.agenda.data.AgendaRepositoryImpl
 import com.example.tasky.agenda.domain.AgendaRepository
@@ -19,6 +20,7 @@ class PeriodicFullSyncWorker(
 ) : CoroutineWorker(context, params), NotificationHandler by NotificationHandlerImpl() {
 
     private val agendaRepo: AgendaRepository by inject(AgendaRepositoryImpl::class.java)
+    private val workManager: WorkManager by inject(WorkManager::class.java)
 
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
@@ -41,7 +43,7 @@ class PeriodicFullSyncWorker(
 
         agenda.items.forEach {
             if (it.time.isAfter(now)) {
-                showNotification(context, it.id, it.getItemType().name, it.title, it.description)
+                workManager.scheduleNotification(it)
             }
         }
     }
