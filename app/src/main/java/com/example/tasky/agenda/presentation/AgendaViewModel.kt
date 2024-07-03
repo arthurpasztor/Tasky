@@ -35,7 +35,7 @@ class AgendaViewModel(
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
     private val scheduler: AgendaAlarmScheduler,
-    private val syncManager: AgendaSyncManager
+    syncManager: AgendaSyncManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())

@@ -88,7 +88,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
 
             is AgendaResponseAction.CreateNewAgendaItem -> {
                 navigator.navigate(
-                    AgendaDetailRootDestination(type = destination.itemType)
+                    AgendaDetailRootDestination(type = destination.itemType.name)
                 ) {
                     popUpTo(LoginRootDestination) {
                         inclusive = true
@@ -99,7 +99,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
             is AgendaResponseAction.OpenAgendaItemDetail -> {
                 navigator.navigate(
                     AgendaDetailRootDestination(
-                        type = destination.itemType,
+                        type = destination.itemType.name,
                         itemId = destination.itemId,
                         editable = destination.isEditable
                     )

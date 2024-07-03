@@ -2,7 +2,6 @@ package com.example.tasky
 
 import android.Manifest
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -25,8 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.tasky.agenda.presentation.workmanager.AGENDA_ITEM_ID
-import com.example.tasky.agenda.presentation.workmanager.AGENDA_ITEM_TYPE
 import com.example.tasky.core.presentation.RootViewModel
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.TaskyTheme
@@ -119,21 +116,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        handleNewIntent(intent)
-    }
-
-    private fun handleNewIntent(intent: Intent?) {
-        val id = intent?.getStringExtra(AGENDA_ITEM_ID)
-        val type = intent?.getStringExtra(AGENDA_ITEM_TYPE)
-
-        Log.e(TAG, "onNewIntent: agenda item id: $id, type: $type")
-        Log.e(TAG, "onNewIntent: intent extras: ${intent?.extras}")
-        // TODO navigate to agenda item
     }
 
     companion object {
