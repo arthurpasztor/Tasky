@@ -87,7 +87,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Navigation
-    val destinationsVersion = "1.10.2"
+    val destinationsVersion = "2.1.0-beta02"
     implementation("io.github.raamcosta.compose-destinations:core:$destinationsVersion")
     ksp("io.github.raamcosta.compose-destinations:ksp:$destinationsVersion")
 

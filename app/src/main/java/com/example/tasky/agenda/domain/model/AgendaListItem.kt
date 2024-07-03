@@ -1,5 +1,6 @@
 package com.example.tasky.agenda.domain.model
 
+import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.formatAgendaDateTime
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,6 +18,12 @@ sealed class AgendaListItem {
     fun isAfterNow() = time.isAfter(LocalDateTime.now())
 
     fun isBeforeNow() = time.isBefore(LocalDateTime.now())
+
+    fun getItemType() = when (this) {
+        is Event -> AgendaItemType.EVENT
+        is Task -> AgendaItemType.TASK
+        is Reminder -> AgendaItemType.REMINDER
+    }
 
     data class Event(
         override val id: String,

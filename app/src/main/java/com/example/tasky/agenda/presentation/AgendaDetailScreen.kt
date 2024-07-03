@@ -45,11 +45,12 @@ import com.example.tasky.agenda.presentation.composables.detail.TitleSection
 import com.example.tasky.agenda.presentation.composables.utils.HorizontalDividerGray1dp
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
-import com.example.tasky.destinations.ImageScreenRootDestination
-import com.example.tasky.destinations.TextEditorRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ImageScreenRootDestination
+import com.ramcosta.composedestinations.generated.destinations.TextEditorRootDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
@@ -61,7 +62,7 @@ import java.time.LocalTime
 
 private const val TAG = "TaskDetailScreen"
 
-@Destination
+@Destination<RootGraph>
 @Composable
 fun AgendaDetailRoot(
     navigator: DestinationsNavigator,
@@ -262,26 +263,26 @@ private fun AgendaDetailScreen(
             HorizontalDividerGray1dp()
 
             if (state.isEvent()) {
-                if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
-                    if (state.allPhotos.isEmpty()) {
+                if (state.allPhotos.isEmpty()) {
+                    if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
                         PhotoEmptySection {
                             singlePhotoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
                         }
-                    } else {
-                        PhotoSection(
-                            state = state,
-                            onOpenGallery = {
-                                singlePhotoPickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                            onOpenFullScreenImage = {
-                                onOpenFullScreenImage.invoke(it)
-                            }
-                        )
                     }
+                } else {
+                    PhotoSection(
+                        state = state,
+                        onOpenGallery = {
+                            singlePhotoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        onOpenFullScreenImage = {
+                            onOpenFullScreenImage.invoke(it)
+                        }
+                    )
                 }
             }
 

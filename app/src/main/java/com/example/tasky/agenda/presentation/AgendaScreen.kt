@@ -45,15 +45,16 @@ import com.example.tasky.agenda.presentation.composables.utils.AddButton
 import com.example.tasky.agenda.presentation.composables.utils.ProfileIcon
 import com.example.tasky.auth.presentation.showToast
 import com.example.tasky.core.presentation.ObserveAsEvents
-import com.example.tasky.destinations.AgendaDetailRootDestination
-import com.example.tasky.destinations.AgendaRootDestination
-import com.example.tasky.destinations.LoginRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.example.tasky.ui.theme.SelectedDateYellow
 import com.example.tasky.ui.theme.UnselectedDateTransparent
 import com.example.tasky.ui.theme.headerStyle
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AgendaDetailRootDestination
+import com.ramcosta.composedestinations.generated.destinations.AgendaRootDestination
+import com.ramcosta.composedestinations.generated.destinations.LoginRootDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
@@ -62,7 +63,7 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.util.Locale
 
-@Destination
+@Destination<RootGraph>
 @Composable
 fun AgendaRoot(navigator: DestinationsNavigator) {
 
@@ -77,7 +78,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
             AgendaResponseAction.HandleLogoutResponseSuccess -> {
                 viewModel.onAction(AgendaAction.ClearUserData)
                 navigator.navigate(LoginRootDestination) {
-                    popUpTo(AgendaRootDestination.route) {
+                    popUpTo(AgendaRootDestination) {
                         inclusive = true
                     }
                 }
@@ -89,7 +90,7 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                 navigator.navigate(
                     AgendaDetailRootDestination(type = destination.itemType)
                 ) {
-                    popUpTo(LoginRootDestination.route) {
+                    popUpTo(LoginRootDestination) {
                         inclusive = true
                     }
                 }

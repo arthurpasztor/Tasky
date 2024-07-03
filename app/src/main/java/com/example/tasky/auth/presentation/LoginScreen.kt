@@ -34,18 +34,17 @@ import com.example.tasky.auth.presentation.util.AuthenticationTitle
 import com.example.tasky.auth.presentation.util.PasswordTextField
 import com.example.tasky.auth.presentation.util.UserInfoTextField
 import com.example.tasky.core.presentation.ObserveAsEvents
-import com.example.tasky.destinations.AgendaRootDestination
-import com.example.tasky.destinations.LoginRootDestination
-import com.example.tasky.destinations.SignUpRootDestination
 import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AgendaRootDestination
+import com.ramcosta.composedestinations.generated.destinations.LoginRootDestination
+import com.ramcosta.composedestinations.generated.destinations.SignUpRootDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
-@RootNavGraph(start = true)
-@Destination
+@Destination<RootGraph>(start = true)
 @Composable
 fun LoginRoot(navigator: DestinationsNavigator) {
 
@@ -57,11 +56,13 @@ fun LoginRoot(navigator: DestinationsNavigator) {
 
     ObserveAsEvents(viewModel.navChannel) { destination ->
         when (destination) {
-            LoginAuthAction.NavigateToSignUpScreen -> navigator.navigate(SignUpRootDestination)
+            LoginAuthAction.NavigateToSignUpScreen -> {
+                navigator.navigate(SignUpRootDestination)
+            }
 
             LoginAuthAction.HandleAuthResponseSuccess -> {
                 navigator.navigate(AgendaRootDestination) {
-                    popUpTo(LoginRootDestination.route) {
+                    popUpTo(LoginRootDestination) {
                         inclusive = true
                     }
                 }

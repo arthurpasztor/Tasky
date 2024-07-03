@@ -17,7 +17,19 @@ fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
     val now = LocalDateTime.now()
     if (agendaItem.remindAt.isAfter(now)) {
         val delayInMinutes = Duration.between(now, agendaItem.remindAt).abs().toMinutes()
-        val request = getOneTimeNotificationSchedulerRequest(agendaItem, delayInMinutes)
+
+        val request = OneTimeWorkRequestBuilder<NotificationSchedulerWorker>()
+            .setInputData(
+                workDataOf(
+                    NotificationSchedulerWorker.NOTIFICATION_AGENDA_ITEM_ID to agendaItem.id,
+                    NotificationSchedulerWorker.NOTIFICATION_AGENDA_ITEM_TYPE to agendaItem.getItemType().name,
+                    NotificationSchedulerWorker.NOTIFICATION_TITLE to agendaItem.title,
+                    NotificationSchedulerWorker.NOTIFICATION_DESCRIPTION to agendaItem.description
+                )
+            )
+            .setInitialDelay(delayInMinutes, TimeUnit.MINUTES)
+            .setId(UUID.fromString(agendaItem.id))
+            .build()
 
         enqueueUniqueWork(agendaItem.id, ExistingWorkPolicy.REPLACE, request)
         Log.i(TAG, "Notification with unique name ${agendaItem.id} enqueued")
@@ -35,14 +47,3 @@ fun WorkManager.cancelNotificationScheduler(itemId: String) {
     Log.i(TAG, "Notification with unique name $itemId canceled")
 }
 
-private fun getOneTimeNotificationSchedulerRequest(agendaItem: AgendaListItem, delayInMinutes: Long) =
-    OneTimeWorkRequestBuilder<NotificationSchedulerWorker>()
-        .setInputData(
-            workDataOf(
-                NotificationSchedulerWorker.NOTIFICATION_TITLE to agendaItem.title,
-                NotificationSchedulerWorker.NOTIFICATION_DESCRIPTION to agendaItem.description
-            )
-        )
-        .setInitialDelay(delayInMinutes, TimeUnit.MINUTES)
-        .setId(UUID.fromString(agendaItem.id))
-        .build()

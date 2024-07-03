@@ -730,7 +730,7 @@ data class AgendaDetailsState(
     val description: String = "Description",
     val date: LocalDate = LocalDate.now(),
     val time: LocalTime = LocalTime.now(),
-    val reminderType: ReminderType = ReminderType.MINUTES_30,
+    val reminderType: ReminderType = ReminderType.MINUTES_10,
 
     val agendaItemType: AgendaItemType = AgendaItemType.EVENT,
     val editable: Boolean = true,
