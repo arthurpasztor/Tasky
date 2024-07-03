@@ -26,7 +26,7 @@ class PeriodicFullSyncWorker(
         withContext(Dispatchers.IO) {
             agendaRepo.syncFullAgenda()
                 .onSuccess { agenda ->
-                    showNotificationForFutureAgendaItems(agenda)
+                    scheduleNotificationForFutureAgendaItems(agenda)
 
                     return@withContext Result.success()
                 }
@@ -38,7 +38,7 @@ class PeriodicFullSyncWorker(
         return Result.success()
     }
 
-    private fun showNotificationForFutureAgendaItems(agenda: Agenda) {
+    private fun scheduleNotificationForFutureAgendaItems(agenda: Agenda) {
         val now = LocalDateTime.now()
 
         agenda.items.forEach {

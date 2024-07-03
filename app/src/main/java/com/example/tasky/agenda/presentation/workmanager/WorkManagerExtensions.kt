@@ -27,8 +27,8 @@ fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
 
     val now = LocalDateTime.now()
 
-    val reminderTime = if (isCurrentUserAsAttendeeInEvent(agendaItem)) {
-        getCurrentUsersPersonalReminder(agendaItem)
+    val reminderTime = if (agendaItem.isCurrentUserAsAttendeeInEvent()) {
+        agendaItem.getCurrentUsersPersonalReminder()
     } else {
         agendaItem.remindAt
     }
@@ -54,15 +54,16 @@ fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
     }
 }
 
-private fun isCurrentUserAsAttendeeInEvent(agendaItem: AgendaListItem) =
-    agendaItem is Event && !agendaItem.isUserEventCreator
+private fun AgendaListItem.isCurrentUserAsAttendeeInEvent() = this is Event && !isUserEventCreator
 
-private fun getCurrentUsersPersonalReminder(agendaItem: AgendaListItem): LocalDateTime {
+private fun AgendaListItem.getCurrentUsersPersonalReminder(): LocalDateTime {
+    val event = this as? Event ?: return remindAt
+
     val prefs: Preferences by inject(Preferences::class.java)
     val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
 
-    val currentUserAsAttendee = (agendaItem as Event).attendees.firstOrNull { it.userId == currentUserId }
-    return currentUserAsAttendee?.remindAt ?: agendaItem.remindAt
+    val currentUserAsAttendee = event.attendees.firstOrNull { it.userId == currentUserId }
+    return currentUserAsAttendee?.remindAt ?: event.remindAt
 }
 
 fun WorkManager.cancelNotificationScheduler(itemId: String) {
