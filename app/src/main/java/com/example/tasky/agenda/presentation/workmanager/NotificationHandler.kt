@@ -43,7 +43,7 @@ class NotificationHandlerImpl : NotificationHandler {
             val pendingIntent =
                 PendingIntent.getActivity(
                     context,
-                    UUID.randomUUID().hashCode(),
+                    agendaItemId.hashCode(),
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
