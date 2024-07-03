@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.di
 
 import com.example.tasky.agenda.data.AgendaRepositoryImpl
+import com.example.tasky.agenda.data.AgendaSyncManagerImpl
 import com.example.tasky.agenda.data.AuthRepositoryImpl
 import com.example.tasky.agenda.data.EventRepositoryImpl
 import com.example.tasky.agenda.data.ReminderRepositoryImpl
@@ -15,6 +16,7 @@ import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.agenda.data.db.TaskDataSourceImpl
 import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AgendaRepository
+import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
@@ -48,4 +50,5 @@ val apiModule = module {
     single<AgendaDataSource> { AgendaDataSourceImpl(get()) }
 
     singleOf(::AgendaAlarmSchedulerImpl).bind<AgendaAlarmScheduler>()
+    singleOf(::AgendaSyncManagerImpl).bind<AgendaSyncManager>()
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.AgendaRepository
+import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.ReminderRepository
@@ -33,7 +34,8 @@ class AgendaViewModel(
     private val taskRepo: TaskRepository,
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
-    private val scheduler: AgendaAlarmScheduler
+    private val scheduler: AgendaAlarmScheduler,
+    private val syncManager: AgendaSyncManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
@@ -50,6 +52,8 @@ class AgendaViewModel(
         }
 
         loadDailyAgenda()
+
+        syncManager.startPeriodicAgendaSync()
     }
 
     fun onAction(action: AgendaAction) {

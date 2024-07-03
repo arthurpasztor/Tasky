@@ -22,6 +22,7 @@ class AgendaRepositoryImpl(
 ) : AgendaRepository {
 
     private val agendaUrl = "${BuildConfig.BASE_URL}/agenda"
+    private val fullAgendaUrl = "${BuildConfig.BASE_URL}/fullAgenda"
 
     override suspend fun getDailyAgenda(time: Long): Result<Agenda, DataError> {
         val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
@@ -33,6 +34,28 @@ class AgendaRepositoryImpl(
             Result.Success(it.body())
         }
 
+        return when (result) {
+            is Result.Success -> {
+                val agendaDTO = result.data
+
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceAgendaItems(agendaDTO)
+                }.join()
+
+                Result.Success(agendaDTO.toAgenda())
+            }
+            is Result.Error -> result
+        }
+    }
+
+    override suspend fun syncFullAgenda(): Result<Agenda, DataError> {
+        val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
+            httpMethod = HttpMethod.Get,
+            url = fullAgendaUrl,
+            tag = TAG
+        ) {
+            Result.Success(it.body())
+        }
         return when (result) {
             is Result.Success -> {
                 val agendaDTO = result.data

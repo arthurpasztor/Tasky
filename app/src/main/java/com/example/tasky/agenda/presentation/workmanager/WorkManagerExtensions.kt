@@ -1,8 +1,12 @@
 package com.example.tasky.agenda.presentation.workmanager
 
 import android.util.Log
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.tasky.agenda.domain.model.AgendaListItem
@@ -12,6 +16,9 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "WorkManager"
+
+private const val AGENDA_SYNC_ID = "agendaSyncId"
+private const val AGENDA_SYNC_PERIOD_MINUTES = 30L
 
 fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
     val now = LocalDateTime.now()
@@ -41,3 +48,12 @@ fun WorkManager.cancelNotificationScheduler(itemId: String) {
     Log.i(TAG, "Notification with unique name $itemId canceled")
 }
 
+fun WorkManager.startPeriodicAgendaSync() {
+    val work = PeriodicWorkRequestBuilder<PeriodicFullSyncWorker>(Duration.ofMinutes(AGENDA_SYNC_PERIOD_MINUTES))
+        .setInitialDelay(AGENDA_SYNC_PERIOD_MINUTES, TimeUnit.MINUTES)
+        .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+        .build()
+
+    enqueueUniquePeriodicWork(AGENDA_SYNC_ID, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, work)
+    Log.i(TAG, "Periodic full agenda sync $AGENDA_SYNC_ID enqueued")
+}

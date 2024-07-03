@@ -6,4 +6,6 @@ import com.example.tasky.core.domain.Result
 
 interface AgendaRepository {
     suspend fun getDailyAgenda(time: Long): Result<Agenda, DataError>
+
+    suspend fun syncFullAgenda(): Result<Agenda, DataError>
 }
