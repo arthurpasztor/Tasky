@@ -1,14 +1,3 @@
-import kotlin.Boolean;
-
-CREATE TABLE taskEntity (
-    id TEXT NOT NULL PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    time INTEGER NOT NULL,
-    remindAt INTEGER NOT NULL,
-    isDone INTEGER AS Boolean NOT NULL
-);
-
 getTaskById:
 SELECT *
 FROM taskEntity

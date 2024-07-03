@@ -1,7 +1,7 @@
 package com.example.tasky.agenda.data.db
 
 import com.example.tasky.agenda.data.dto.TaskDTO
-import com.example.tasky.db.TaskEntity
+import com.example.tasky.migrations.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 interface TaskDataSource {
