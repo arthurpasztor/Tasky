@@ -49,6 +49,7 @@ import com.example.tasky.ui.theme.BackgroundBlack
 import com.example.tasky.ui.theme.BackgroundWhite
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.generated.destinations.ImageScreenRootDestination
 import com.ramcosta.composedestinations.generated.destinations.TextEditorRootDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -62,19 +63,27 @@ import java.time.LocalTime
 
 private const val TAG = "TaskDetailScreen"
 
-@Destination<RootGraph>
+const val DEEP_LINK_URL_PATTERN = "tasky://agenda-detail?type={type}&itemId={itemId}"
+
+@Destination<RootGraph>(
+    deepLinks = [
+        DeepLink(uriPattern = DEEP_LINK_URL_PATTERN)
+    ]
+)
 @Composable
 fun AgendaDetailRoot(
     navigator: DestinationsNavigator,
     resultRecipient: ResultRecipient<TextEditorRootDestination, TextEditorResponse>,
     imageResultRecipient: ResultRecipient<ImageScreenRootDestination, String>,
-    type: AgendaItemType,
+    type: String,
     itemId: String? = null,
     editable: Boolean = true
 ) {
 
     val context = LocalContext.current
-    val viewModel: AgendaDetailsViewModel = getViewModel(parameters = { parametersOf(type, itemId, editable) })
+    val viewModel: AgendaDetailsViewModel = getViewModel(parameters = {
+        parametersOf(AgendaItemType.valueOf(type), itemId, editable)
+    })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.navChannel) { destination ->

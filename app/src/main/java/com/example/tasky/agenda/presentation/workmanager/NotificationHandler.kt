@@ -6,11 +6,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import com.example.tasky.MainActivity
 import com.example.tasky.MyApplication
 import com.example.tasky.R
 import java.util.UUID
@@ -37,16 +37,15 @@ class NotificationHandlerImpl : NotificationHandler {
         }
 
         if (isNotificationPermissionGranted) {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                putExtras(bundleOf(AGENDA_ITEM_ID to agendaItemId, AGENDA_ITEM_TYPE to type))
-            }
-            val pendingIntent =
-                PendingIntent.getActivity(
-                    context,
+            val deepLinkUri = context.getString(R.string.deep_link, type, agendaItemId)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLinkUri))
+            val pendingIntent = TaskStackBuilder.create(context).run {
+                addNextIntentWithParentStack(intent)
+                getPendingIntent(
                     agendaItemId.hashCode(),
-                    intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
+            }
 
             val notification = NotificationCompat.Builder(context, MyApplication.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baby_changing_station_24)
@@ -61,6 +60,3 @@ class NotificationHandlerImpl : NotificationHandler {
         }
     }
 }
-
-const val AGENDA_ITEM_ID = "agenda_item_id"
-const val AGENDA_ITEM_TYPE = "agenda_item_type"
