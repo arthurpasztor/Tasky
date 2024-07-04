@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.DeleteAgendaItemDataSource
 import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.agenda.data.dto.TaskDTO
 import com.example.tasky.agenda.data.dto.toTask
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 
 class TaskRepositoryImpl(
     private val client: HttpClient,
-    private val localDataSource: TaskDataSource,
+    private val localTaskDataSource: TaskDataSource,
+    private val localDeleteItemDataSource: DeleteAgendaItemDataSource,
     private val applicationScope: CoroutineScope,
     private val networkMonitor: NetworkConnectivityMonitor
 ) : TaskRepository {
@@ -40,13 +42,13 @@ class TaskRepositoryImpl(
                 tag = TAG
             ) {
                 applicationScope.launch {
-                    localDataSource.insertOrReplaceTask(taskDTO)
+                    localTaskDataSource.insertOrReplaceTask(taskDTO)
                 }
                 Result.Success(Unit)
             }
         } else {
             applicationScope.launch {
-                localDataSource.insertOrReplaceTask(task.toTaskDTO(), OfflineStatus.CREATED)
+                localTaskDataSource.insertOrReplaceTask(task.toTaskDTO(), OfflineStatus.CREATED)
             }.join()
 
             Result.Success(Unit)
@@ -64,35 +66,42 @@ class TaskRepositoryImpl(
                 tag = TAG
             ) {
                 applicationScope.launch {
-                    localDataSource.insertOrReplaceTask(taskDTO)
+                    localTaskDataSource.insertOrReplaceTask(taskDTO)
                 }.join()
                 Result.Success(Unit)
             }
         } else {
             applicationScope.launch {
-                val taskEntity = localDataSource.getTaskById(task.id)
+                val taskEntity = localTaskDataSource.getTaskById(task.id)
                 val appendedOfflineStatus = if (taskEntity.isOfflineCreated()) {
                     OfflineStatus.CREATED
                 } else {
                     OfflineStatus.UPDATED
                 }
-                localDataSource.insertOrReplaceTask(task.toTaskDTO(), appendedOfflineStatus)
+                localTaskDataSource.insertOrReplaceTask(task.toTaskDTO(), appendedOfflineStatus)
             }.join()
 
             Result.Success(Unit)
         }
     }
     override suspend fun deleteTask(taskId: String): EmptyResult<DataError> {
-        //TODO handle offline use case
-        return client.executeRequest<Unit, Unit>(
-            httpMethod = HttpMethod.Delete,
-            url = taskUrl,
-            queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
-            tag = TAG
-        ) {
+        return if (networkMonitor.isNetworkAvailable()) {
+            return client.executeRequest<Unit, Unit>(
+                httpMethod = HttpMethod.Delete,
+                url = taskUrl,
+                queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
+                tag = TAG
+            ) {
+                applicationScope.launch {
+                    localTaskDataSource.deleteTask(taskId)
+                }.join()
+                Result.Success(Unit)
+            }
+        } else {
             applicationScope.launch {
-                localDataSource.deleteTask(taskId)
+                localDeleteItemDataSource.insertOrReplaceTaskId(taskId)
             }.join()
+
             Result.Success(Unit)
         }
     }
@@ -111,7 +120,7 @@ class TaskRepositoryImpl(
             when (result) {
                 is Result.Success -> {
                     applicationScope.launch {
-                        localDataSource.insertOrReplaceTask(result.data)
+                        localTaskDataSource.insertOrReplaceTask(result.data)
                     }.join()
                     Result.Success(result.data.toTask())
                 }
@@ -119,7 +128,7 @@ class TaskRepositoryImpl(
                 is Result.Error -> Result.Error(result.error)
             }
         } else {
-            val taskEntity = localDataSource.getTaskById(taskId)
+            val taskEntity = localTaskDataSource.getTaskById(taskId)
             if (taskEntity != null) {
                 Result.Success(taskEntity.toTask())
             } else {

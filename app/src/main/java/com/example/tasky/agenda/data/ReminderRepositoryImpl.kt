@@ -1,11 +1,11 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.DeleteAgendaItemDataSource
 import com.example.tasky.agenda.data.db.ReminderDataSource
 import com.example.tasky.agenda.data.dto.ReminderDTO
 import com.example.tasky.agenda.data.dto.toReminder
 import com.example.tasky.agenda.data.dto.toReminderDTO
-import com.example.tasky.agenda.data.dto.toTaskDTO
 import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem
@@ -23,7 +23,8 @@ import kotlinx.coroutines.launch
 
 class ReminderRepositoryImpl(
     private val client: HttpClient,
-    private val localDataSource: ReminderDataSource,
+    private val localReminderDataSource: ReminderDataSource,
+    private val localDeleteItemDataSource: DeleteAgendaItemDataSource,
     private val applicationScope: CoroutineScope,
     private val networkMonitor: NetworkConnectivityMonitor
 ) : ReminderRepository {
@@ -41,13 +42,13 @@ class ReminderRepositoryImpl(
                 tag = TAG
             ) {
                 applicationScope.launch {
-                    localDataSource.insertOrReplaceReminder(reminderDTO)
+                    localReminderDataSource.insertOrReplaceReminder(reminderDTO)
                 }.join()
                 Result.Success(Unit)
             }
         } else {
             applicationScope.launch {
-                localDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), OfflineStatus.CREATED)
+                localReminderDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), OfflineStatus.CREATED)
             }.join()
 
             Result.Success(Unit)
@@ -65,35 +66,42 @@ class ReminderRepositoryImpl(
                 tag = TAG
             ) {
                 applicationScope.launch {
-                    localDataSource.insertOrReplaceReminder(reminderDTO)
+                    localReminderDataSource.insertOrReplaceReminder(reminderDTO)
                 }.join()
                 Result.Success(Unit)
             }
         } else {
             applicationScope.launch {
-                val reminderEntity = localDataSource.getReminderById(reminder.id)
+                val reminderEntity = localReminderDataSource.getReminderById(reminder.id)
                 val appendedOfflineStatus = if (reminderEntity.isOfflineCreated()) {
                     OfflineStatus.CREATED
                 } else {
                     OfflineStatus.UPDATED
                 }
-                localDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), appendedOfflineStatus)
+                localReminderDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), appendedOfflineStatus)
             }.join()
 
             Result.Success(Unit)
         }
     }
     override suspend fun deleteReminder(reminderId: String): EmptyResult<DataError> {
-        //TODO handle offline use case
-        return client.executeRequest<Unit, Unit>(
-            httpMethod = HttpMethod.Delete,
-            url = reminderUrl,
-            queryParams = Pair(QUERY_PARAM_KEY_ID, reminderId),
-            tag = TAG
-        ) {
-            applicationScope.launch {
-                localDataSource.deleteReminder(reminderId)
+        return if (networkMonitor.isNetworkAvailable()) {
+            return client.executeRequest<Unit, Unit>(
+                httpMethod = HttpMethod.Delete,
+                url = reminderUrl,
+                queryParams = Pair(QUERY_PARAM_KEY_ID, reminderId),
+                tag = TAG
+            ) {
+                applicationScope.launch {
+                    localReminderDataSource.deleteReminder(reminderId)
+                }
+                Result.Success(Unit)
             }
+        } else {
+            applicationScope.launch {
+                localDeleteItemDataSource.insertOrReplaceReminderId(reminderId)
+            }.join()
+
             Result.Success(Unit)
         }
     }
@@ -112,7 +120,7 @@ class ReminderRepositoryImpl(
             when (result) {
                 is Result.Success -> {
                     applicationScope.launch {
-                        localDataSource.insertOrReplaceReminder(result.data)
+                        localReminderDataSource.insertOrReplaceReminder(result.data)
                     }.join()
                     Result.Success(result.data.toReminder())
                 }
@@ -120,7 +128,7 @@ class ReminderRepositoryImpl(
                 is Result.Error -> Result.Error(result.error)
             }
         } else {
-            val reminderEntity = localDataSource.getReminderById(reminderId)
+            val reminderEntity = localReminderDataSource.getReminderById(reminderId)
             if (reminderEntity != null) {
                 Result.Success(reminderEntity.toReminder())
             } else {

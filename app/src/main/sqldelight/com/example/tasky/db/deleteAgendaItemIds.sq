@@ -1,0 +1,26 @@
+insertOrReplaceEventId:
+INSERT OR REPLACE
+INTO deletedEventIdEntity
+VALUES (?);
+
+getAllDeletedEventIds:
+SELECT *
+FROM deletedEventIdEntity;
+
+insertOrReplaceTaskId:
+INSERT OR REPLACE
+INTO deletedTaskIdEntity
+VALUES (?);
+
+getAllDeletedTaskIds:
+SELECT *
+FROM deletedTaskIdEntity;
+
+insertOrReplaceReminderId:
+INSERT OR REPLACE
+INTO deleteReminderIdEntity
+VALUES (?);
+
+getAllDeletedReminderIds:
+SELECT *
+FROM deleteReminderIdEntity;
