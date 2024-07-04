@@ -15,7 +15,7 @@ FROM taskEntity;
 insertOrReplaceTask:
 INSERT OR REPLACE
 INTO taskEntity
-VALUES (?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteTaskById:
 DELETE FROM taskEntity

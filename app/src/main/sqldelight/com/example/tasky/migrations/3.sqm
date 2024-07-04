@@ -1,3 +1,4 @@
+import com.example.tasky.agenda.domain.model.OfflineStatus;
 import kotlin.Boolean;
 
 CREATE TABLE taskEntity (
@@ -7,6 +8,7 @@ CREATE TABLE taskEntity (
     time INTEGER NOT NULL,
     remindAt INTEGER NOT NULL,
     isDone INTEGER AS Boolean NOT NULL,
-    timeDayFormatted TEXT NOT NULL
+    timeDayFormatted TEXT NOT NULL,
+    offlineStatus TEXT AS OfflineStatus
 );
 

@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.TaskDTO
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
+import com.example.tasky.agenda.domain.model.OfflineStatus
 import com.example.tasky.db.TaskyDatabase
 import com.example.tasky.migrations.TaskEntity
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceTask(task: TaskDTO) {
+    override suspend fun insertOrReplaceTask(task: TaskDTO, offlineStatus: OfflineStatus?) {
         withContext(Dispatchers.IO) {
             queries.insertOrReplaceTask(
                 task.id,
@@ -35,7 +36,8 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
                 task.time,
                 task.remindAt,
                 task.isDone,
-                task.time.getFormattedLocalDateFromMillis()
+                task.time.getFormattedLocalDateFromMillis(),
+                offlineStatus
             )
         }
     }

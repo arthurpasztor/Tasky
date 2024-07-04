@@ -1,8 +1,11 @@
+import com.example.tasky.agenda.domain.model.OfflineStatus;
+
 CREATE TABLE IF NOT EXISTS reminderEntity (
     id TEXT NOT NULL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     time INTEGER NOT NULL,
     remindAt INTEGER NOT NULL,
-    timeDayFormatted TEXT NOT NULL
+    timeDayFormatted TEXT NOT NULL,
+    offlineStatus TEXT AS OfflineStatus
 );

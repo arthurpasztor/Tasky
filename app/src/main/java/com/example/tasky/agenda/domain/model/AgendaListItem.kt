@@ -12,6 +12,7 @@ sealed class AgendaListItem {
     open val description: String = ""
     open val time: LocalDateTime = LocalDateTime.now()
     open val remindAt: LocalDateTime = LocalDateTime.now()
+    open val offlineStatus: OfflineStatus? = null
 
     open fun getFormattedTime() : String = time.formatAgendaDateTime()
 
@@ -32,6 +33,7 @@ sealed class AgendaListItem {
         override val time: LocalDateTime,
         val to: LocalDateTime,
         override val remindAt: LocalDateTime,
+        override val offlineStatus: OfflineStatus? = null,
         val host: String,
         val isUserEventCreator: Boolean,
         val attendees: List<Attendee>,
@@ -49,6 +51,7 @@ sealed class AgendaListItem {
                 time = LocalDateTime.now(),
                 to = LocalDateTime.now(),
                 remindAt = LocalDateTime.now().minusMinutes(30),
+                offlineStatus = null,
                 host = UUID.randomUUID().toString(),
                 isUserEventCreator = true,
                 attendees = listOf(
@@ -68,6 +71,7 @@ sealed class AgendaListItem {
         override val description: String,
         override val time: LocalDateTime,
         override val remindAt: LocalDateTime,
+        override val offlineStatus: OfflineStatus? = null,
         val isDone: Boolean
     ): AgendaListItem() {
 
@@ -78,7 +82,8 @@ sealed class AgendaListItem {
                 description = "This is a sample task",
                 time = LocalDateTime.now(),
                 remindAt = LocalDateTime.now().minusMinutes(30),
-                isDone = true
+                isDone = true,
+                offlineStatus = null
             )
         }
     }
@@ -88,7 +93,8 @@ sealed class AgendaListItem {
         override val title: String,
         override val description: String,
         override val time: LocalDateTime,
-        override val remindAt: LocalDateTime
+        override val remindAt: LocalDateTime,
+        override val offlineStatus: OfflineStatus? = null
     ): AgendaListItem() {
 
         companion object {
@@ -97,7 +103,8 @@ sealed class AgendaListItem {
                 title = "Sample Reminder",
                 description = "This is a sample reminder",
                 time = LocalDateTime.now(),
-                remindAt = LocalDateTime.now().minusMinutes(30)
+                remindAt = LocalDateTime.now().minusMinutes(30),
+                offlineStatus = null
             )
         }
     }

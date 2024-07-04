@@ -56,7 +56,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.isUserEventCreator,
                         it.attendees,
                         it.photos,
-                        it.from.getFormattedLocalDateFromMillis()
+                        it.from.getFormattedLocalDateFromMillis(),
+                        null
                     )
                 }
                 agenda.tasks.forEach {
@@ -67,7 +68,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.time,
                         it.remindAt,
                         it.isDone,
-                        it.time.getFormattedLocalDateFromMillis()
+                        it.time.getFormattedLocalDateFromMillis(),
+                        null
                     )
                 }
                 agenda.reminders.forEach {
@@ -77,7 +79,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.description,
                         it.time,
                         it.remindAt,
-                        it.time.getFormattedLocalDateFromMillis()
+                        it.time.getFormattedLocalDateFromMillis(),
+                        null
                     )
                 }
             }

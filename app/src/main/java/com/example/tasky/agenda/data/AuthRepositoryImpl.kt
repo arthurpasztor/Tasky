@@ -47,6 +47,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout(): EmptyResult<DataError> {
+        //TODO handle offline use case
         client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
 
         return client.executeRequest<Unit, Unit>(

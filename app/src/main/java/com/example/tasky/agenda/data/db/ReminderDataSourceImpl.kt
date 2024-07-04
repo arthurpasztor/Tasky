@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.ReminderDTO
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
+import com.example.tasky.agenda.domain.model.OfflineStatus
 import com.example.tasky.migrations.ReminderEntity
 import com.example.tasky.db.TaskyDatabase
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceReminder(reminder: ReminderDTO) {
+    override suspend fun insertOrReplaceReminder(reminder: ReminderDTO, offlineStatus: OfflineStatus?) {
         withContext(Dispatchers.IO) {
             queries.insertOrReplaceReminder(
                 reminder.id,
@@ -34,7 +35,8 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
                 reminder.description,
                 reminder.time,
                 reminder.remindAt,
-                reminder.time.getFormattedLocalDateFromMillis()
+                reminder.time.getFormattedLocalDateFromMillis(),
+                offlineStatus
             )
         }
     }
