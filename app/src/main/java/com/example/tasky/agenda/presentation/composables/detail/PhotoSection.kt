@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.AgendaDetailsState
 import com.example.tasky.agenda.presentation.AgendaItemDetails
@@ -48,6 +49,7 @@ private fun PhotoSectionPreview() {
                 newPhotos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
             )
         ),
+        networkState = NetworkConnectivityMonitor.NetworkState.Available,
         onOpenGallery = {},
         onOpenFullScreenImage = {}
     )
@@ -56,6 +58,7 @@ private fun PhotoSectionPreview() {
 @Composable
 fun PhotoSection(
     state: AgendaDetailsState,
+    networkState: NetworkConnectivityMonitor.NetworkState,
     onOpenGallery: () -> Unit,
     onOpenFullScreenImage: (photo: Photo) -> Unit,
 ) {
@@ -98,7 +101,7 @@ fun PhotoSection(
                 }
             }
 
-            if (state.allPhotos.size < MAX_NUMBER_OF_PHOTOS) {
+            if (networkState.isAvailable() && state.allPhotos.size < MAX_NUMBER_OF_PHOTOS) {
                 item {
                     Box(modifier = Modifier
                         .size(70.dp)
