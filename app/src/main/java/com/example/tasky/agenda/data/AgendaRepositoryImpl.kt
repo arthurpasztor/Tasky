@@ -54,9 +54,9 @@ class AgendaRepositoryImpl(
             }
         } else {
             val todayFormatted = LocalDate.now().formatDetailDate()
-            val agenda = localDataSource.getAllAgendaItemsByDay(todayFormatted)
+            val agendaItemsList = localDataSource.getAllAgendaItemsByDay(todayFormatted)
 
-            Result.Success(agenda)
+            Result.Success(Agenda(agendaItemsList))
         }
     }
 
