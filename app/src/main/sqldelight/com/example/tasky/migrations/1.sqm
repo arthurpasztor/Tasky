@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS reminderEntity (
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     time INTEGER NOT NULL,
-    remindAt INTEGER NOT NULL
+    remindAt INTEGER NOT NULL,
+    timeDayFormatted TEXT NOT NULL
 );

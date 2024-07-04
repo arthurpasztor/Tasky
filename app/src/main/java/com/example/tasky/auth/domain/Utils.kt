@@ -46,6 +46,7 @@ fun DataError.asUiText(): UiText {
         HttpError.UNKNOWN -> UiText.StringResource(R.string.error_unknown)
         LocalError.DISK_FULL -> UiText.StringResource(R.string.error_disk_full)
         LocalError.NOT_FOUND -> UiText.StringResource(R.string.error_not_found)
+        LocalError.USER_IS_LOGGED_OUT -> UiText.StringResource(R.string.error_user_is_logged_out)
     }
 }
 

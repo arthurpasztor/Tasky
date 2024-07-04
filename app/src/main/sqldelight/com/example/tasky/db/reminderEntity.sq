@@ -3,6 +3,11 @@ SELECT *
 FROM reminderEntity
 WHERE id = :id;
 
+getAllRemindersForToday:
+SELECT *
+FROM reminderEntity
+WHERE timeDayFormatted = :dayFormatted;
+
 getAllReminders:
 SELECT *
 FROM reminderEntity;
@@ -10,7 +15,7 @@ FROM reminderEntity;
 insertOrReplaceReminder:
 INSERT OR REPLACE
 INTO reminderEntity
-VALUES (?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?);
 
 deleteReminderById:
 DELETE FROM reminderEntity

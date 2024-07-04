@@ -13,5 +13,6 @@ CREATE TABLE IF NOT EXISTS eventEntity (
     host TEXT NOT NULL,
     isUserEventCreator INTEGER AS Boolean NOT NULL,
     attendees TEXT AS List<AttendeeDTO> NOT NULL,
-    photos TEXT AS List<PhotoDTO> NOT NULL
+    photos TEXT AS List<PhotoDTO> NOT NULL,
+    startDateDayFormatted TEXT NOT NULL
 );

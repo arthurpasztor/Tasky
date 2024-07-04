@@ -23,6 +23,10 @@ class Preferences(context: Context) {
             )
         }
 
+    fun containsEncrypted(key: String): Boolean {
+        return encryptedPreferences.contains(key)
+    }
+
     fun getString(key: String, default: String): String {
         return preferences.getString(key, default) ?: return default
     }

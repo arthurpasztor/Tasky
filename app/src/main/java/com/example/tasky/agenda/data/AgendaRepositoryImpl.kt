@@ -8,43 +8,55 @@ import com.example.tasky.agenda.data.dto.AgendaDTO
 import com.example.tasky.agenda.data.dto.toAgenda
 import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
+import com.example.tasky.agenda.domain.formatDetailDate
 import com.example.tasky.core.domain.DataError
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class AgendaRepositoryImpl(
     private val client: HttpClient,
     private val localDataSource: AgendaDataSource,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val networkMonitor: NetworkConnectivityMonitor,
 ) : AgendaRepository {
 
     private val agendaUrl = "${BuildConfig.BASE_URL}/agenda"
     private val fullAgendaUrl = "${BuildConfig.BASE_URL}/fullAgenda"
 
     override suspend fun getDailyAgenda(time: Long): Result<Agenda, DataError> {
-        val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
-            httpMethod = HttpMethod.Get,
-            url = agendaUrl,
-            queryParams = Pair(QUERY_PARAM_KEY_TIME, time),
-            tag = TAG
-        ) {
-            Result.Success(it.body())
-        }
-
-        return when (result) {
-            is Result.Success -> {
-                val agendaDTO = result.data
-
-                applicationScope.launch {
-                    localDataSource.insertOrReplaceAgendaItems(agendaDTO)
-                }.join()
-
-                Result.Success(agendaDTO.toAgenda())
+        return if (networkMonitor.isNetworkAvailable()) {
+            val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
+                httpMethod = HttpMethod.Get,
+                url = agendaUrl,
+                queryParams = Pair(QUERY_PARAM_KEY_TIME, time),
+                tag = TAG
+            ) {
+                Result.Success(it.body())
             }
-            is Result.Error -> result
+
+            return when (result) {
+                is Result.Success -> {
+                    val agendaDTO = result.data
+
+                    applicationScope.launch {
+                        localDataSource.insertOrReplaceAgendaItems(agendaDTO)
+                    }.join()
+
+                    Result.Success(agendaDTO.toAgenda())
+                }
+
+                is Result.Error -> result
+            }
+        } else {
+            val todayFormatted = LocalDate.now().formatDetailDate()
+            val agenda = localDataSource.getAllAgendaItemsByDay(todayFormatted)
+
+            Result.Success(agenda)
         }
     }
 

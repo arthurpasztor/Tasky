@@ -34,6 +34,7 @@
 
     <string name="error_disk_full">Disk is full</string>
     <string name="error_not_found">Not found</string>
+    <string name="error_user_is_logged_out">User is logged out</string>
 
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
