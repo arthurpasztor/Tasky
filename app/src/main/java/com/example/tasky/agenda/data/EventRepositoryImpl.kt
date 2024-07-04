@@ -6,6 +6,7 @@ import com.example.tasky.agenda.data.dto.EventCreateDTO
 import com.example.tasky.agenda.data.dto.EventDTO
 import com.example.tasky.agenda.data.dto.EventUpdateDTO
 import com.example.tasky.agenda.data.dto.NewAttendeeDTO
+import com.example.tasky.agenda.data.dto.PhotoDTO
 import com.example.tasky.agenda.data.dto.toAttendee
 import com.example.tasky.agenda.data.dto.toEvent
 import com.example.tasky.agenda.data.dto.toEventCreateDTO
@@ -107,11 +108,18 @@ class EventRepositoryImpl(
                         OfflineStatus.UPDATED
                     }
 
+                    val photosUpdated = mutableListOf<PhotoDTO>().apply {
+                        addAll(eventEntity.photos)
+                        eventUpdate.deletedPhotoKeys.forEach { deletedPhotoKey ->
+                            removeIf { it.key == deletedPhotoKey }
+                        }
+                    }
+
                     // create EventDTO with missing info from the DB
                     eventDTO = eventUpdate.toEventDTO(
                         eventEntity.host,
                         eventEntity.isUserEventCreator,
-                        eventEntity.photos
+                        photosUpdated
                     )
 
                     // append the newly deleted photo IDs to the already existing ones
