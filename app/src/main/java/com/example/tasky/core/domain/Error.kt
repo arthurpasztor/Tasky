@@ -18,6 +18,7 @@ sealed interface DataError : Error {
     enum class LocalError : DataError {
         USER_IS_LOGGED_OUT,
         DISK_FULL,
-        NOT_FOUND
+        NOT_FOUND,
+        CANNOT_FETCH_USERS
     }
 }

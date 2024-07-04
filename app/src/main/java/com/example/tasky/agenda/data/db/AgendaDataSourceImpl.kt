@@ -57,6 +57,7 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.attendees,
                         it.photos,
                         it.from.getFormattedLocalDateFromMillis(),
+                        emptyList(),
                         null
                     )
                 }

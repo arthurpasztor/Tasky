@@ -126,6 +126,23 @@ fun EventUpdate.toEventUpdateDTO() = EventUpdateDTO(
     isGoing = isGoing,
 )
 
+fun EventUpdate.toEventDTO(
+    host: String,
+    isUserCreator: Boolean,
+    photos: List<PhotoDTO>
+) = EventDTO(
+    id = id,
+    title = title,
+    description = description,
+    from = from.getMillis(),
+    to = to.getMillis(),
+    remindAt = remindAt.getMillis(),
+    host = host,
+    isUserEventCreator = isUserCreator,
+    attendees = attendees.map { it.toAttendeeDTO() },
+    photos = photos
+)
+
 fun EventEntity.toEvent() = Event(
     id = id,
     title = title,

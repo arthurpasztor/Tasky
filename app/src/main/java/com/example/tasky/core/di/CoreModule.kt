@@ -37,6 +37,7 @@ val coreModule = module {
         EventEntity.Adapter(
             attendeesAdapter = getListOfItemAdapter(),
             photosAdapter = getListOfItemAdapter(),
+            deletedPhotoKeysAdapter = getListOfItemAdapter(),
             offlineStatusAdapter = getOfflineStatusAdapter()
         )
     }

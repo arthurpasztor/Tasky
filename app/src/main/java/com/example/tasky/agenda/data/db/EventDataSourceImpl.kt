@@ -27,7 +27,11 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceEvent(event: EventDTO, offlineStatus: OfflineStatus?) {
+    override suspend fun insertOrReplaceEvent(
+        event: EventDTO,
+        deletedPhotoKeys: List<String>,
+        offlineStatus: OfflineStatus?
+    ) {
         withContext(Dispatchers.IO) {
             queries.insertOrReplaceEvent(
                 event.id,
@@ -41,6 +45,7 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
                 event.attendees,
                 event.photos,
                 event.from.getFormattedLocalDateFromMillis(),
+                deletedPhotoKeys,
                 offlineStatus
             )
         }
