@@ -5,22 +5,21 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import com.example.tasky.agenda.domain.getMillis
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.presentation.alarmmanager.AlarmReceiver.Companion.ALARM_MGR_AGENDA_ITEM_ID
 import com.example.tasky.agenda.presentation.alarmmanager.AlarmReceiver.Companion.ALARM_MGR_AGENDA_ITEM_TYPE
 import com.example.tasky.agenda.presentation.alarmmanager.AlarmReceiver.Companion.ALARM_MGR_DESCRIPTION
 import com.example.tasky.agenda.presentation.alarmmanager.AlarmReceiver.Companion.ALARM_MGR_TITLE
-import com.example.tasky.core.data.Preferences
-import java.time.Duration
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 private const val TAG = "AlarmManager"
 
 @SuppressLint("MissingPermission")
-fun AlarmManager.scheduleNotification(context: Context, prefs: Preferences, agendaItem: AgendaListItem) {
+fun AlarmManager.scheduleNotification(context: Context, agendaItem: AgendaListItem) {
 
     val now = LocalDateTime.now()
 
@@ -30,7 +29,12 @@ fun AlarmManager.scheduleNotification(context: Context, prefs: Preferences, agen
         agendaItem.remindAt
     }
 
-    if (reminderTime.isAfter(now)) {
+    val canScheduleExactAlarms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        canScheduleExactAlarms()
+    } else {
+        true
+    }
+    if (reminderTime.isAfter(now) && canScheduleExactAlarms) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra(ALARM_MGR_AGENDA_ITEM_ID, agendaItem.id)
             putExtra(ALARM_MGR_AGENDA_ITEM_TYPE, agendaItem.getItemType().name)
@@ -48,13 +52,13 @@ fun AlarmManager.scheduleNotification(context: Context, prefs: Preferences, agen
             )
         )
 
-        prefs.putScheduledAgendaItemId(agendaItem.id)
+        Toast.makeText(context, "Notification ${agendaItem.title} scheduled", Toast.LENGTH_SHORT).show()
 
-        Log.i(TAG, "Notification with unique name ${agendaItem.id} scheduled with AlarmManager")
+        Log.i(TAG, "Notification with unique name ${agendaItem.title} scheduled with AlarmManager")
     }
 }
 
-fun AlarmManager.cancelNotificationScheduler(context: Context, prefs: Preferences, agendaItemId: String) {
+fun AlarmManager.cancelNotificationScheduler(context: Context, agendaItemId: String) {
     cancel(
         PendingIntent.getBroadcast(
             context,
@@ -63,15 +67,7 @@ fun AlarmManager.cancelNotificationScheduler(context: Context, prefs: Preference
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     )
-
-    prefs.removeScheduledAgendaItemId(agendaItemId)
     Log.i(TAG, "Notification with unique name $agendaItemId canceled with AlarmManager")
 }
 
-fun AlarmManager.cancelAllNotificationSchedulers(context: Context, prefs: Preferences) {
-    prefs.getScheduledAgendaItemIds().forEach {
-        cancelNotificationScheduler(context, prefs, it)
-    }
-    Log.i(TAG, "All notifications canceled with AlarmManager")
-}
 

@@ -17,7 +17,7 @@ import org.koin.java.KoinJavaComponent.inject
 import java.time.LocalDateTime
 
 class PeriodicFullSyncWorker(
-    private val context: Context,
+    context: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(context, params), NotificationHandler by NotificationHandlerImpl() {
 

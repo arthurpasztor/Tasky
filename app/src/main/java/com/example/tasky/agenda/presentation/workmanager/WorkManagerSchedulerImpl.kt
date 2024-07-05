@@ -9,6 +9,10 @@ class WorkManagerSchedulerImpl(private val workManager: WorkManager): AgendaAlar
         workManager.scheduleNotification(agendaItem)
     }
 
+    override fun scheduleAllNotificationsAfterReboot() {
+        // not relevant for work manager
+    }
+
     override fun cancelNotificationScheduler(agendaItemId: String) {
         workManager.cancelNotificationScheduler(agendaItemId)
     }

@@ -37,7 +37,7 @@ class AgendaViewModel(
     private val prefs: Preferences,
     private val scheduler: AgendaAlarmScheduler,
     syncManager: AgendaSyncManager,
-    private val networkMonitor: NetworkConnectivityMonitor,
+    networkMonitor: NetworkConnectivityMonitor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
@@ -250,7 +250,6 @@ class AgendaViewModel(
         viewModelScope.launch {
             authRepo.logout()
                 .onSuccess {
-                    scheduler.cancelAllNotificationSchedulers()
                     _navChannel.send(AgendaResponseAction.HandleLogoutResponseSuccess)
                 }
                 .onError {
@@ -278,9 +277,9 @@ class AgendaViewModel(
     }
 
     private fun clearUserData() {
-        prefs.removeAll()
-        prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN)
-        prefs.removeEncrypted(Preferences.KEY_REFRESH_TOKEN)
+        viewModelScope.launch {
+            authRepo.clearAllData()
+        }
     }
 }
 

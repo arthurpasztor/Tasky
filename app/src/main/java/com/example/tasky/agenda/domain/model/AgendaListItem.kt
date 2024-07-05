@@ -39,7 +39,6 @@ sealed class AgendaListItem {
         return currentUserAsAttendee?.remindAt ?: event.remindAt
     }
 
-
     data class Event(
         override val id: String,
         override val title: String,
