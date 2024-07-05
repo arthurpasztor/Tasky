@@ -58,7 +58,7 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
 
     override suspend fun deleteAllTasks() {
         withContext(Dispatchers.IO) {
-            queries.deleteAll()
+            queries.deleteAll(null)
         }
     }
 }

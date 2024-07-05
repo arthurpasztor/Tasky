@@ -30,12 +30,17 @@ class AuthRepositoryImpl(
 
     override suspend fun authenticate(): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Get,
                 url = tokenCheckUrl,
                 tag = TAG
             ) {
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> Result.Success(Unit)
+                is Result.Error -> result
             }
         } else {
             if (prefs.containsEncrypted(Preferences.KEY_ACCESS_TOKEN)) {

@@ -60,7 +60,7 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
 
     override suspend fun deleteAllReminders() {
         withContext(Dispatchers.IO) {
-            queries.deleteAll()
+            queries.deleteAll(null)
         }
     }
 }
