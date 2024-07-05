@@ -1,6 +1,7 @@
 package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.db.DeleteAgendaItemDataSource
 import com.example.tasky.agenda.data.db.EventDataSource
 import com.example.tasky.agenda.data.dto.EventCreateDTO
 import com.example.tasky.agenda.data.dto.EventDTO
@@ -35,7 +36,8 @@ private const val UPDATE_EVENT_MULTIPART_JSON_KEY = "update_event_request"
 
 class EventRepositoryImpl(
     private val client: HttpClient,
-    private val localDataSource: EventDataSource,
+    private val localEventDataSource: EventDataSource,
+    private val localDeleteItemDataSource: DeleteAgendaItemDataSource,
     private val applicationScope: CoroutineScope,
     private val networkMonitor: NetworkConnectivityMonitor
 ) : EventRepository {
@@ -59,7 +61,7 @@ class EventRepositoryImpl(
             when (result) {
                 is Result.Success -> {
                     applicationScope.launch {
-                        localDataSource.insertOrReplaceEvent(result.data)
+                        localEventDataSource.insertOrReplaceEvent(result.data)
                     }.join()
                     Result.Success(result.data.toEvent())
                 }
@@ -68,7 +70,7 @@ class EventRepositoryImpl(
             }
         } else {
             applicationScope.launch {
-                localDataSource.insertOrReplaceEvent(event = event.toEventDTO(), offlineStatus = OfflineStatus.CREATED)
+                localEventDataSource.insertOrReplaceEvent(event = event.toEventDTO(), offlineStatus = OfflineStatus.CREATED)
             }.join()
 
             Result.Success(event)
@@ -91,7 +93,7 @@ class EventRepositoryImpl(
             when (result) {
                 is Result.Success -> {
                     applicationScope.launch {
-                        localDataSource.insertOrReplaceEvent(result.data)
+                        localEventDataSource.insertOrReplaceEvent(result.data)
                     }.join()
                     Result.Success(result.data.toEvent())
                 }
@@ -101,7 +103,7 @@ class EventRepositoryImpl(
         } else {
             var eventDTO: EventDTO? = null
             applicationScope.launch {
-                localDataSource.getEventById(eventUpdate.id)?.let { eventEntity ->
+                localEventDataSource.getEventById(eventUpdate.id)?.let { eventEntity ->
                     val appendedOfflineStatus = if (eventEntity.isOfflineCreated()) {
                         OfflineStatus.CREATED
                     } else {
@@ -128,7 +130,7 @@ class EventRepositoryImpl(
                         addAll(eventUpdate.deletedPhotoKeys)
                     }
 
-                    localDataSource.insertOrReplaceEvent(
+                    localEventDataSource.insertOrReplaceEvent(
                         event = eventDTO!!,
                         deletedPhotoKeys = combinedDeletedPhotoKeys,
                         offlineStatus = appendedOfflineStatus
@@ -144,16 +146,23 @@ class EventRepositoryImpl(
     }
 
     override suspend fun deleteEvent(eventId: String): EmptyResult<DataError> {
-        //TODO handle offline use case
-        return client.executeRequest<Unit, Unit>(
-            httpMethod = HttpMethod.Delete,
-            url = eventUrl,
-            queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
-            tag = TAG
-        ) {
+        return if (networkMonitor.isNetworkAvailable()) {
+            return client.executeRequest<Unit, Unit>(
+                httpMethod = HttpMethod.Delete,
+                url = eventUrl,
+                queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
+                tag = TAG
+            ) {
+                applicationScope.launch {
+                    localEventDataSource.deleteEvent(eventId)
+                }.join()
+                Result.Success(Unit)
+            }
+        } else {
             applicationScope.launch {
-                localDataSource.deleteEvent(eventId)
+                localDeleteItemDataSource.insertOrReplaceEventId(eventId)
             }.join()
+
             Result.Success(Unit)
         }
     }
@@ -172,7 +181,7 @@ class EventRepositoryImpl(
             when (result) {
                 is Result.Success -> {
                     applicationScope.launch {
-                        localDataSource.insertOrReplaceEvent(result.data)
+                        localEventDataSource.insertOrReplaceEvent(result.data)
                     }.join()
                     Result.Success(result.data.toEvent())
                 }
@@ -180,7 +189,7 @@ class EventRepositoryImpl(
                 is Result.Error -> result
             }
         } else {
-            val eventEntity = localDataSource.getEventById(eventId)
+            val eventEntity = localEventDataSource.getEventById(eventId)
             if (eventEntity != null) {
                 Result.Success(eventEntity.toEvent())
             } else {

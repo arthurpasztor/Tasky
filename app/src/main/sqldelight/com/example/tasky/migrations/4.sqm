@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS deletedEventIdEntity (
+    deletedEventId TEXT NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS deletedTaskIdEntity (
+    deletedTaskId TEXT NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS deleteReminderIdEntity (
+    deleteReminderId TEXT NOT NULL PRIMARY KEY
+);

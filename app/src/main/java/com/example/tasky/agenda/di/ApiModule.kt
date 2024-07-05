@@ -9,6 +9,8 @@ import com.example.tasky.agenda.data.ReminderRepositoryImpl
 import com.example.tasky.agenda.data.TaskRepositoryImpl
 import com.example.tasky.agenda.data.db.AgendaDataSource
 import com.example.tasky.agenda.data.db.AgendaDataSourceImpl
+import com.example.tasky.agenda.data.db.DeleteAgendaItemDataSource
+import com.example.tasky.agenda.data.db.DeleteAgendaItemDataSourceImpl
 import com.example.tasky.agenda.data.db.EventDataSource
 import com.example.tasky.agenda.data.db.EventDataSourceImpl
 import com.example.tasky.agenda.data.db.ReminderDataSource
@@ -50,6 +52,7 @@ val apiModule = module {
     single<TaskDataSource> { TaskDataSourceImpl(get()) }
     single<ReminderDataSource> { ReminderDataSourceImpl(get()) }
     single<AgendaDataSource> { AgendaDataSourceImpl(get()) }
+    single<DeleteAgendaItemDataSource> { DeleteAgendaItemDataSourceImpl(get()) }
 
     singleOf(::AgendaAlarmSchedulerImpl).bind<AgendaAlarmScheduler>()
     singleOf(::AgendaSyncManagerImpl).bind<AgendaSyncManager>()
