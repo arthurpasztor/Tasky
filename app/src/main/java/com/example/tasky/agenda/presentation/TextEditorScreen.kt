@@ -2,12 +2,12 @@ package com.example.tasky.agenda.presentation
 
 import android.os.Parcelable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -102,15 +102,15 @@ private fun TextEditorScreen(
                 color = Color.Black
             )
             Spacer(Modifier.weight(1f))
-            ClickableText(
+            Text(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .padding(end = headerPadding),
+                    .padding(end = headerPadding)
+                    .clickable {
+                        onSave.invoke(mutableText)
+                    },
                 text = AnnotatedString(stringResource(id = R.string.save)),
-                style = greenSaveButtonStyle,
-                onClick = {
-                    onSave.invoke(mutableText)
-                }
+                style = greenSaveButtonStyle
             )
         }
 

@@ -1,11 +1,11 @@
 package com.example.tasky.agenda.presentation.composables.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -73,24 +73,26 @@ fun DateTimeSection(
             maxLines = 1
         )
         Spacer(Modifier.weight(1f))
-        ClickableText(
-            modifier = Modifier.align(Alignment.CenterVertically),
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clickable {
+                    timeDialogState.show()
+                },
             text = AnnotatedString(initialTime.formatDetailTime()),
             style = detailDescriptionStyle,
-            maxLines = 1,
-            onClick = {
-                timeDialogState.show()
-            }
+            maxLines = 1
         )
         Spacer(Modifier.weight(1f))
-        ClickableText(
-            modifier = Modifier.align(Alignment.CenterVertically),
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clickable {
+                    dateDialogState.show()
+                },
             text = AnnotatedString(initialDate.formatDetailDate()),
             style = detailDescriptionStyle,
-            maxLines = 1,
-            onClick = {
-                dateDialogState.show()
-            }
+            maxLines = 1
         )
         Spacer(Modifier.weight(1f))
     }
