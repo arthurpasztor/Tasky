@@ -35,6 +35,8 @@
     <string name="error_disk_full">Disk is full</string>
     <string name="error_not_found">Not found</string>
     <string name="error_user_is_logged_out">User is logged out</string>
+    <string name="error_cannot_fetch_users">Cannot fetch users in offline mode</string>
+    <string name="error_cannot_offline_update_event_as_attendee">You cannot offline update an event as an ettendee</string>
 
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>

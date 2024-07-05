@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.EventRepository
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.TaskRepository
@@ -38,6 +39,7 @@ class AgendaDetailsViewModel(
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
     private val scheduler: AgendaAlarmScheduler,
+    private val networkMonitor: NetworkConnectivityMonitor,
     type: AgendaItemType,
     itemId: String? = null,
     editable: Boolean = true
@@ -56,6 +58,8 @@ class AgendaDetailsViewModel(
 
     private val _navChannel = Channel<AgendaDetailVMAction>()
     val navChannel = _navChannel.receiveAsFlow()
+
+    val networkState = networkMonitor.observeNetworkAvailability()
 
     init {
         // a non-null itemId means we are viewing or editing an existing item
@@ -418,34 +422,40 @@ class AgendaDetailsViewModel(
     }
 
     private fun saveEvent(photoByteArrays: List<ByteArray>) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-
-            when {
-                _state.value.isCreateMode() -> {
-                    eventRepo.createEvent(getEventPayloadForCreation(), photoByteArrays)
-                        .onSuccess {
-                            scheduler.scheduleNotification(it)
-                            _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
-                        }
-                        .onError {
-                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
-                        }
-                }
-
-                _state.value.isEditMode() -> {
-                    eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
-                        .onSuccess {
-                            scheduler.scheduleNotification(it)
-                            _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
-                        }
-                        .onError {
-                            _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
-                        }
-                }
+        if (!networkMonitor.isNetworkAvailable() && !_state.value.isUserEventCreator) {
+            viewModelScope.launch {
+                _navChannel.send(AgendaDetailVMAction.CannotOfflineUpdateEventAsAttendee)
             }
+        } else {
+            viewModelScope.launch {
+                _state.update { it.copy(isLoading = true) }
 
-            _state.update { it.copy(isLoading = false) }
+                when {
+                    _state.value.isCreateMode() -> {
+                        eventRepo.createEvent(getEventPayloadForCreation(), photoByteArrays)
+                            .onSuccess {
+                                scheduler.scheduleNotification(it)
+                                _navChannel.send(AgendaDetailVMAction.CreateAgendaItemSuccess(AgendaItemType.EVENT))
+                            }
+                            .onError {
+                                _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                            }
+                    }
+
+                    _state.value.isEditMode() -> {
+                        eventRepo.updateEvent(getEventPayloadForUpdate(), photoByteArrays)
+                            .onSuccess {
+                                scheduler.scheduleNotification(it)
+                                _navChannel.send(AgendaDetailVMAction.UpdateAgendaItemSuccess(AgendaItemType.EVENT))
+                            }
+                            .onError {
+                                _navChannel.send(AgendaDetailVMAction.AgendaItemError(it))
+                            }
+                    }
+                }
+
+                _state.update { it.copy(isLoading = false) }
+            }
         }
     }
 
@@ -795,6 +805,7 @@ sealed class AgendaDetailVMAction {
 
     class AgendaItemError(val error: DataError) : AgendaDetailVMAction()
     data object PhotoUriEmptyOrNull : AgendaDetailVMAction()
+    data object CannotOfflineUpdateEventAsAttendee : AgendaDetailVMAction()
 
     data object EventStartDateIsAfterEndDate : AgendaDetailVMAction()
     data object EventStartTimeIsAfterEndTime : AgendaDetailVMAction()

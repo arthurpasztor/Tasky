@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.DetailItemType
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.ReminderType
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Photo
@@ -85,6 +86,9 @@ fun AgendaDetailRoot(
         parametersOf(AgendaItemType.valueOf(type), itemId, editable)
     })
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val networkState by viewModel.networkState.collectAsStateWithLifecycle(
+        initialValue = NetworkConnectivityMonitor.NetworkState.Unavailable
+    )
 
     ObserveAsEvents(viewModel.navChannel) { destination ->
         when (destination) {
@@ -153,6 +157,11 @@ fun AgendaDetailRoot(
                 R.string.warning_start_time_is_later_than_end_time,
                 TAG
             )
+
+            AgendaDetailVMAction.CannotOfflineUpdateEventAsAttendee -> context.showToast(
+                R.string.error_cannot_offline_update_event_as_attendee,
+                TAG
+            )
         }
     }
 
@@ -173,6 +182,7 @@ fun AgendaDetailRoot(
 
     AgendaDetailScreen(
         state = state,
+        networkState = networkState,
         onAction = viewModel::onAction,
         onNavigateBack = { navigator.navigateUp() },
         onOpenFullScreenImage = {
@@ -205,6 +215,7 @@ private fun AgendaDetailScreenPreview() {
                 newPhotos = listOf(Photo("key1", "uri1"), Photo("key2", "uri2"))
             )
         ),
+        networkState = NetworkConnectivityMonitor.NetworkState.Available,
         onAction = {},
         onNavigateBack = {},
         onOpenFullScreenImage = {}
@@ -214,6 +225,7 @@ private fun AgendaDetailScreenPreview() {
 @Composable
 private fun AgendaDetailScreen(
     state: AgendaDetailsState,
+    networkState: NetworkConnectivityMonitor.NetworkState,
     onAction: (AgendaDetailAction) -> Unit,
     onNavigateBack: () -> Unit,
     onOpenFullScreenImage: (photo: Photo) -> Unit
@@ -273,7 +285,10 @@ private fun AgendaDetailScreen(
 
             if (state.isEvent()) {
                 if (state.allPhotos.isEmpty()) {
-                    if (state.isUserEventCreator && (state.isCreateMode() || state.isEditMode())) {
+                    if (state.isUserEventCreator
+                        && (state.isCreateMode() || state.isEditMode())
+                        && networkState.isAvailable()
+                    ) {
                         PhotoEmptySection {
                             singlePhotoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -283,6 +298,7 @@ private fun AgendaDetailScreen(
                 } else {
                     PhotoSection(
                         state = state,
+                        networkState = networkState,
                         onOpenGallery = {
                             singlePhotoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -314,7 +330,7 @@ private fun AgendaDetailScreen(
             HorizontalDividerGray1dp()
 
             if (state.isEvent()) {
-                AttendeeSection(state, onAction)
+                AttendeeSection(state, networkState, onAction)
             }
 
             if (state.isEditMode()) {

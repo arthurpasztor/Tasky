@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.getInitials
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.presentation.AgendaDetailAction
@@ -51,8 +52,12 @@ import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
 @Composable
-fun AttendeeSection(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
-    AttendeeHeader(state, onAction)
+fun AttendeeSection(
+    state: AgendaDetailsState,
+    networkState: NetworkConnectivityMonitor.NetworkState,
+    onAction: (AgendaDetailAction) -> Unit
+) {
+    AttendeeHeader(state, networkState, onAction)
     AttendeeToggleToolbar(state, onAction)
     AttendeeFullList(state, onAction)
 }
@@ -60,11 +65,18 @@ fun AttendeeSection(state: AgendaDetailsState, onAction: (AgendaDetailAction) ->
 @Preview
 @Composable
 private fun AttendeeHeaderPreview() {
-    AttendeeHeader(state = AgendaDetailsState(itemId = null), onAction = {})
+    AttendeeHeader(
+        state = AgendaDetailsState(itemId = null),
+        networkState = NetworkConnectivityMonitor.NetworkState.Available,
+        onAction = {})
 }
 
 @Composable
-private fun AttendeeHeader(state: AgendaDetailsState, onAction: (AgendaDetailAction) -> Unit) {
+private fun AttendeeHeader(
+    state: AgendaDetailsState,
+    networkState: NetworkConnectivityMonitor.NetworkState,
+    onAction: (AgendaDetailAction) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,7 +91,7 @@ private fun AttendeeHeader(state: AgendaDetailsState, onAction: (AgendaDetailAct
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.size(16.dp))
-        if (state.isCreateMode() || state.isEditMode()) {
+        if (networkState.isAvailable() && (state.isCreateMode() || state.isEditMode())) {
             AddAttendeeButton(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)

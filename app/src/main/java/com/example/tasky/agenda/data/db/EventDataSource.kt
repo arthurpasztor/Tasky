@@ -11,7 +11,11 @@ interface EventDataSource {
 
     suspend fun getAllEvents(): Flow<List<EventEntity>>
 
-    suspend fun insertOrReplaceEvent(event: EventDTO, offlineStatus: OfflineStatus? = null)
+    suspend fun insertOrReplaceEvent(
+        event: EventDTO,
+        deletedPhotoKeys: List<String> = emptyList(),
+        offlineStatus: OfflineStatus? = null
+    )
 
     suspend fun deleteEvent(id: String)
 
