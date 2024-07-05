@@ -1,5 +1,6 @@
 import com.example.tasky.agenda.data.dto.AttendeeDTO;
 import com.example.tasky.agenda.data.dto.PhotoDTO;
+import com.example.tasky.agenda.domain.model.OfflineStatus;
 import kotlin.Boolean;
 import kotlin.collections.List;
 
@@ -14,5 +15,6 @@ CREATE TABLE IF NOT EXISTS eventEntity (
     isUserEventCreator INTEGER AS Boolean NOT NULL,
     attendees TEXT AS List<AttendeeDTO> NOT NULL,
     photos TEXT AS List<PhotoDTO> NOT NULL,
-    startDateDayFormatted TEXT NOT NULL
+    startDateDayFormatted TEXT NOT NULL,
+    offlineStatus TEXT AS OfflineStatus
 );

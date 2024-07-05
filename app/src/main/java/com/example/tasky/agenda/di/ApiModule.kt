@@ -45,7 +45,7 @@ val apiModule = module {
     singleOf(::TaskRepositoryImpl).bind<TaskRepository>()
     singleOf(::ReminderRepositoryImpl).bind<ReminderRepository>()
 
-    single { TaskyDatabase(get(), get()) }
+    single { TaskyDatabase(get(), get(), get(), get()) }
     single<EventDataSource> { EventDataSourceImpl(get()) }
     single<TaskDataSource> { TaskDataSourceImpl(get()) }
     single<ReminderDataSource> { ReminderDataSourceImpl(get()) }

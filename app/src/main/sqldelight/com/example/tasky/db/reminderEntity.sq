@@ -15,7 +15,7 @@ FROM reminderEntity;
 insertOrReplaceReminder:
 INSERT OR REPLACE
 INTO reminderEntity
-VALUES (?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 deleteReminderById:
 DELETE FROM reminderEntity

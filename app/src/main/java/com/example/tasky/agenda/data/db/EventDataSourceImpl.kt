@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.EventDTO
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
+import com.example.tasky.agenda.domain.model.OfflineStatus
 import com.example.tasky.db.TaskyDatabase
 import com.example.tasky.migrations.EventEntity
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceEvent(event: EventDTO) {
+    override suspend fun insertOrReplaceEvent(event: EventDTO, offlineStatus: OfflineStatus?) {
         withContext(Dispatchers.IO) {
             queries.insertOrReplaceEvent(
                 event.id,
@@ -39,7 +40,8 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
                 event.isUserEventCreator,
                 event.attendees,
                 event.photos,
-                event.from.getFormattedLocalDateFromMillis()
+                event.from.getFormattedLocalDateFromMillis(),
+                offlineStatus
             )
         }
     }

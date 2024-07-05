@@ -11,6 +11,7 @@ import com.example.tasky.agenda.data.dto.toEvent
 import com.example.tasky.agenda.data.dto.toEventCreateDTO
 import com.example.tasky.agenda.data.dto.toEventUpdateDTO
 import com.example.tasky.agenda.domain.EventRepository
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
@@ -31,13 +32,15 @@ private const val UPDATE_EVENT_MULTIPART_JSON_KEY = "update_event_request"
 class EventRepositoryImpl(
     private val client: HttpClient,
     private val localDataSource: EventDataSource,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val networkMonitor: NetworkConnectivityMonitor
 ) : EventRepository {
 
     private val eventUrl = "${BuildConfig.BASE_URL}/event"
     private val attendeeUrl = "${BuildConfig.BASE_URL}/attendee"
 
     override suspend fun createEvent(event: Event, imageBytes: List<ByteArray>): Result<Event, DataError> {
+        //TODO handle offline use case
         val result: Result<EventDTO, DataError> = client.executeMultipartRequest<EventCreateDTO, EventDTO>(
             httpMethod = HttpMethod.Post,
             url = eventUrl,
@@ -61,6 +64,7 @@ class EventRepositoryImpl(
     }
 
     override suspend fun updateEvent(event: EventUpdate, imageBytes: List<ByteArray>): Result<Event, DataError> {
+        //TODO handle offline use case
         val result: Result<EventDTO, DataError> = client.executeMultipartRequest<EventUpdateDTO, EventDTO>(
             httpMethod = HttpMethod.Put,
             url = eventUrl,
@@ -84,6 +88,7 @@ class EventRepositoryImpl(
     }
 
     override suspend fun deleteEvent(eventId: String): EmptyResult<DataError> {
+        //TODO handle offline use case
         return client.executeRequest<Unit, Unit>(
             httpMethod = HttpMethod.Delete,
             url = eventUrl,
@@ -98,6 +103,7 @@ class EventRepositoryImpl(
     }
 
     override suspend fun getEventDetails(eventId: String): Result<Event, DataError> {
+        //TODO handle offline use case
         val result = client.executeRequest<Unit, EventDTO>(
             httpMethod = HttpMethod.Get,
             url = eventUrl,
@@ -119,6 +125,7 @@ class EventRepositoryImpl(
     }
 
     override suspend fun getAttendee(email: String): Result<NewAttendee, DataError> {
+        //TODO handle offline use case
         val result: Result<NewAttendeeDTO, DataError> = client.executeRequest<Unit, NewAttendeeDTO>(
             httpMethod = HttpMethod.Get,
             url = attendeeUrl,

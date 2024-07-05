@@ -9,14 +9,13 @@ import com.example.tasky.agenda.data.dto.toAgenda
 import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
-import com.example.tasky.agenda.domain.formatDetailDate
+import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.core.domain.DataError
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class AgendaRepositoryImpl(
     private val client: HttpClient,
@@ -53,14 +52,15 @@ class AgendaRepositoryImpl(
                 is Result.Error -> result
             }
         } else {
-            val todayFormatted = LocalDate.now().formatDetailDate()
-            val agenda = localDataSource.getAllAgendaItemsByDay(todayFormatted)
+            val todayFormatted = time.getFormattedLocalDateFromMillis()
+            val agendaItemsList = localDataSource.getAllAgendaItemsByDay(todayFormatted)
 
-            Result.Success(agenda)
+            Result.Success(Agenda(agendaItemsList))
         }
     }
 
     override suspend fun syncFullAgenda(): Result<Agenda, DataError> {
+        //TODO handle offline use case
         val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
             httpMethod = HttpMethod.Get,
             url = fullAgendaUrl,

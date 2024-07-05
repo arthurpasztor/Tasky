@@ -5,7 +5,6 @@ import com.example.tasky.agenda.data.dto.toEvent
 import com.example.tasky.agenda.data.dto.toReminder
 import com.example.tasky.agenda.data.dto.toTask
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
-import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.db.TaskyDatabase
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +12,7 @@ import kotlinx.coroutines.withContext
 
 class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
 
-    override suspend fun getAllAgendaItemsByDay(dayFormatted: String): Agenda {
+    override suspend fun getAllAgendaItemsByDay(dayFormatted: String): MutableList<AgendaListItem> {
         return withContext(Dispatchers.IO) {
             val agendaList = mutableListOf<AgendaListItem>()
 
@@ -38,7 +37,7 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
 
             }
 
-            Agenda(agendaList)
+            agendaList
         }
     }
 
@@ -57,7 +56,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.isUserEventCreator,
                         it.attendees,
                         it.photos,
-                        it.from.getFormattedLocalDateFromMillis()
+                        it.from.getFormattedLocalDateFromMillis(),
+                        null
                     )
                 }
                 agenda.tasks.forEach {
@@ -68,7 +68,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.time,
                         it.remindAt,
                         it.isDone,
-                        it.time.getFormattedLocalDateFromMillis()
+                        it.time.getFormattedLocalDateFromMillis(),
+                        null
                     )
                 }
                 agenda.reminders.forEach {
@@ -78,7 +79,8 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
                         it.description,
                         it.time,
                         it.remindAt,
-                        it.time.getFormattedLocalDateFromMillis()
+                        it.time.getFormattedLocalDateFromMillis(),
+                        null
                     )
                 }
             }

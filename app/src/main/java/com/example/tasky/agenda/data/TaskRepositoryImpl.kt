@@ -5,12 +5,15 @@ import com.example.tasky.agenda.data.db.TaskDataSource
 import com.example.tasky.agenda.data.dto.TaskDTO
 import com.example.tasky.agenda.data.dto.toTask
 import com.example.tasky.agenda.data.dto.toTaskDTO
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem.Task
+import com.example.tasky.agenda.domain.model.OfflineStatus
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
+import com.example.tasky.migrations.TaskEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.http.HttpMethod
@@ -20,44 +23,67 @@ import kotlinx.coroutines.launch
 class TaskRepositoryImpl(
     private val client: HttpClient,
     private val localDataSource: TaskDataSource,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val networkMonitor: NetworkConnectivityMonitor
 ) : TaskRepository {
 
     private val taskUrl = "${BuildConfig.BASE_URL}/task"
 
     override suspend fun createTask(task: Task): EmptyResult<DataError> {
-        val taskDTO = task.toTaskDTO()
+        return if (networkMonitor.isNetworkAvailable()) {
+            val taskDTO = task.toTaskDTO()
 
-        return client.executeRequest<TaskDTO, Unit>(
-            httpMethod = HttpMethod.Post,
-            url = taskUrl,
-            payload = taskDTO,
-            tag = TAG
-        ) {
-            applicationScope.launch {
-                localDataSource.insertOrReplaceTask(taskDTO)
+            client.executeRequest<TaskDTO, Unit>(
+                httpMethod = HttpMethod.Post,
+                url = taskUrl,
+                payload = taskDTO,
+                tag = TAG
+            ) {
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceTask(taskDTO)
+                }
+                Result.Success(Unit)
             }
+        } else {
+            applicationScope.launch {
+                localDataSource.insertOrReplaceTask(task.toTaskDTO(), OfflineStatus.CREATED)
+            }.join()
+
             Result.Success(Unit)
         }
     }
 
     override suspend fun updateTask(task: Task): EmptyResult<DataError> {
-        val taskDTO = task.toTaskDTO()
+        return if (networkMonitor.isNetworkAvailable()) {
+            val taskDTO = task.toTaskDTO()
 
-        return client.executeRequest<TaskDTO, Unit>(
-            httpMethod = HttpMethod.Put,
-            url = taskUrl,
-            payload = taskDTO,
-            tag = TAG
-        ) {
+            client.executeRequest<TaskDTO, Unit>(
+                httpMethod = HttpMethod.Put,
+                url = taskUrl,
+                payload = taskDTO,
+                tag = TAG
+            ) {
+                applicationScope.launch {
+                    localDataSource.insertOrReplaceTask(taskDTO)
+                }.join()
+                Result.Success(Unit)
+            }
+        } else {
             applicationScope.launch {
-                localDataSource.insertOrReplaceTask(taskDTO)
+                val taskEntity = localDataSource.getTaskById(task.id)
+                val appendedOfflineStatus = if (taskEntity.isOfflineCreated()) {
+                    OfflineStatus.CREATED
+                } else {
+                    OfflineStatus.UPDATED
+                }
+                localDataSource.insertOrReplaceTask(task.toTaskDTO(), appendedOfflineStatus)
             }.join()
+
             Result.Success(Unit)
         }
     }
-
     override suspend fun deleteTask(taskId: String): EmptyResult<DataError> {
+        //TODO handle offline use case
         return client.executeRequest<Unit, Unit>(
             httpMethod = HttpMethod.Delete,
             url = taskUrl,
@@ -72,26 +98,37 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun getTaskDetails(taskId: String): Result<Task, DataError> {
-        val result = client.executeRequest<Unit, TaskDTO>(
-            httpMethod = HttpMethod.Get,
-            url = taskUrl,
-            queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
-            tag = TAG
-        ) {
-            Result.Success(it.body())
-        }
-
-        return when (result) {
-            is Result.Success -> {
-                applicationScope.launch {
-                    localDataSource.insertOrReplaceTask(result.data)
-                }.join()
-                Result.Success(result.data.toTask())
+        return if (networkMonitor.isNetworkAvailable()) {
+            val result = client.executeRequest<Unit, TaskDTO>(
+                httpMethod = HttpMethod.Get,
+                url = taskUrl,
+                queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
+                tag = TAG
+            ) {
+                Result.Success(it.body())
             }
 
-            is Result.Error -> Result.Error(result.error)
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localDataSource.insertOrReplaceTask(result.data)
+                    }.join()
+                    Result.Success(result.data.toTask())
+                }
+
+                is Result.Error -> Result.Error(result.error)
+            }
+        } else {
+            val taskEntity = localDataSource.getTaskById(taskId)
+            if (taskEntity != null) {
+                Result.Success(taskEntity.toTask())
+            } else {
+                Result.Error(DataError.LocalError.NOT_FOUND)
+            }
         }
     }
+
+    private fun TaskEntity?.isOfflineCreated() = this?.offlineStatus == OfflineStatus.CREATED
 
     companion object {
         private const val TAG = "TaskRepository"
