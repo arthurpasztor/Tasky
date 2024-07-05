@@ -9,5 +9,5 @@ interface AgendaDataSource {
 
     suspend fun insertOrReplaceAgendaItems(agenda: AgendaDTO)
 
-    suspend fun clearDatabase()
+    suspend fun clearDatabaseWithNoOfflineChanges()
 }

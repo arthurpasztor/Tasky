@@ -45,10 +45,15 @@ class Preferences(context: Context) {
         editor.apply()
     }
 
-    fun removeAll() {
+    fun removeAllExceptOfflineActivityFlag() {
+        val isOfflineActivity = isOfflineActivity()
+
         editor.clear()
         editor.apply()
+
+        setOfflineActivity(isOfflineActivity)
     }
+
     fun getEncryptedString(key: String, default: String): String {
         return encryptedPreferences.getString(key, default) ?: default
     }

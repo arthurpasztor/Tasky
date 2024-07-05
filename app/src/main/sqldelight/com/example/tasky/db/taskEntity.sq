@@ -27,4 +27,5 @@ DELETE FROM taskEntity
 WHERE id = :id;
 
 deleteAll:
-DELETE FROM taskEntity;
+DELETE FROM taskEntity
+WHERE offlineStatus = :offlineStatus;

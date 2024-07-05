@@ -27,4 +27,5 @@ DELETE FROM reminderEntity
 WHERE id = :id;
 
 deleteAll:
-DELETE FROM reminderEntity;
+DELETE FROM reminderEntity
+WHERE offlineStatus = :offlineStatus;

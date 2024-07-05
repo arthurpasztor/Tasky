@@ -27,4 +27,5 @@ DELETE FROM eventEntity
 WHERE id = :id;
 
 deleteAll:
-DELETE FROM eventEntity;
+DELETE FROM eventEntity
+WHERE offlineStatus = :offlineStatus;

@@ -91,12 +91,12 @@ class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
         }
     }
 
-    override suspend fun clearDatabase() {
+    override suspend fun clearDatabaseWithNoOfflineChanges() {
         withContext(Dispatchers.IO) {
             db.transaction {
-                db.eventEntityQueries.deleteAll()
-                db.taskEntityQueries.deleteAll()
-                db.reminderEntityQueries.deleteAll()
+                db.eventEntityQueries.deleteAll(offlineStatus = null)
+                db.taskEntityQueries.deleteAll(offlineStatus = null)
+                db.reminderEntityQueries.deleteAll(offlineStatus = null)
             }
         }
     }
