@@ -18,9 +18,9 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
         }
     }
 
-    override suspend fun getAllOfflineTasks(offlineStatus: OfflineStatus): List<TaskEntity> {
+    override suspend fun getAllOfflineTasks(offlineUserAuthorId: String, offlineStatus: OfflineStatus): List<TaskEntity> {
         return withContext(Dispatchers.IO) {
-            queries.getAllOfflineTasks(offlineStatus).executeAsList()
+            queries.getAllOfflineTasks(offlineUserAuthorId, offlineStatus).executeAsList()
         }
     }
 
@@ -30,7 +30,11 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceTask(task: TaskDTO, offlineStatus: OfflineStatus?) {
+    override suspend fun insertOrReplaceTask(
+        task: TaskDTO,
+        offlineUserAuthorId: String?,
+        offlineStatus: OfflineStatus?
+    ) {
         withContext(Dispatchers.IO) {
             queries.insertOrReplaceTask(
                 task.id,
@@ -40,6 +44,7 @@ class TaskDataSourceImpl(db: TaskyDatabase) : TaskDataSource {
                 task.remindAt,
                 task.isDone,
                 task.time.getFormattedLocalDateFromMillis(),
+                offlineUserAuthorId,
                 offlineStatus
             )
         }

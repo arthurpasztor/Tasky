@@ -1,11 +1,14 @@
 CREATE TABLE IF NOT EXISTS deletedEventIdEntity (
-    deletedEventId TEXT NOT NULL PRIMARY KEY
+    deletedEventId TEXT NOT NULL PRIMARY KEY,
+    offlineUserAuthorId TEXT
 );
 
 CREATE TABLE IF NOT EXISTS deletedTaskIdEntity (
-    deletedTaskId TEXT NOT NULL PRIMARY KEY
+    deletedTaskId TEXT NOT NULL PRIMARY KEY,
+    offlineUserAuthorId TEXT
 );
 
 CREATE TABLE IF NOT EXISTS deleteReminderIdEntity (
-    deleteReminderId TEXT NOT NULL PRIMARY KEY
+    deleteReminderId TEXT NOT NULL PRIMARY KEY,
+    offlineUserAuthorId TEXT
 );

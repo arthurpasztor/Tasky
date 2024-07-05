@@ -18,5 +18,6 @@ CREATE TABLE IF NOT EXISTS eventEntity (
     photos TEXT AS List<PhotoDTO> NOT NULL,
     startDateDayFormatted TEXT NOT NULL,
     deletedPhotoKeys TEXT AS List<String> NOT NULL,
+    offlineUserAuthorId TEXT,
     offlineStatus TEXT AS OfflineStatus
 );

@@ -3,8 +3,8 @@ package com.example.tasky.agenda.data.db
 import com.example.tasky.agenda.data.dto.ReminderDTO
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.agenda.domain.model.OfflineStatus
-import com.example.tasky.migrations.ReminderEntity
 import com.example.tasky.db.TaskyDatabase
+import com.example.tasky.migrations.ReminderEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,9 +18,12 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
         }
     }
 
-    override suspend fun getAllOfflineReminders(offlineStatus: OfflineStatus): List<ReminderEntity> {
+    override suspend fun getAllOfflineReminders(
+        offlineUserAuthorId: String,
+        offlineStatus: OfflineStatus
+    ): List<ReminderEntity> {
         return withContext(Dispatchers.IO) {
-            queries.getAllOfflineReminders(offlineStatus).executeAsList()
+            queries.getAllOfflineReminders(offlineUserAuthorId, offlineStatus).executeAsList()
         }
     }
 
@@ -30,7 +33,11 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
         }
     }
 
-    override suspend fun insertOrReplaceReminder(reminder: ReminderDTO, offlineStatus: OfflineStatus?) {
+    override suspend fun insertOrReplaceReminder(
+        reminder: ReminderDTO,
+        offlineUserAuthorId: String?,
+        offlineStatus: OfflineStatus?
+    ) {
         withContext(Dispatchers.IO) {
             queries.insertOrReplaceReminder(
                 reminder.id,
@@ -39,6 +46,7 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
                 reminder.time,
                 reminder.remindAt,
                 reminder.time.getFormattedLocalDateFromMillis(),
+                offlineUserAuthorId,
                 offlineStatus
             )
         }
