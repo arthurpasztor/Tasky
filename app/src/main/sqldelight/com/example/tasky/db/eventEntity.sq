@@ -8,6 +8,11 @@ SELECT *
 FROM eventEntity
 WHERE startDateDayFormatted = :dayFormatted;
 
+getAllOfflineEvents:
+SELECT *
+FROM eventEntity
+WHERE offlineStatus = :offlineStatus;
+
 getAllEvents:
 SELECT *
 FROM eventEntity;

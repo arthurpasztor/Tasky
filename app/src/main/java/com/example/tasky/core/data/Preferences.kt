@@ -36,6 +36,15 @@ class Preferences(context: Context) {
         editor.apply()
     }
 
+    fun isOfflineActivity(): Boolean {
+        return preferences.getBoolean(KEY_IS_OFFLINE_ACTIVITY, false) ?: return false
+    }
+
+    fun setOfflineActivity(value: Boolean) {
+        editor.putBoolean(KEY_IS_OFFLINE_ACTIVITY, value)
+        editor.apply()
+    }
+
     fun removeAll() {
         editor.clear()
         editor.apply()
@@ -60,5 +69,6 @@ class Preferences(context: Context) {
         const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_USER_NAME = "full_name"
         const val KEY_USER_ID = "user_id"
+        const val KEY_IS_OFFLINE_ACTIVITY = "is_offline_activity"
     }
 }

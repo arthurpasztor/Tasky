@@ -24,3 +24,12 @@ VALUES (?);
 getAllDeletedReminderIds:
 SELECT *
 FROM deleteReminderIdEntity;
+
+deleteAllEventIds:
+DELETE FROM deletedEventIdEntity;
+
+deleteAllTaskIds:
+DELETE FROM deletedTaskIdEntity;
+
+deleteAllReminderIds:
+DELETE FROM deleteReminderIdEntity;

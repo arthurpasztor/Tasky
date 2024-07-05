@@ -13,4 +13,6 @@ interface DeleteAgendaItemDataSource {
     suspend fun getAllReminderIds(): List<String>
 
     suspend fun insertOrReplaceReminderId(id: String)
+
+    suspend fun clearAll()
 }

@@ -1,14 +1,11 @@
 package com.example.tasky.agenda.data.db
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.ReminderDTO
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.agenda.domain.model.OfflineStatus
 import com.example.tasky.migrations.ReminderEntity
 import com.example.tasky.db.TaskyDatabase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
@@ -21,9 +18,15 @@ class ReminderDataSourceImpl(db: TaskyDatabase) : ReminderDataSource {
         }
     }
 
-    override suspend fun getAllReminders(): Flow<List<ReminderEntity>> {
+    override suspend fun getAllOfflineReminders(offlineStatus: OfflineStatus): List<ReminderEntity> {
         return withContext(Dispatchers.IO) {
-            queries.getAllReminders().asFlow().mapToList(this.coroutineContext)
+            queries.getAllOfflineReminders(offlineStatus).executeAsList()
+        }
+    }
+
+    override suspend fun getAllReminders(): List<ReminderEntity> {
+        return withContext(Dispatchers.IO) {
+            queries.getAllReminders().executeAsList()
         }
     }
 

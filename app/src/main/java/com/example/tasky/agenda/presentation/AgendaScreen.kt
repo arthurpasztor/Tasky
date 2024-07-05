@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.AgendaItemType
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.isToday
 import com.example.tasky.agenda.presentation.composables.list.AgendaItem
 import com.example.tasky.agenda.presentation.composables.list.Needle
@@ -105,6 +106,15 @@ fun AgendaRoot(navigator: DestinationsNavigator) {
                     )
                 )
             }
+
+            AgendaResponseAction.SyncOfflineChangesSuccessful -> context.showToast(R.string.success_offline_sync, TAG)
+        }
+    }
+
+    ObserveAsEvents(viewModel.networkState) {
+        when (it) {
+            NetworkConnectivityMonitor.NetworkState.Available -> viewModel.onAction(AgendaAction.SyncOfflineChanges)
+            NetworkConnectivityMonitor.NetworkState.Unavailable -> {} // do nothing
         }
     }
 
@@ -262,6 +272,8 @@ sealed interface AgendaAction {
     class Open(val itemId: String, val itemType: AgendaItemType) : AgendaAction
     class Edit(val itemId: String, val itemType: AgendaItemType) : AgendaAction
     class Delete(val itemId: String, val itemType: AgendaItemType) : AgendaAction
+
+    data object SyncOfflineChanges : AgendaAction
 }
 
 @Preview

@@ -10,6 +10,7 @@ import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.model.AgendaListItem
 import com.example.tasky.agenda.domain.model.OfflineStatus
+import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.EmptyResult
@@ -26,7 +27,8 @@ class ReminderRepositoryImpl(
     private val localReminderDataSource: ReminderDataSource,
     private val localDeleteItemDataSource: DeleteAgendaItemDataSource,
     private val applicationScope: CoroutineScope,
-    private val networkMonitor: NetworkConnectivityMonitor
+    private val networkMonitor: NetworkConnectivityMonitor,
+    private val prefs: Preferences
 ) : ReminderRepository {
 
     private val reminderUrl = "${BuildConfig.BASE_URL}/reminder"
@@ -58,6 +60,8 @@ class ReminderRepositoryImpl(
             applicationScope.launch {
                 localReminderDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), OfflineStatus.CREATED)
             }.join()
+
+            prefs.setOfflineActivity(true)
 
             Result.Success(Unit)
         }
@@ -97,6 +101,8 @@ class ReminderRepositoryImpl(
                 localReminderDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), appendedOfflineStatus)
             }.join()
 
+            prefs.setOfflineActivity(true)
+
             Result.Success(Unit)
         }
     }
@@ -123,8 +129,14 @@ class ReminderRepositoryImpl(
             }
         } else {
             applicationScope.launch {
-                localDeleteItemDataSource.insertOrReplaceReminderId(reminderId)
+                val reminderEntity = localReminderDataSource.getReminderById(reminderId)
+                if (!reminderEntity.isOfflineCreated()) {
+                    localDeleteItemDataSource.insertOrReplaceReminderId(reminderId)
+                }
+                localReminderDataSource.deleteReminder(reminderId)
             }.join()
+
+            prefs.setOfflineActivity(true)
 
             Result.Success(Unit)
         }
