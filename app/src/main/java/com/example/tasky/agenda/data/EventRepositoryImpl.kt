@@ -114,12 +114,7 @@ class EventRepositoryImpl(
                         OfflineStatus.UPDATED
                     }
 
-                    val photosUpdated = mutableListOf<PhotoDTO>().apply {
-                        addAll(eventEntity.photos)
-                        eventUpdate.deletedPhotoKeys.forEach { deletedPhotoKey ->
-                            removeIf { it.key == deletedPhotoKey }
-                        }
-                    }
+                    val photosUpdated = eventEntity.photos.filter { it.key !in eventUpdate.deletedPhotoKeys }
 
                     // create EventDTO with missing info from the DB
                     eventDTO = eventUpdate.toEventDTO(
@@ -129,10 +124,7 @@ class EventRepositoryImpl(
                     )
 
                     // append the newly deleted photo IDs to the already existing ones
-                    val combinedDeletedPhotoKeys = mutableListOf<String>().apply {
-                        addAll(eventEntity.deletedPhotoKeys)
-                        addAll(eventUpdate.deletedPhotoKeys)
-                    }
+                    val combinedDeletedPhotoKeys = eventEntity.deletedPhotoKeys + eventUpdate.deletedPhotoKeys
 
                     localEventDataSource.insertOrReplaceEvent(
                         event = eventDTO!!,

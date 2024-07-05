@@ -50,7 +50,7 @@ class TaskRepositoryImpl(
                 is Result.Success -> {
                     applicationScope.launch {
                         localTaskDataSource.insertOrReplaceTask(taskDTO)
-                    }
+                    }.join()
                     Result.Success(Unit)
                 }
 
