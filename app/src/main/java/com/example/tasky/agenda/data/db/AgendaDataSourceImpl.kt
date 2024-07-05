@@ -12,20 +12,23 @@ import kotlinx.coroutines.withContext
 
 class AgendaDataSourceImpl(private val db: TaskyDatabase) : AgendaDataSource {
 
-    override suspend fun getAllAgendaItemsByDay(dayFormatted: String): MutableList<AgendaListItem> {
+    override suspend fun getAllAgendaItemsByDay(
+        dayFormatted: String,
+        currentUserId: String
+    ): MutableList<AgendaListItem> {
         return withContext(Dispatchers.IO) {
             val agendaList = mutableListOf<AgendaListItem>()
 
             db.transaction {
-                val events = db.eventEntityQueries.getAllEventsForToday(dayFormatted).executeAsList().map {
-                    it.toEvent()
-                }
-                val reminders = db.reminderEntityQueries.getAllRemindersForToday(dayFormatted).executeAsList().map {
-                    it.toReminder()
-                }
-                val tasks = db.taskEntityQueries.getAllTasksForToday(dayFormatted).executeAsList().map {
-                    it.toTask()
-                }
+                val events = db.eventEntityQueries.getAllEventsForToday(dayFormatted).executeAsList()
+                    .filter { it.offlineUserAuthorId == currentUserId || it.offlineUserAuthorId == null }
+                    .map { it.toEvent() }
+                val reminders = db.reminderEntityQueries.getAllRemindersForToday(dayFormatted).executeAsList()
+                    .filter { it.offlineUserAuthorId == currentUserId || it.offlineUserAuthorId == null }
+                    .map { it.toReminder() }
+                val tasks = db.taskEntityQueries.getAllTasksForToday(dayFormatted).executeAsList()
+                    .filter { it.offlineUserAuthorId == currentUserId || it.offlineUserAuthorId == null }
+                    .map { it.toTask() }
 
                 agendaList.apply {
                     addAll(events)
