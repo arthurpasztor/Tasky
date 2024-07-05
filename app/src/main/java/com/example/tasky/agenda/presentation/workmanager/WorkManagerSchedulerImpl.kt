@@ -4,7 +4,7 @@ import androidx.work.WorkManager
 import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.model.AgendaListItem
 
-class AgendaAlarmSchedulerImpl(private val workManager: WorkManager): AgendaAlarmScheduler {
+class WorkManagerSchedulerImpl(private val workManager: WorkManager): AgendaAlarmScheduler {
     override fun scheduleNotification(agendaItem: AgendaListItem) {
         workManager.scheduleNotification(agendaItem)
     }

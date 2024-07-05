@@ -5,6 +5,9 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class Preferences(context: Context) {
 
@@ -33,6 +36,25 @@ class Preferences(context: Context) {
 
     fun putString(key: String, value: String) {
         editor.putString(key, value)
+        editor.apply()
+    }
+
+    fun getScheduledAgendaItemIds(): List<String> {
+        val json = preferences.getString(KEY_SCHEDULED_AGENDA_ITEM_IDS, "[]") ?: "[]"
+        return Json.decodeFromString(json)
+    }
+
+    fun putScheduledAgendaItemId(agendaItemId: String) {
+        val ids = getScheduledAgendaItemIds() + agendaItemId
+        val json = Json.encodeToString(ids)
+        editor.putString(KEY_SCHEDULED_AGENDA_ITEM_IDS, json)
+        editor.apply()
+    }
+
+    fun removeScheduledAgendaItemId(agendaItemId: String) {
+        val ids = getScheduledAgendaItemIds() - agendaItemId
+        val json = Json.encodeToString(ids)
+        editor.putString(KEY_SCHEDULED_AGENDA_ITEM_IDS, json)
         editor.apply()
     }
 
@@ -70,5 +92,6 @@ class Preferences(context: Context) {
         const val KEY_USER_NAME = "full_name"
         const val KEY_USER_ID = "user_id"
         const val KEY_IS_OFFLINE_ACTIVITY = "is_offline_activity"
+        const val KEY_SCHEDULED_AGENDA_ITEM_IDS = "scheduled_agenda_item_ids"
     }
 }

@@ -10,9 +10,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.tasky.agenda.domain.model.AgendaListItem
-import com.example.tasky.agenda.domain.model.AgendaListItem.Event
-import com.example.tasky.core.data.Preferences
-import org.koin.java.KoinJavaComponent.inject
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
@@ -52,18 +49,6 @@ fun WorkManager.scheduleNotification(agendaItem: AgendaListItem) {
         enqueueUniqueWork(agendaItem.id, ExistingWorkPolicy.REPLACE, request)
         Log.i(TAG, "Notification with unique name ${agendaItem.id} enqueued")
     }
-}
-
-private fun AgendaListItem.isCurrentUserAsAttendeeInEvent() = this is Event && !isUserEventCreator
-
-private fun AgendaListItem.getCurrentUsersPersonalReminder(): LocalDateTime {
-    val event = this as? Event ?: return remindAt
-
-    val prefs: Preferences by inject(Preferences::class.java)
-    val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
-
-    val currentUserAsAttendee = event.attendees.firstOrNull { it.userId == currentUserId }
-    return currentUserAsAttendee?.remindAt ?: event.remindAt
 }
 
 fun WorkManager.cancelNotificationScheduler(itemId: String) {
