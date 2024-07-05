@@ -35,16 +35,24 @@ class TaskRepositoryImpl(
         return if (networkMonitor.isNetworkAvailable()) {
             val taskDTO = task.toTaskDTO()
 
-            client.executeRequest<TaskDTO, Unit>(
+            val result = client.executeRequest<TaskDTO, Unit>(
                 httpMethod = HttpMethod.Post,
                 url = taskUrl,
                 payload = taskDTO,
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localTaskDataSource.insertOrReplaceTask(taskDTO)
-                }
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localTaskDataSource.insertOrReplaceTask(taskDTO)
+                    }
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
@@ -59,16 +67,24 @@ class TaskRepositoryImpl(
         return if (networkMonitor.isNetworkAvailable()) {
             val taskDTO = task.toTaskDTO()
 
-            client.executeRequest<TaskDTO, Unit>(
+            val result = client.executeRequest<TaskDTO, Unit>(
                 httpMethod = HttpMethod.Put,
                 url = taskUrl,
                 payload = taskDTO,
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localTaskDataSource.insertOrReplaceTask(taskDTO)
-                }.join()
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localTaskDataSource.insertOrReplaceTask(taskDTO)
+                    }.join()
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
@@ -86,16 +102,24 @@ class TaskRepositoryImpl(
     }
     override suspend fun deleteTask(taskId: String): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            return client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Delete,
                 url = taskUrl,
                 queryParams = Pair(QUERY_PARAM_KEY_ID, taskId),
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localTaskDataSource.deleteTask(taskId)
-                }.join()
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localTaskDataSource.deleteTask(taskId)
+                    }.join()
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
@@ -125,7 +149,7 @@ class TaskRepositoryImpl(
                     Result.Success(result.data.toTask())
                 }
 
-                is Result.Error -> Result.Error(result.error)
+                is Result.Error -> result
             }
         } else {
             val taskEntity = localTaskDataSource.getTaskById(taskId)

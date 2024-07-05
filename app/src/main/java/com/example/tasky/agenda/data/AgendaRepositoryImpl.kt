@@ -60,25 +60,29 @@ class AgendaRepositoryImpl(
     }
 
     override suspend fun syncFullAgenda(): Result<Agenda, DataError> {
-        //TODO handle offline use case
-        val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
-            httpMethod = HttpMethod.Get,
-            url = fullAgendaUrl,
-            tag = TAG
-        ) {
-            Result.Success(it.body())
-        }
-        return when (result) {
-            is Result.Success -> {
-                val agendaDTO = result.data
-
-                applicationScope.launch {
-                    localDataSource.insertOrReplaceAgendaItems(agendaDTO)
-                }.join()
-
-                Result.Success(agendaDTO.toAgenda())
+        return if (networkMonitor.isNetworkAvailable()) {
+            val result: Result<AgendaDTO, DataError> = client.executeRequest<Unit, AgendaDTO>(
+                httpMethod = HttpMethod.Get,
+                url = fullAgendaUrl,
+                tag = TAG
+            ) {
+                Result.Success(it.body())
             }
-            is Result.Error -> result
+            when (result) {
+                is Result.Success -> {
+                    val agendaDTO = result.data
+
+                    applicationScope.launch {
+                        localDataSource.insertOrReplaceAgendaItems(agendaDTO)
+                    }.join()
+
+                    Result.Success(agendaDTO.toAgenda())
+                }
+
+                is Result.Error -> result
+            }
+        } else {
+            Result.Error(DataError.LocalError.NO_INTERNET_CONNECTION)
         }
     }
 

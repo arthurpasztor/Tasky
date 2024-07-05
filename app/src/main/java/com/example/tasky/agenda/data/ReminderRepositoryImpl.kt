@@ -35,16 +35,24 @@ class ReminderRepositoryImpl(
         return if (networkMonitor.isNetworkAvailable()) {
             val reminderDTO = reminder.toReminderDTO()
 
-            client.executeRequest<ReminderDTO, Unit>(
+            val result = client.executeRequest<ReminderDTO, Unit>(
                 httpMethod = HttpMethod.Post,
                 url = reminderUrl,
                 payload = reminderDTO,
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localReminderDataSource.insertOrReplaceReminder(reminderDTO)
-                }.join()
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localReminderDataSource.insertOrReplaceReminder(reminderDTO)
+                    }.join()
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
@@ -59,16 +67,24 @@ class ReminderRepositoryImpl(
         return if (networkMonitor.isNetworkAvailable()) {
             val reminderDTO = reminder.toReminderDTO()
 
-            client.executeRequest<ReminderDTO, Unit>(
+            val result = client.executeRequest<ReminderDTO, Unit>(
                 httpMethod = HttpMethod.Put,
                 url = reminderUrl,
                 payload = reminderDTO,
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localReminderDataSource.insertOrReplaceReminder(reminderDTO)
-                }.join()
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localReminderDataSource.insertOrReplaceReminder(reminderDTO)
+                    }.join()
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
@@ -86,16 +102,24 @@ class ReminderRepositoryImpl(
     }
     override suspend fun deleteReminder(reminderId: String): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            return client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Delete,
                 url = reminderUrl,
                 queryParams = Pair(QUERY_PARAM_KEY_ID, reminderId),
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localReminderDataSource.deleteReminder(reminderId)
-                }
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localReminderDataSource.deleteReminder(reminderId)
+                    }
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
@@ -125,7 +149,7 @@ class ReminderRepositoryImpl(
                     Result.Success(result.data.toReminder())
                 }
 
-                is Result.Error -> Result.Error(result.error)
+                is Result.Error -> result
             }
         } else {
             val reminderEntity = localReminderDataSource.getReminderById(reminderId)

@@ -147,16 +147,24 @@ class EventRepositoryImpl(
 
     override suspend fun deleteEvent(eventId: String): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            return client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Delete,
                 url = eventUrl,
                 queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localEventDataSource.deleteEvent(eventId)
-                }.join()
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localEventDataSource.deleteEvent(eventId)
+                    }.join()
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
