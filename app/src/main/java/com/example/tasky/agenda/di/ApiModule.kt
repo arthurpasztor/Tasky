@@ -27,7 +27,7 @@ import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.presentation.AgendaDetailsViewModel
 import com.example.tasky.agenda.presentation.AgendaViewModel
-import com.example.tasky.agenda.presentation.workmanager.AgendaAlarmSchedulerImpl
+import com.example.tasky.agenda.presentation.alarmmanager.AlarmManagerSchedulerImpl
 import com.example.tasky.db.TaskyDatabase
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -54,7 +54,7 @@ val apiModule = module {
     single<AgendaDataSource> { AgendaDataSourceImpl(get()) }
     single<DeleteAgendaItemDataSource> { DeleteAgendaItemDataSourceImpl(get()) }
 
-    singleOf(::AgendaAlarmSchedulerImpl).bind<AgendaAlarmScheduler>()
+    singleOf(::AlarmManagerSchedulerImpl).bind<AgendaAlarmScheduler>()
     singleOf(::AgendaSyncManagerImpl).bind<AgendaSyncManager>()
 
     singleOf(::NetworkConnectivityMonitorImpl).bind<NetworkConnectivityMonitor>()

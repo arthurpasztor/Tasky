@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.CircularProgressIndicator
@@ -144,13 +143,12 @@ private fun AgendaScreen(
                 .background(BackgroundBlack)
         ) {
             Row {
-                ClickableText(
-                    modifier = Modifier.padding(start = monthPadding, top = monthPadding, bottom = monthPadding),
+                Text(
+                    modifier = Modifier
+                        .padding(start = monthPadding, top = monthPadding, bottom = monthPadding)
+                        .clickable { dateDialogState.show() },
                     text = AnnotatedString(state.selectedDate.month.name.uppercase(Locale.getDefault())),
-                    style = headerStyle,
-                    onClick = {
-                        dateDialogState.show()
-                    }
+                    style = headerStyle
                 )
                 Icon(
                     modifier = Modifier.align(Alignment.CenterVertically),

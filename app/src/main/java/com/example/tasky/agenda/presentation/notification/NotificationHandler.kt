@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation.workmanager
+package com.example.tasky.agenda.presentation.notification
 
 import android.Manifest
 import android.app.NotificationManager

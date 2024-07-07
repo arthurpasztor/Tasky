@@ -2,6 +2,7 @@ package com.example.tasky.agenda.data
 
 import com.example.tasky.BuildConfig
 import com.example.tasky.agenda.data.db.AgendaDataSource
+import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.core.data.Preferences
@@ -22,6 +23,7 @@ class AuthRepositoryImpl(
     private val localDataSource: AgendaDataSource,
     private val applicationScope: CoroutineScope,
     private val networkMonitor: NetworkConnectivityMonitor,
+    private val scheduler: AgendaAlarmScheduler,
     private val prefs: Preferences
 ) : AuthRepository {
 
@@ -30,12 +32,17 @@ class AuthRepositoryImpl(
 
     override suspend fun authenticate(): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Get,
                 url = tokenCheckUrl,
                 tag = TAG
             ) {
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> Result.Success(Unit)
+                is Result.Error -> result
             }
         } else {
             if (prefs.containsEncrypted(Preferences.KEY_ACCESS_TOKEN)) {
@@ -47,20 +54,37 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout(): EmptyResult<DataError> {
-        //TODO handle offline use case
-        client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
+        return if (networkMonitor.isNetworkAvailable()) {
+            client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
 
-        return client.executeRequest<Unit, Unit>(
-            httpMethod = HttpMethod.Get,
-            url = logoutUrl,
-            tag = TAG
-        ) {
-            applicationScope.launch {
-                localDataSource.clearDatabase()
-            }.join()
+            val result = client.executeRequest<Unit, Unit>(
+                httpMethod = HttpMethod.Get,
+                url = logoutUrl,
+                tag = TAG
+            ) {
+                Result.Success(Unit)
+            }
 
+            when (result) {
+                is Result.Success -> Result.Success(Unit)
+                is Result.Error -> result
+            }
+        } else {
             Result.Success(Unit)
         }
+    }
+
+    override suspend fun clearAllData() {
+        applicationScope.launch {
+            scheduler.cancelAllNotificationSchedulers()
+        }.join()
+        applicationScope.launch {
+            localDataSource.clearDatabase()
+            prefs.removeAll()
+            prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN)
+            prefs.removeEncrypted(Preferences.KEY_REFRESH_TOKEN)
+            prefs.removeEncrypted(Preferences.KEY_USER_ID)
+        }.join()
     }
 
     companion object {

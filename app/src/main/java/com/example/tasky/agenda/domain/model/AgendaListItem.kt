@@ -2,6 +2,8 @@ package com.example.tasky.agenda.domain.model
 
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.formatAgendaDateTime
+import com.example.tasky.core.data.Preferences
+import org.koin.java.KoinJavaComponent
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -23,6 +25,18 @@ sealed class AgendaListItem {
         is Event -> AgendaItemType.EVENT
         is Task -> AgendaItemType.TASK
         is Reminder -> AgendaItemType.REMINDER
+    }
+
+    fun isCurrentUserAsAttendeeInEvent() = this is Event && !isUserEventCreator
+
+    fun getCurrentUsersPersonalReminder(): LocalDateTime {
+        val event = this as? Event ?: return remindAt
+
+        val prefs: Preferences by KoinJavaComponent.inject(Preferences::class.java)
+        val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+
+        val currentUserAsAttendee = event.attendees.firstOrNull { it.userId == currentUserId }
+        return currentUserAsAttendee?.remindAt ?: event.remindAt
     }
 
     data class Event(

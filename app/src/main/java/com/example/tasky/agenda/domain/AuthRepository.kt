@@ -6,4 +6,5 @@ import com.example.tasky.core.domain.EmptyResult
 interface AuthRepository {
     suspend fun authenticate(): EmptyResult<DataError>
     suspend fun logout(): EmptyResult<DataError>
+    suspend fun clearAllData()
 }

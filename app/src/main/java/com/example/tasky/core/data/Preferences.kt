@@ -37,7 +37,7 @@ class Preferences(context: Context) {
     }
 
     fun isOfflineActivity(): Boolean {
-        return preferences.getBoolean(KEY_IS_OFFLINE_ACTIVITY, false) ?: return false
+        return preferences.getBoolean(KEY_IS_OFFLINE_ACTIVITY, false)
     }
 
     fun setOfflineActivity(value: Boolean) {

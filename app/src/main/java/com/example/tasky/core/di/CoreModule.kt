@@ -1,5 +1,6 @@
 package com.example.tasky.core.di
 
+import android.app.AlarmManager
 import androidx.work.WorkManager
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
@@ -57,4 +58,6 @@ val coreModule = module {
     single<CoroutineScope> { (androidApplication() as MyApplication).applicationScope }
 
     single<WorkManager> { WorkManager.getInstance(androidApplication()) }
+
+    single<AlarmManager> { androidApplication().getSystemService(AlarmManager::class.java) }
 }

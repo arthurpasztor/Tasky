@@ -1,12 +1,12 @@
 package com.example.tasky.agenda.presentation.composables.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
@@ -99,13 +99,15 @@ fun HeaderSection(
             }
 
             else -> {
-                ClickableText(
+                Text(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(end = headerPadding),
+                        .padding(end = headerPadding)
+                        .clickable {
+                            onSave.invoke()
+                        },
                     text = AnnotatedString(stringResource(id = R.string.save)),
-                    style = headerStyle,
-                    onClick = { onSave.invoke() }
+                    style = headerStyle
                 )
             }
         }
