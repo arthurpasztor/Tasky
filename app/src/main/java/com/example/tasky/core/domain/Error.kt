@@ -19,6 +19,7 @@ sealed interface DataError : Error {
         USER_IS_LOGGED_OUT,
         DISK_FULL,
         NOT_FOUND,
-        CANNOT_FETCH_USERS
+        CANNOT_FETCH_USERS,
+        NO_INTERNET_CONNECTION
     }
 }

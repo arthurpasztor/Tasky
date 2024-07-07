@@ -48,6 +48,7 @@ fun DataError.asUiText(): UiText {
         LocalError.NOT_FOUND -> UiText.StringResource(R.string.error_not_found)
         LocalError.USER_IS_LOGGED_OUT -> UiText.StringResource(R.string.error_user_is_logged_out)
         LocalError.CANNOT_FETCH_USERS -> UiText.StringResource(R.string.error_cannot_fetch_users)
+        LocalError.NO_INTERNET_CONNECTION -> UiText.StringResource(R.string.error_no_internet_connection)
     }
 }
 

@@ -8,6 +8,7 @@ import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.EventRepository
+import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
 import com.example.tasky.agenda.domain.ReminderRepository
 import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.getUTCMillis
@@ -35,7 +36,8 @@ class AgendaViewModel(
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
     private val scheduler: AgendaAlarmScheduler,
-    syncManager: AgendaSyncManager
+    syncManager: AgendaSyncManager,
+    private val networkMonitor: NetworkConnectivityMonitor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
@@ -44,6 +46,8 @@ class AgendaViewModel(
     private val _navChannel = Channel<AgendaResponseAction>()
     val navChannel = _navChannel.receiveAsFlow()
 
+    val networkState = networkMonitor.observeNetworkAvailability()
+
     init {
         _state.update {
             it.copy(
@@ -51,7 +55,9 @@ class AgendaViewModel(
             )
         }
 
-        loadDailyAgenda()
+        if (!prefs.isOfflineActivity()) {
+            loadDailyAgenda()
+        }
 
         syncManager.startPeriodicAgendaSync()
     }
@@ -77,6 +83,8 @@ class AgendaViewModel(
             is AgendaAction.Delete -> deleteItem(action.itemId, action.itemType)
             is AgendaAction.Edit -> editAgendaItem(action.itemId, action.itemType)
             is AgendaAction.Open -> openAgendaItem(action.itemId, action.itemType)
+
+            AgendaAction.SyncOfflineChanges -> syncOfflineChanges()
         }
     }
 
@@ -203,6 +211,29 @@ class AgendaViewModel(
         }
     }
 
+    private fun syncOfflineChanges() {
+        if (prefs.isOfflineActivity()) {
+            _state.update { it.copy(isLoading = true) }
+
+            viewModelScope.launch {
+                val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+
+                agendaRepo.syncOfflineChanges(currentUserId)
+                    .onSuccess {
+                        prefs.setOfflineActivity(false)
+                        _state.update { it.copy(isLoading = false) }
+                        _navChannel.send(AgendaResponseAction.SyncOfflineChangesSuccessful)
+
+                        loadDailyAgenda()
+                    }
+                    .onError { error ->
+                        _state.update { it.copy(isLoading = false) }
+                        _navChannel.send(AgendaResponseAction.AgendaError(error))
+                    }
+            }
+        }
+    }
+
     private fun openAgendaItem(itemId: String, itemType: AgendaItemType) {
         viewModelScope.launch {
             _navChannel.send(AgendaResponseAction.OpenAgendaItemDetail(itemId, itemType, false))
@@ -273,4 +304,6 @@ sealed interface AgendaResponseAction {
         AgendaResponseAction
 
     class AgendaError(val error: DataError) : AgendaResponseAction
+
+    data object SyncOfflineChangesSuccessful : AgendaResponseAction
 }

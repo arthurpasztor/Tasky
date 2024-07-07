@@ -1,14 +1,11 @@
 package com.example.tasky.agenda.data.db
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import com.example.tasky.agenda.data.dto.EventDTO
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.agenda.domain.model.OfflineStatus
 import com.example.tasky.db.TaskyDatabase
 import com.example.tasky.migrations.EventEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
@@ -21,9 +18,15 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
         }
     }
 
-    override suspend fun getAllEvents(): Flow<List<EventEntity>> {
+    override suspend fun getAllOfflineEvents(offlineStatus: OfflineStatus): List<EventEntity> {
         return withContext(Dispatchers.IO) {
-            queries.getAllEvents().asFlow().mapToList(this.coroutineContext)
+            queries.getAllOfflineEvents(offlineStatus).executeAsList()
+        }
+    }
+
+    override suspend fun getAllEvents(): List<EventEntity> {
+        return withContext(Dispatchers.IO) {
+            queries.getAllEvents().executeAsList()
         }
     }
 

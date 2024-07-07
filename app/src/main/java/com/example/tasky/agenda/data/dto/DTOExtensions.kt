@@ -156,6 +156,22 @@ fun EventEntity.toEvent() = Event(
     photos = photos.map { it.toPhoto() }
 )
 
+fun EventEntity.toEventUpdate(currentUserId: String): EventUpdate {
+    val isGoing = attendees.find { attendee -> attendee.userId == currentUserId }?.isGoing ?: false
+
+    return EventUpdate(
+        id = id,
+        title = title,
+        description = description,
+        from = startDate.getLocalDateTimeFromMillis(),
+        to = endDate.getLocalDateTimeFromMillis(),
+        remindAt = remindAt.getLocalDateTimeFromMillis(),
+        attendees = attendees.map { it.toAttendee() },
+        deletedPhotoKeys = deletedPhotoKeys,
+        isGoing = isGoing
+    )
+}
+
 fun AttendeeDTO.toAttendee() = Attendee(
     email = email,
     fullName = fullName,

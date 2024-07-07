@@ -43,4 +43,12 @@ class DeleteAgendaItemDataSourceImpl(db: TaskyDatabase) : DeleteAgendaItemDataSo
             queries.insertOrReplaceReminderId(id)
         }
     }
+
+    override suspend fun clearAll() {
+        withContext(Dispatchers.IO) {
+            queries.deleteAllEventIds()
+            queries.deleteAllTaskIds()
+            queries.deleteAllReminderIds()
+        }
+    }
 }

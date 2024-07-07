@@ -8,6 +8,11 @@ SELECT *
 FROM taskEntity
 WHERE timeDayFormatted = :dayFormatted;
 
+getAllOfflineTasks:
+SELECT *
+FROM taskEntity
+WHERE offlineStatus = :offlineStatus;
+
 getAllTasks:
 SELECT *
 FROM taskEntity;

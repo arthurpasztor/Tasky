@@ -19,6 +19,7 @@ import com.example.tasky.agenda.domain.model.AgendaListItem.Event
 import com.example.tasky.agenda.domain.model.EventUpdate
 import com.example.tasky.agenda.domain.model.NewAttendee
 import com.example.tasky.agenda.domain.model.OfflineStatus
+import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.data.executeMultipartRequest
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
@@ -39,7 +40,8 @@ class EventRepositoryImpl(
     private val localEventDataSource: EventDataSource,
     private val localDeleteItemDataSource: DeleteAgendaItemDataSource,
     private val applicationScope: CoroutineScope,
-    private val networkMonitor: NetworkConnectivityMonitor
+    private val networkMonitor: NetworkConnectivityMonitor,
+    private val prefs: Preferences
 ) : EventRepository {
 
     private val eventUrl = "${BuildConfig.BASE_URL}/event"
@@ -72,6 +74,8 @@ class EventRepositoryImpl(
             applicationScope.launch {
                 localEventDataSource.insertOrReplaceEvent(event = event.toEventDTO(), offlineStatus = OfflineStatus.CREATED)
             }.join()
+
+            prefs.setOfflineActivity(true)
 
             Result.Success(event)
         }
@@ -140,6 +144,8 @@ class EventRepositoryImpl(
                 }
             }.join()
 
+            prefs.setOfflineActivity(true)
+
             // Non-null assertion permitted, since the null case is handled by returning an error
             Result.Success(eventDTO!!.toEvent())
         }
@@ -147,21 +153,35 @@ class EventRepositoryImpl(
 
     override suspend fun deleteEvent(eventId: String): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            return client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Delete,
                 url = eventUrl,
                 queryParams = Pair(QUERY_PARAM_KEY_ID, eventId),
                 tag = TAG
             ) {
-                applicationScope.launch {
-                    localEventDataSource.deleteEvent(eventId)
-                }.join()
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localEventDataSource.deleteEvent(eventId)
+                    }.join()
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
             }
         } else {
             applicationScope.launch {
-                localDeleteItemDataSource.insertOrReplaceEventId(eventId)
+                val eventEntity = localEventDataSource.getEventById(eventId)
+                if (!eventEntity.isOfflineCreated()) {
+                    localDeleteItemDataSource.insertOrReplaceEventId(eventId)
+                }
+                localEventDataSource.deleteEvent(eventId)
             }.join()
+
+            prefs.setOfflineActivity(true)
 
             Result.Success(Unit)
         }
