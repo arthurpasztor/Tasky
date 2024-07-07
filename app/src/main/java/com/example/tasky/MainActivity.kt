@@ -86,7 +86,6 @@ class MainActivity : ComponentActivity() {
                 }
 
                 NotificationPermissionsHandler()
-                AlarmSchedulerPermissionsHandler()
             }
 
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -114,32 +113,6 @@ class MainActivity : ComponentActivity() {
 
                 SideEffect {
                     launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun AlarmSchedulerPermissionsHandler() {
-        val context = LocalContext.current
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val status = ContextCompat.checkSelfPermission(context, Manifest.permission.SCHEDULE_EXACT_ALARM)
-            if (status != PackageManager.PERMISSION_GRANTED) {
-
-                val launcher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.RequestPermission(),
-                    onResult = { isGranted ->
-                        if (isGranted) {
-                            Log.i(TAG, "Manifest.permission.SCHEDULE_EXACT_ALARM permission granted")
-                        } else {
-                            Log.i(TAG, "Manifest.permission.SCHEDULE_EXACT_ALARM permission denied")
-                        }
-                    }
-                )
-
-                SideEffect {
-                    launcher.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
                 }
             }
         }

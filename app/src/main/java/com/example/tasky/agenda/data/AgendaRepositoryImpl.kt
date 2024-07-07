@@ -117,25 +117,14 @@ class AgendaRepositoryImpl(
         return if (networkMonitor.isNetworkAvailable()) {
 
             // First step, get all DB items that are destined to be synchronised
-            var createdEvents = emptyList<EventEntity>()
-            var updatedEvents = emptyList<EventEntity>()
+            val createdEvents = localEventDataSource.getAllOfflineEvents(OfflineStatus.CREATED)
+            val updatedEvents = localEventDataSource.getAllOfflineEvents(OfflineStatus.UPDATED)
 
-            var createdTasks = emptyList<TaskEntity>()
-            var updatedTasks = emptyList<TaskEntity>()
+            val createdTasks = localTaskDataSource.getAllOfflineTasks(OfflineStatus.CREATED)
+            val updatedTasks = localTaskDataSource.getAllOfflineTasks(OfflineStatus.UPDATED)
 
-            var createdReminders = emptyList<ReminderEntity>()
-            var updatedReminders = emptyList<ReminderEntity>()
-
-            applicationScope.launch {
-                createdEvents = localEventDataSource.getAllOfflineEvents(OfflineStatus.CREATED)
-                updatedEvents = localEventDataSource.getAllOfflineEvents(OfflineStatus.UPDATED)
-
-                createdTasks = localTaskDataSource.getAllOfflineTasks(OfflineStatus.CREATED)
-                updatedTasks = localTaskDataSource.getAllOfflineTasks(OfflineStatus.UPDATED)
-
-                createdReminders = localReminderDataSource.getAllOfflineReminders(OfflineStatus.CREATED)
-                updatedReminders = localReminderDataSource.getAllOfflineReminders(OfflineStatus.UPDATED)
-            }.join()
+            val createdReminders = localReminderDataSource.getAllOfflineReminders(OfflineStatus.CREATED)
+            val updatedReminders = localReminderDataSource.getAllOfflineReminders(OfflineStatus.UPDATED)
 
             // Second step, sync items created / updated / deleted offline
             var resultsList = listOf<Result<Any, DataError>>()
@@ -178,14 +167,9 @@ class AgendaRepositoryImpl(
 
     private suspend fun syncOfflineDeletedItems(): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            var deletedEventIds = emptyList<String>()
-            var deletedTaskIds = emptyList<String>()
-            var deletedReminderIds = emptyList<String>()
-            applicationScope.launch {
-                deletedEventIds = localDeleteItemDataSource.getAllEventIds()
-                deletedTaskIds = localDeleteItemDataSource.getAllTaskIds()
-                deletedReminderIds = localDeleteItemDataSource.getAllReminderIds()
-            }.join()
+            val deletedEventIds = localDeleteItemDataSource.getAllEventIds()
+            val deletedTaskIds = localDeleteItemDataSource.getAllTaskIds()
+            val deletedReminderIds = localDeleteItemDataSource.getAllReminderIds()
 
             val payload = DeleteAgendaItemIdsDTO(
                 deletedEventIds = deletedEventIds,

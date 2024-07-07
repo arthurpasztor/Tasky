@@ -78,13 +78,11 @@ class AuthRepositoryImpl(
         applicationScope.launch {
             scheduler.cancelAllNotificationSchedulers()
         }.join()
-        applicationScope.launch {
-            localDataSource.clearDatabase()
-            prefs.removeAll()
-            prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN)
-            prefs.removeEncrypted(Preferences.KEY_REFRESH_TOKEN)
-            prefs.removeEncrypted(Preferences.KEY_USER_ID)
-        }.join()
+        localDataSource.clearDatabase()
+        prefs.removeAll()
+        prefs.removeEncrypted(Preferences.KEY_ACCESS_TOKEN)
+        prefs.removeEncrypted(Preferences.KEY_REFRESH_TOKEN)
+        prefs.removeEncrypted(Preferences.KEY_USER_ID)
     }
 
     companion object {
