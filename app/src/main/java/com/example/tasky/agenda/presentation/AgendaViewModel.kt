@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class AgendaViewModel(
     private val authRepo: AuthRepository,
@@ -122,6 +123,8 @@ class AgendaViewModel(
                             dailyAgendaError = null
                         )
                     }
+
+                    scheduleNotificationForFutureAgendaItems(agenda)
                 }
                 .onError { error ->
                     _state.update {
@@ -135,6 +138,16 @@ class AgendaViewModel(
 
             if (triggerFromPullToRefresh) {
                 _state.update { it.copy(isRefreshing = false) }
+            }
+        }
+    }
+
+    private fun scheduleNotificationForFutureAgendaItems(agenda: Agenda) {
+        val now = LocalDateTime.now()
+
+        agenda.items.forEach {
+            if (it.time.isAfter(now)) {
+                scheduler.scheduleNotification(it)
             }
         }
     }

@@ -7,8 +7,6 @@ import androidx.work.WorkerParameters
 import com.example.tasky.agenda.data.AgendaRepositoryImpl
 import com.example.tasky.agenda.domain.AgendaRepository
 import com.example.tasky.agenda.domain.model.Agenda
-import com.example.tasky.agenda.presentation.notification.NotificationHandler
-import com.example.tasky.agenda.presentation.notification.NotificationHandlerImpl
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +17,7 @@ import java.time.LocalDateTime
 class PeriodicFullSyncWorker(
     context: Context,
     params: WorkerParameters,
-) : CoroutineWorker(context, params), NotificationHandler by NotificationHandlerImpl() {
+) : CoroutineWorker(context, params) {
 
     private val agendaRepo: AgendaRepository by inject(AgendaRepositoryImpl::class.java)
     private val workManager: WorkManager by inject(WorkManager::class.java)
