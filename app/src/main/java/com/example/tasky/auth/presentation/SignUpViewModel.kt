@@ -2,7 +2,6 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
@@ -20,10 +19,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SignUpViewModel(
-    private val repository: AuthRepository,
-    private val syncManager: AgendaSyncManager
-) : ViewModel() {
+class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val _state = MutableStateFlow(SignUpState())
     val state = _state.asStateFlow()
@@ -89,8 +85,6 @@ class SignUpViewModel(
             repository.login(email, password)
                 .onSuccess {
                     _state.update { it.copy(isLoading = false) }
-
-                    syncManager.startPeriodicAgendaSync()
 
                     _navChannel.send(SignUpAuthAction.HandleAuthResponseSuccess)
                 }
