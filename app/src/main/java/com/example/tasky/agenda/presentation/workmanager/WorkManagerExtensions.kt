@@ -58,7 +58,6 @@ fun WorkManager.cancelNotificationScheduler(itemId: String) {
 
 fun WorkManager.startPeriodicAgendaSync() {
     val work = PeriodicWorkRequestBuilder<PeriodicFullSyncWorker>(Duration.ofMinutes(AGENDA_SYNC_PERIOD_MINUTES))
-        .setInitialDelay(AGENDA_SYNC_PERIOD_MINUTES, TimeUnit.MINUTES)
         .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
         .build()
 

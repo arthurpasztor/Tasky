@@ -123,8 +123,6 @@ class AgendaViewModel(
                             dailyAgendaError = null
                         )
                     }
-
-                    scheduleNotificationForFutureAgendaItems(agenda)
                 }
                 .onError { error ->
                     _state.update {
@@ -138,16 +136,6 @@ class AgendaViewModel(
 
             if (triggerFromPullToRefresh) {
                 _state.update { it.copy(isRefreshing = false) }
-            }
-        }
-    }
-
-    private fun scheduleNotificationForFutureAgendaItems(agenda: Agenda) {
-        val now = LocalDateTime.now()
-
-        agenda.items.forEach {
-            if (it.time.isAfter(now)) {
-                scheduler.scheduleNotification(it)
             }
         }
     }
