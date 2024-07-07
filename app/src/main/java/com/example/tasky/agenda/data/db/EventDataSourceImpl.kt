@@ -18,9 +18,12 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
         }
     }
 
-    override suspend fun getAllOfflineEvents(offlineStatus: OfflineStatus): List<EventEntity> {
+    override suspend fun getAllOfflineEvents(
+        offlineUserAuthorId: String,
+        offlineStatus: OfflineStatus
+    ): List<EventEntity> {
         return withContext(Dispatchers.IO) {
-            queries.getAllOfflineEvents(offlineStatus).executeAsList()
+            queries.getAllOfflineEvents(offlineUserAuthorId, offlineStatus).executeAsList()
         }
     }
 
@@ -33,6 +36,7 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
     override suspend fun insertOrReplaceEvent(
         event: EventDTO,
         deletedPhotoKeys: List<String>,
+        offlineUserAuthorId: String?,
         offlineStatus: OfflineStatus?
     ) {
         withContext(Dispatchers.IO) {
@@ -49,6 +53,7 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
                 event.photos,
                 event.from.getFormattedLocalDateFromMillis(),
                 deletedPhotoKeys,
+                offlineUserAuthorId,
                 offlineStatus
             )
         }
@@ -62,7 +67,7 @@ class EventDataSourceImpl(db: TaskyDatabase) : EventDataSource {
 
     override suspend fun deleteAllEvents() {
         withContext(Dispatchers.IO) {
-            queries.deleteAll()
+            queries.deleteAll(null)
         }
     }
 }

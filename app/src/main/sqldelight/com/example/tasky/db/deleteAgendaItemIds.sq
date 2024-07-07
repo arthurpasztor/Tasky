@@ -1,35 +1,41 @@
 insertOrReplaceEventId:
 INSERT OR REPLACE
 INTO deletedEventIdEntity
-VALUES (?);
+VALUES (?, ?);
 
 getAllDeletedEventIds:
 SELECT *
-FROM deletedEventIdEntity;
+FROM deletedEventIdEntity
+WHERE offlineUserAuthorId = :offlineUserAuthorId;
 
 insertOrReplaceTaskId:
 INSERT OR REPLACE
 INTO deletedTaskIdEntity
-VALUES (?);
+VALUES (?, ?);
 
 getAllDeletedTaskIds:
 SELECT *
-FROM deletedTaskIdEntity;
+FROM deletedTaskIdEntity
+WHERE offlineUserAuthorId = :offlineUserAuthorId;
 
 insertOrReplaceReminderId:
 INSERT OR REPLACE
 INTO deleteReminderIdEntity
-VALUES (?);
+VALUES (?, ?);
 
 getAllDeletedReminderIds:
 SELECT *
-FROM deleteReminderIdEntity;
+FROM deleteReminderIdEntity
+WHERE offlineUserAuthorId = :offlineUserAuthorId;
 
 deleteAllEventIds:
-DELETE FROM deletedEventIdEntity;
+DELETE FROM deletedEventIdEntity
+WHERE offlineUserAuthorId = :offlineUserAuthorId;
 
 deleteAllTaskIds:
-DELETE FROM deletedTaskIdEntity;
+DELETE FROM deletedTaskIdEntity
+WHERE offlineUserAuthorId = :offlineUserAuthorId;
 
 deleteAllReminderIds:
-DELETE FROM deleteReminderIdEntity;
+DELETE FROM deleteReminderIdEntity
+WHERE offlineUserAuthorId = :offlineUserAuthorId;

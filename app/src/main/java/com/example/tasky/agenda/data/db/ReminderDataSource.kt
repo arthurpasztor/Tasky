@@ -8,11 +8,15 @@ interface ReminderDataSource {
 
     suspend fun getReminderById(id: String): ReminderEntity?
 
-    suspend fun getAllOfflineReminders(offlineStatus: OfflineStatus): List<ReminderEntity>
+    suspend fun getAllOfflineReminders(offlineUserAuthorId: String, offlineStatus: OfflineStatus): List<ReminderEntity>
 
     suspend fun getAllReminders(): List<ReminderEntity>
 
-    suspend fun insertOrReplaceReminder(reminder: ReminderDTO, offlineStatus: OfflineStatus? = null)
+    suspend fun insertOrReplaceReminder(
+        reminder: ReminderDTO,
+        offlineUserAuthorId: String? = null,
+        offlineStatus: OfflineStatus? = null
+    )
 
     suspend fun deleteReminder(id: String)
 

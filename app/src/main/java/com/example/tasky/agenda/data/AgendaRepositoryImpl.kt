@@ -21,10 +21,14 @@ import com.example.tasky.agenda.domain.TaskRepository
 import com.example.tasky.agenda.domain.getFormattedLocalDateFromMillis
 import com.example.tasky.agenda.domain.model.Agenda
 import com.example.tasky.agenda.domain.model.OfflineStatus
+import com.example.tasky.core.data.Preferences
 import com.example.tasky.core.data.executeRequest
 import com.example.tasky.core.domain.DataError
 import com.example.tasky.core.domain.EmptyResult
 import com.example.tasky.core.domain.Result
+import com.example.tasky.migrations.DeleteReminderIdEntity
+import com.example.tasky.migrations.DeletedEventIdEntity
+import com.example.tasky.migrations.DeletedTaskIdEntity
 import com.example.tasky.migrations.EventEntity
 import com.example.tasky.migrations.ReminderEntity
 import com.example.tasky.migrations.TaskEntity
@@ -46,6 +50,7 @@ class AgendaRepositoryImpl(
     private val localTaskDataSource: TaskDataSource,
     private val localReminderDataSource: ReminderDataSource,
     private val localDeleteItemDataSource: DeleteAgendaItemDataSource,
+    prefs: Preferences,
     private val applicationScope: CoroutineScope,
     private val networkMonitor: NetworkConnectivityMonitor,
 ) : AgendaRepository {
@@ -53,6 +58,8 @@ class AgendaRepositoryImpl(
     private val agendaUrl = "${BuildConfig.BASE_URL}/agenda"
     private val fullAgendaUrl = "${BuildConfig.BASE_URL}/fullAgenda"
     private val syncOfflineDeletedIdsUrl = "${BuildConfig.BASE_URL}/syncAgenda"
+
+    private val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
 
     override suspend fun getDailyAgenda(time: Long): Result<Agenda, DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
@@ -80,7 +87,7 @@ class AgendaRepositoryImpl(
             }
         } else {
             val todayFormatted = time.getFormattedLocalDateFromMillis()
-            val agendaItemsList = localAgendaDataSource.getAllAgendaItemsByDay(todayFormatted)
+            val agendaItemsList = localAgendaDataSource.getAllAgendaItemsByDay(todayFormatted, currentUserId)
 
             Result.Success(Agenda(agendaItemsList))
         }
@@ -127,14 +134,14 @@ class AgendaRepositoryImpl(
             var updatedReminders = emptyList<ReminderEntity>()
 
             applicationScope.launch {
-                createdEvents = localEventDataSource.getAllOfflineEvents(OfflineStatus.CREATED)
-                updatedEvents = localEventDataSource.getAllOfflineEvents(OfflineStatus.UPDATED)
+                createdEvents = localEventDataSource.getAllOfflineEvents(currentUserId, OfflineStatus.CREATED)
+                updatedEvents = localEventDataSource.getAllOfflineEvents(currentUserId, OfflineStatus.UPDATED)
 
-                createdTasks = localTaskDataSource.getAllOfflineTasks(OfflineStatus.CREATED)
-                updatedTasks = localTaskDataSource.getAllOfflineTasks(OfflineStatus.UPDATED)
+                createdTasks = localTaskDataSource.getAllOfflineTasks(currentUserId, OfflineStatus.CREATED)
+                updatedTasks = localTaskDataSource.getAllOfflineTasks(currentUserId, OfflineStatus.UPDATED)
 
-                createdReminders = localReminderDataSource.getAllOfflineReminders(OfflineStatus.CREATED)
-                updatedReminders = localReminderDataSource.getAllOfflineReminders(OfflineStatus.UPDATED)
+                createdReminders = localReminderDataSource.getAllOfflineReminders(currentUserId, OfflineStatus.CREATED)
+                updatedReminders = localReminderDataSource.getAllOfflineReminders(currentUserId, OfflineStatus.UPDATED)
             }.join()
 
             // Second step, sync items created / updated / deleted offline
@@ -178,19 +185,19 @@ class AgendaRepositoryImpl(
 
     private suspend fun syncOfflineDeletedItems(): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            var deletedEventIds = emptyList<String>()
-            var deletedTaskIds = emptyList<String>()
-            var deletedReminderIds = emptyList<String>()
+            var deletedEventIds = emptyList<DeletedEventIdEntity>()
+            var deletedTaskIds = emptyList<DeletedTaskIdEntity>()
+            var deletedReminderIds = emptyList<DeleteReminderIdEntity>()
             applicationScope.launch {
-                deletedEventIds = localDeleteItemDataSource.getAllEventIds()
-                deletedTaskIds = localDeleteItemDataSource.getAllTaskIds()
-                deletedReminderIds = localDeleteItemDataSource.getAllReminderIds()
+                deletedEventIds = localDeleteItemDataSource.getAllEventIds(currentUserId)
+                deletedTaskIds = localDeleteItemDataSource.getAllTaskIds(currentUserId)
+                deletedReminderIds = localDeleteItemDataSource.getAllReminderIds(currentUserId)
             }.join()
 
             val payload = DeleteAgendaItemIdsDTO(
-                deletedEventIds = deletedEventIds,
-                deletedTaskIds = deletedTaskIds,
-                deletedReminderIds = deletedReminderIds
+                deletedEventIds = deletedEventIds.map { it.deletedEventId },
+                deletedTaskIds = deletedTaskIds.map { it.deletedTaskId },
+                deletedReminderIds = deletedReminderIds.map { it.deleteReminderId }
             )
 
             if (payload.isEmpty()) {
@@ -208,7 +215,7 @@ class AgendaRepositoryImpl(
                 when (result) {
                     is Result.Success -> {
                         applicationScope.launch {
-                            localDeleteItemDataSource.clearAll()
+                            localDeleteItemDataSource.clearAll(currentUserId)
                         }.join()
 
                         Result.Success(Unit)

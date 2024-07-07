@@ -11,7 +11,7 @@ WHERE timeDayFormatted = :dayFormatted;
 getAllOfflineTasks:
 SELECT *
 FROM taskEntity
-WHERE offlineStatus = :offlineStatus;
+WHERE offlineUserAuthorId = :offlineUserAuthorId AND offlineStatus = :offlineStatus;
 
 getAllTasks:
 SELECT *
@@ -20,11 +20,12 @@ FROM taskEntity;
 insertOrReplaceTask:
 INSERT OR REPLACE
 INTO taskEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteTaskById:
 DELETE FROM taskEntity
 WHERE id = :id;
 
 deleteAll:
-DELETE FROM taskEntity;
+DELETE FROM taskEntity
+WHERE offlineStatus = :offlineStatus;

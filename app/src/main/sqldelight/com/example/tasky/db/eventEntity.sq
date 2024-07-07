@@ -11,7 +11,7 @@ WHERE startDateDayFormatted = :dayFormatted;
 getAllOfflineEvents:
 SELECT *
 FROM eventEntity
-WHERE offlineStatus = :offlineStatus;
+WHERE offlineUserAuthorId = :offlineUserAuthorId AND offlineStatus = :offlineStatus;
 
 getAllEvents:
 SELECT *
@@ -20,11 +20,12 @@ FROM eventEntity;
 insertOrReplaceEvent:
 INSERT OR REPLACE
 INTO eventEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteEventById:
 DELETE FROM eventEntity
 WHERE id = :id;
 
 deleteAll:
-DELETE FROM eventEntity;
+DELETE FROM eventEntity
+WHERE offlineStatus = :offlineStatus;

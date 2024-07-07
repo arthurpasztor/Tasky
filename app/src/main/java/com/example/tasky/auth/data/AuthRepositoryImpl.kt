@@ -20,7 +20,7 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
     private val signUpUrl = "${BuildConfig.BASE_URL}/register"
 
     override suspend fun login(email: String, password: String): EmptyResult<DataError> {
-        return client.executeRequest<LoginDTO, Unit>(
+        val result = client.executeRequest<LoginDTO, Unit>(
             httpMethod = HttpMethod.Post,
             url = loginUrl,
             payload = LoginDTO(email, password),
@@ -35,10 +35,15 @@ class AuthRepositoryImpl(private val client: HttpClient, private val prefs: Pref
 
             Result.Success(Unit)
         }
+
+        return when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> result
+        }
     }
 
     override suspend fun signUp(fullName: String, email: String, password: String): Result<Pair<String, String>, DataError> {
-        val result =  client.executeRequest<SignUpDTO, LoginDTO>(
+        val result = client.executeRequest<SignUpDTO, LoginDTO>(
             httpMethod = HttpMethod.Post,
             url = signUpUrl,
             payload = SignUpDTO(fullName, email, password),

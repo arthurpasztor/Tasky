@@ -33,6 +33,8 @@ class TaskRepositoryImpl(
 
     private val taskUrl = "${BuildConfig.BASE_URL}/task"
 
+    private val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+
     override suspend fun createTask(task: Task): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
             val taskDTO = task.toTaskDTO()
@@ -58,7 +60,7 @@ class TaskRepositoryImpl(
             }
         } else {
             applicationScope.launch {
-                localTaskDataSource.insertOrReplaceTask(task.toTaskDTO(), OfflineStatus.CREATED)
+                localTaskDataSource.insertOrReplaceTask(task.toTaskDTO(), currentUserId, OfflineStatus.CREATED)
             }.join()
 
             prefs.setOfflineActivity(true)
@@ -98,7 +100,7 @@ class TaskRepositoryImpl(
                 } else {
                     OfflineStatus.UPDATED
                 }
-                localTaskDataSource.insertOrReplaceTask(task.toTaskDTO(), appendedOfflineStatus)
+                localTaskDataSource.insertOrReplaceTask(task.toTaskDTO(), currentUserId, appendedOfflineStatus)
             }.join()
 
             prefs.setOfflineActivity(true)
@@ -131,7 +133,7 @@ class TaskRepositoryImpl(
             applicationScope.launch {
                 val taskEntity = localTaskDataSource.getTaskById(taskId)
                 if (!taskEntity.isOfflineCreated()) {
-                    localDeleteItemDataSource.insertOrReplaceTaskId(taskId)
+                    localDeleteItemDataSource.insertOrReplaceTaskId(taskId, currentUserId)
                 }
                 localTaskDataSource.deleteTask(taskId)
             }.join()

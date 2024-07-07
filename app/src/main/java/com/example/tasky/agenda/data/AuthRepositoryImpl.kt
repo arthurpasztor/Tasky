@@ -30,12 +30,17 @@ class AuthRepositoryImpl(
 
     override suspend fun authenticate(): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
-            client.executeRequest<Unit, Unit>(
+            val result = client.executeRequest<Unit, Unit>(
                 httpMethod = HttpMethod.Get,
                 url = tokenCheckUrl,
                 tag = TAG
             ) {
                 Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> Result.Success(Unit)
+                is Result.Error -> result
             }
         } else {
             if (prefs.containsEncrypted(Preferences.KEY_ACCESS_TOKEN)) {
@@ -47,16 +52,31 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout(): EmptyResult<DataError> {
-        //TODO handle offline use case
-        client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
+        return if (networkMonitor.isNetworkAvailable()) {
+            client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
 
-        return client.executeRequest<Unit, Unit>(
-            httpMethod = HttpMethod.Get,
-            url = logoutUrl,
-            tag = TAG
-        ) {
+            val result = client.executeRequest<Unit, Unit>(
+                httpMethod = HttpMethod.Get,
+                url = logoutUrl,
+                tag = TAG
+            ) {
+                Result.Success(Unit)
+            }
+
+            when (result) {
+                is Result.Success -> {
+                    applicationScope.launch {
+                        localDataSource.clearDatabaseWithNoOfflineChanges()
+                    }.join()
+
+                    Result.Success(Unit)
+                }
+
+                is Result.Error -> result
+            }
+        } else {
             applicationScope.launch {
-                localDataSource.clearDatabase()
+                localDataSource.clearDatabaseWithNoOfflineChanges()
             }.join()
 
             Result.Success(Unit)

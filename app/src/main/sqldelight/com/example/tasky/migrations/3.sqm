@@ -9,6 +9,7 @@ CREATE TABLE taskEntity (
     remindAt INTEGER NOT NULL,
     isDone INTEGER AS Boolean NOT NULL,
     timeDayFormatted TEXT NOT NULL,
+    offlineUserAuthorId TEXT,
     offlineStatus TEXT AS OfflineStatus
 );
 

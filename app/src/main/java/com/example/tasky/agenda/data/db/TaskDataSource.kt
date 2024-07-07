@@ -8,11 +8,15 @@ interface TaskDataSource {
 
     suspend fun getTaskById(id: String): TaskEntity?
 
-    suspend fun getAllOfflineTasks(offlineStatus: OfflineStatus): List<TaskEntity>
+    suspend fun getAllOfflineTasks(offlineUserAuthorId: String, offlineStatus: OfflineStatus): List<TaskEntity>
 
     suspend fun getAllTasks(): List<TaskEntity>
 
-    suspend fun insertOrReplaceTask(task: TaskDTO, offlineStatus: OfflineStatus? = null)
+    suspend fun insertOrReplaceTask(
+        task: TaskDTO,
+        offlineUserAuthorId: String? = null,
+        offlineStatus: OfflineStatus? = null
+    )
 
     suspend fun deleteTask(id: String)
 

@@ -11,7 +11,7 @@ WHERE timeDayFormatted = :dayFormatted;
 getAllOfflineReminders:
 SELECT *
 FROM reminderEntity
-WHERE offlineStatus = :offlineStatus;
+WHERE offlineUserAuthorId = :offlineUserAuthorId AND offlineStatus = :offlineStatus;
 
 getAllReminders:
 SELECT *
@@ -20,11 +20,12 @@ FROM reminderEntity;
 insertOrReplaceReminder:
 INSERT OR REPLACE
 INTO reminderEntity
-VALUES (?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteReminderById:
 DELETE FROM reminderEntity
 WHERE id = :id;
 
 deleteAll:
-DELETE FROM reminderEntity;
+DELETE FROM reminderEntity
+WHERE offlineStatus = :offlineStatus;

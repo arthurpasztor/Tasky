@@ -37,7 +37,7 @@ class Preferences(context: Context) {
     }
 
     fun isOfflineActivity(): Boolean {
-        return preferences.getBoolean(KEY_IS_OFFLINE_ACTIVITY, false) ?: return false
+        return preferences.getBoolean(KEY_IS_OFFLINE_ACTIVITY, false)
     }
 
     fun setOfflineActivity(value: Boolean) {
@@ -45,10 +45,15 @@ class Preferences(context: Context) {
         editor.apply()
     }
 
-    fun removeAll() {
+    fun removeAllExceptOfflineActivityFlag() {
+        val isOfflineActivity = isOfflineActivity()
+
         editor.clear()
         editor.apply()
+
+        setOfflineActivity(isOfflineActivity)
     }
+
     fun getEncryptedString(key: String, default: String): String {
         return encryptedPreferences.getString(key, default) ?: default
     }

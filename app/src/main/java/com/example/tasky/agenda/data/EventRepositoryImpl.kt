@@ -7,7 +7,6 @@ import com.example.tasky.agenda.data.dto.EventCreateDTO
 import com.example.tasky.agenda.data.dto.EventDTO
 import com.example.tasky.agenda.data.dto.EventUpdateDTO
 import com.example.tasky.agenda.data.dto.NewAttendeeDTO
-import com.example.tasky.agenda.data.dto.PhotoDTO
 import com.example.tasky.agenda.data.dto.toAttendee
 import com.example.tasky.agenda.data.dto.toEvent
 import com.example.tasky.agenda.data.dto.toEventCreateDTO
@@ -47,6 +46,8 @@ class EventRepositoryImpl(
     private val eventUrl = "${BuildConfig.BASE_URL}/event"
     private val attendeeUrl = "${BuildConfig.BASE_URL}/attendee"
 
+    private val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+
     override suspend fun createEvent(event: Event, imageBytes: List<ByteArray>): Result<Event, DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
             val result: Result<EventDTO, DataError> = client.executeMultipartRequest<EventCreateDTO, EventDTO>(
@@ -72,7 +73,10 @@ class EventRepositoryImpl(
             }
         } else {
             applicationScope.launch {
-                localEventDataSource.insertOrReplaceEvent(event = event.toEventDTO(), offlineStatus = OfflineStatus.CREATED)
+                localEventDataSource.insertOrReplaceEvent(
+                    event = event.toEventDTO(),
+                    offlineUserAuthorId = currentUserId,
+                    offlineStatus = OfflineStatus.CREATED)
             }.join()
 
             prefs.setOfflineActivity(true)
@@ -129,6 +133,7 @@ class EventRepositoryImpl(
                     localEventDataSource.insertOrReplaceEvent(
                         event = eventDTO!!,
                         deletedPhotoKeys = combinedDeletedPhotoKeys,
+                        offlineUserAuthorId = currentUserId,
                         offlineStatus = appendedOfflineStatus
                     )
                 } ?: run {
@@ -168,7 +173,7 @@ class EventRepositoryImpl(
             applicationScope.launch {
                 val eventEntity = localEventDataSource.getEventById(eventId)
                 if (!eventEntity.isOfflineCreated()) {
-                    localDeleteItemDataSource.insertOrReplaceEventId(eventId)
+                    localDeleteItemDataSource.insertOrReplaceEventId(eventId, currentUserId)
                 }
                 localEventDataSource.deleteEvent(eventId)
             }.join()

@@ -8,13 +8,14 @@ interface EventDataSource {
 
     suspend fun getEventById(id: String): EventEntity?
 
-    suspend fun getAllOfflineEvents(offlineStatus: OfflineStatus): List<EventEntity>
+    suspend fun getAllOfflineEvents(offlineUserAuthorId: String, offlineStatus: OfflineStatus): List<EventEntity>
 
     suspend fun getAllEvents(): List<EventEntity>
 
     suspend fun insertOrReplaceEvent(
         event: EventDTO,
         deletedPhotoKeys: List<String> = emptyList(),
+        offlineUserAuthorId: String? = null,
         offlineStatus: OfflineStatus? = null
     )
 

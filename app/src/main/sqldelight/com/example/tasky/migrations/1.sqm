@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS reminderEntity (
     time INTEGER NOT NULL,
     remindAt INTEGER NOT NULL,
     timeDayFormatted TEXT NOT NULL,
+    offlineUserAuthorId TEXT,
     offlineStatus TEXT AS OfflineStatus
 );

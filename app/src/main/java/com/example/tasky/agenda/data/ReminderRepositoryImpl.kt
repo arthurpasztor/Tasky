@@ -33,6 +33,8 @@ class ReminderRepositoryImpl(
 
     private val reminderUrl = "${BuildConfig.BASE_URL}/reminder"
 
+    private val currentUserId = prefs.getEncryptedString(Preferences.KEY_USER_ID, "")
+
     override suspend fun createReminder(reminder: AgendaListItem.Reminder): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
             val reminderDTO = reminder.toReminderDTO()
@@ -58,7 +60,11 @@ class ReminderRepositoryImpl(
             }
         } else {
             applicationScope.launch {
-                localReminderDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), OfflineStatus.CREATED)
+                localReminderDataSource.insertOrReplaceReminder(
+                    reminder.toReminderDTO(),
+                    currentUserId,
+                    OfflineStatus.CREATED
+                )
             }.join()
 
             prefs.setOfflineActivity(true)
@@ -98,7 +104,11 @@ class ReminderRepositoryImpl(
                 } else {
                     OfflineStatus.UPDATED
                 }
-                localReminderDataSource.insertOrReplaceReminder(reminder.toReminderDTO(), appendedOfflineStatus)
+                localReminderDataSource.insertOrReplaceReminder(
+                    reminder.toReminderDTO(),
+                    currentUserId,
+                    appendedOfflineStatus
+                )
             }.join()
 
             prefs.setOfflineActivity(true)
@@ -106,6 +116,7 @@ class ReminderRepositoryImpl(
             Result.Success(Unit)
         }
     }
+
     override suspend fun deleteReminder(reminderId: String): EmptyResult<DataError> {
         return if (networkMonitor.isNetworkAvailable()) {
             val result = client.executeRequest<Unit, Unit>(
@@ -131,7 +142,7 @@ class ReminderRepositoryImpl(
             applicationScope.launch {
                 val reminderEntity = localReminderDataSource.getReminderById(reminderId)
                 if (!reminderEntity.isOfflineCreated()) {
-                    localDeleteItemDataSource.insertOrReplaceReminderId(reminderId)
+                    localDeleteItemDataSource.insertOrReplaceReminderId(reminderId, currentUserId)
                 }
                 localReminderDataSource.deleteReminder(reminderId)
             }.join()
