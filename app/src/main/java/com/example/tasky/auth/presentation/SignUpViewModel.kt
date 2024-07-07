@@ -2,15 +2,15 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.NameError
 import com.example.tasky.auth.domain.PasswordError
-import com.example.tasky.core.domain.Result
-import com.example.tasky.core.domain.RootError
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.auth.domain.validateName
 import com.example.tasky.auth.domain.validatePassword
 import com.example.tasky.core.domain.DataError
+import com.example.tasky.core.domain.Result
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
@@ -20,7 +20,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
+class SignUpViewModel(
+    private val repository: AuthRepository,
+    private val syncManager: AgendaSyncManager
+) : ViewModel() {
 
     private val _state = MutableStateFlow(SignUpState())
     val state = _state.asStateFlow()
@@ -86,6 +89,8 @@ class SignUpViewModel(private val repository: AuthRepository) : ViewModel() {
             repository.login(email, password)
                 .onSuccess {
                     _state.update { it.copy(isLoading = false) }
+
+                    syncManager.startPeriodicAgendaSync()
 
                     _navChannel.send(SignUpAuthAction.HandleAuthResponseSuccess)
                 }
