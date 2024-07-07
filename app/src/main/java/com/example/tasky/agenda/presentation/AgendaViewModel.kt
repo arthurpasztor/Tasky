@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.AgendaAlarmScheduler
 import com.example.tasky.agenda.domain.AgendaItemType
 import com.example.tasky.agenda.domain.AgendaRepository
-import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.agenda.domain.AuthRepository
 import com.example.tasky.agenda.domain.EventRepository
 import com.example.tasky.agenda.domain.NetworkConnectivityMonitor
@@ -37,7 +36,6 @@ class AgendaViewModel(
     private val reminderRepo: ReminderRepository,
     private val prefs: Preferences,
     private val scheduler: AgendaAlarmScheduler,
-    syncManager: AgendaSyncManager,
     networkMonitor: NetworkConnectivityMonitor,
 ) : ViewModel() {
 
@@ -59,8 +57,6 @@ class AgendaViewModel(
         if (!prefs.isOfflineActivity()) {
             loadDailyAgenda()
         }
-
-        syncManager.startPeriodicAgendaSync()
     }
 
     fun onAction(action: AgendaAction) {

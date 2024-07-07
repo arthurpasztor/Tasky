@@ -2,10 +2,10 @@ package com.example.tasky.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.agenda.domain.AgendaSyncManager
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.isEmailValid
 import com.example.tasky.core.domain.DataError
-import com.example.tasky.core.domain.RootError
 import com.example.tasky.core.domain.onError
 import com.example.tasky.core.domain.onSuccess
 import kotlinx.coroutines.channels.Channel
@@ -15,7 +15,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
+class LoginViewModel(
+    private val repository: AuthRepository,
+    private val syncManager: AgendaSyncManager
+) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
@@ -54,6 +57,8 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
             )
                 .onSuccess {
                     _state.update { it.copy(isLoading = false) }
+
+                    syncManager.startPeriodicAgendaSync()
 
                     _navChannel.send(LoginAuthAction.HandleAuthResponseSuccess)
                 }
