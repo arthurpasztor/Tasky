@@ -121,7 +121,7 @@ class ReminderRepositoryImpl(
                 is Result.Success -> {
                     applicationScope.launch {
                         localReminderDataSource.deleteReminder(reminderId)
-                    }
+                    }.join()
                     Result.Success(Unit)
                 }
 
